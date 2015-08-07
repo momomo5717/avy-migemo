@@ -1,0 +1,35 @@
+* avy-migemo
+
+  This package provides the following functions:
+
+    + avy-migemo-goto-char
+    + avy-migemo-goto-char-in-line
+    + avy-migemo-goto-char-2
+    + avy-migemo-isearch
+    + avy-migemo-goto-word-1
+    + avy-migemo-goto-char-timer
+
+  These are the same as avy's predefined functions except for adding candidates via migemo.
+  
+** Requirements
+
+   + GNU Emacs 24.4 or later
+   + [[https://github.com/abo-abo/avy][avy]] 0.3 or later
+   + [[https://github.com/emacs-jp/migemo][migemo]] 1.9 or later
+
+** Setup
+
+   #+BEGIN_SRC emacs-lisp
+     (add-to-list 'load-path "/path/to/avy-migemo")
+     (require 'avy-migemo)
+     ;; If you override avy's predefined functions using `advice-add',
+     (avy-migemo-mode 1)
+   #+END_SRC
+
+** Customization
+
+***** User Option: =avy-migemo-get-function=
+
+      Its type is function. Default value is =migemo-search-pattern-get=.
+
+      It takes a string and returns a regular expression.
