@@ -9,8 +9,9 @@
     + avy-migemo-goto-word-1
     + avy-migemo-goto-char-timer
 
-  These are the same as avy's predefined functions except for adding candidates via migemo.
-  
+  These are the same as [[https://github.com/abo-abo/avy][avy]]'s predefined functions
+  except for adding candidates via [[https://github.com/emacs-jp/migemo][migemo]] (simply using migemo as =regexp-quote=).
+
 ** Requirements
 
    + GNU Emacs 24.4 or later
@@ -33,3 +34,16 @@
       Its type is function. Default value is =migemo-search-pattern-get=.
 
       It takes a string and returns a regular expression.
+
+***** User Option: =avy-migemo-function-names=
+
+      Its value is a list of avy-migemo's function names. Default value has all avy-migemo's function names.
+
+      If you want to override only =avy-goto-char-timer=, you can use =custom-set-variables= as below.
+
+      #+BEGIN_SRC emacs-lisp
+        ;; Override only `avy-goto-char-timer' when `avy-migemo-mode' is enabled.
+        (custom-set-variables
+         '(avy-migemo-function-names
+           '(avy-migemo-goto-char-timer)))
+      #+END_SRC
