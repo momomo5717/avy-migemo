@@ -32,7 +32,8 @@
 ;;   + avy-migemo-goto-word-1
 ;;   + avy-migemo-goto-char-timer
 ;;
-;;  These are the same as avy's predefined functions except for adding candidates via migemo.
+;;  These are the same as avy's predefined functions
+;;  except for adding candidates via migemo (simply using migemo as `regexp-quote').
 ;;
 ;; Setup:
 ;; (add-to-list 'load-path "/path/to/avy-migemo")
@@ -44,20 +45,31 @@
 (require 'avy)
 (require 'migemo)
 
+(defgroup avy-migemo nil
+  "avy with migemo."
+  :group  'avy
+  :prefix "avy-migemo-")
+
 (defcustom avy-migemo-get-function 'migemo-search-pattern-get
   "Getter function of migemo.
 It takes a string and returns a regular expression."
-  :group 'avy
-  :type  'function)
+  :type 'function)
 
-(defvar avy-migemo-function-names
+(defcustom avy-migemo-function-names
   '(avy-migemo-goto-char
     avy-migemo-goto-char-in-line
     avy-migemo-goto-char-2
     avy-migemo-isearch
     avy-migemo-goto-word-1
     avy-migemo-goto-char-timer)
-  "Function names for overriding avy's functions.")
+  "Function names for overriding avy's functions."
+  :set (lambda (symbol value)
+         (if (and (boundp symbol) (boundp 'avy-migemo-mode))
+             (let ((avy-migemo-mode-p avy-migemo-mode))
+               (ignore-errors (when avy-migemo-mode-p (avy-migemo-mode -1)))
+               (set symbol value)
+               (ignore-errors (when avy-migemo-mode-p (avy-migemo-mode 1))))
+           (set symbol value))))
 
 ;;;###autoload
 (defun avy-migemo-goto-char (char &optional arg)
