@@ -88,14 +88,13 @@ It takes a string and returns a regular expression."
 (defun avy-migemo-goto-char-in-line (char)
   "The same as `avy-goto-char-in-line' except for the candidates via migemo."
   (interactive (list (read-char "char: " t)))
-  (let ((avy-all-windows nil))
-    (avy-with avy-goto-char
-      (avy--process
-       (save-restriction
-         (narrow-to-region (line-beginning-position)
-                           (line-end-position))
-         (avy--regex-candidates (funcall avy-migemo-get-function (string char))))
-       (avy--style-fn avy-style)))))
+  (avy-with avy-goto-char
+    (avy--generic-jump
+     (funcall avy-migemo-get-function (string char))
+     avy-all-windows
+     avy-style
+     (line-beginning-position)
+     (line-end-position))))
 
 ;;;###autoload
 (defun avy-migemo-goto-char-2 (char1 char2 &optional arg)
