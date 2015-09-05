@@ -1,13 +1,17 @@
 * avy-migemo
 
-  This package provides the following functions:
+  This package is a minor mode of avy for using migemo.
+
+  The following functions are provided:
 
     + avy-migemo-goto-char
-    + avy-migemo-goto-char-in-line
     + avy-migemo-goto-char-2
-    + avy-migemo-isearch
-    + avy-migemo-goto-word-1
+    + avy-migemo-goto-char-in-line
     + avy-migemo-goto-char-timer
+    + avy-migemo-goto-word-1
+    + avy-migemo-isearch
+    + avy-migemo--overlay-at
+    + avy-migemo--overlay-at-full
 
   These are the same as [[https://github.com/abo-abo/avy][avy]]'s predefined functions
   except for adding candidates via [[https://github.com/emacs-jp/migemo][migemo]] (simply using migemo as =regexp-quote=).
@@ -27,6 +31,8 @@
      (avy-migemo-mode 1)
    #+END_SRC
 
+   You can toggle =avy-migemo-mode= by M-x =avy-migemo-mode=.
+
 ** Customization
 
 ***** User Option: =avy-migemo-get-function=
@@ -37,7 +43,9 @@
 
 ***** User Option: =avy-migemo-function-names=
 
-      Its value is a list of avy-migemo's function names. Default value has all avy-migemo's function names.
+      Its value is a list of avy-migemo's function names. 
+      Default value has all avy-migemo's function names.
+      Instead of using =setq=, =custom-set-variables= is recommended for changing its value.
 
       If you want to override only =avy-goto-char-timer=, you can use =custom-set-variables= as below.
 
@@ -47,3 +55,52 @@
          '(avy-migemo-function-names
            '(avy-migemo-goto-char-timer)))
       #+END_SRC
+
+***** Macro: =avy-migemo-add-names= /&rest/ /names/
+
+      This macro adds /names/ to =avy-migemo-function-names=.
+
+      You can add avy functions which are adapted for migemo like the following.
+
+      #+BEGIN_SRC emacs-lisp
+        ;; If you use zzz-to-char (which can be installed from MELPA), you can adapt it for migemo.
+        (require 'zzz-to-char)
+
+        ;; You need to add "-migemo" to the original name.
+        (defun zzz-to-char--base-migemo (char n-shift)
+            "The same as `zzz-to-char--base' except for using migemo."
+            (let ((p (point))
+                  (avy-all-windows nil))
+              (avy-with zzz-to-char
+                (avy--generic-jump
+                 (if (= 13 char)
+                     "\n"
+                   ;; Adapt for migemo
+                   (funcall avy-migemo-get-function (string char)))
+                 nil
+                 avy-style
+                 (- p zzz-to-char-reach)
+                 (+ p zzz-to-char-reach)))
+              (let ((n (point)))
+                (when (/= n p)
+                  (cl-destructuring-bind (beg . end)
+                      (if (> n p)
+                          (cons p (- (1+ n) n-shift))
+                        (cons (+ n n-shift) p))
+                    (goto-char end)
+                    (kill-region beg end))))))
+
+        (avy-migemo-add-names zzz-to-char--base-migemo)
+
+      #+END_SRC
+
+***** Macro: =avy-migemo-remove-names= /&rest/ /names/
+
+      This macro removes /names/ from =avy-migemo-function-names=.
+
+      #+BEGIN_SRC emacs-lisp
+        ;; Remove only `avy-migemo-goto-char' from `avy-migemo-function-names'.
+        (avy-migemo-remove-names avy-migemo-goto-char)
+      #+END_SRC
+
+
