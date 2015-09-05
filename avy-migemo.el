@@ -84,6 +84,32 @@ It takes a string and returns a regular expression."
            (set symbol value))))
 
 ;;;###autoload
+(defmacro avy-migemo-add-names (&rest names)
+  "Add NAMES to the front of `avy-migemo-function-names'."
+  (let* ((names (mapcar (lambda(name)
+                          (if (eq (car-safe name) 'quote)
+                              (cadr name) name))
+                        names))
+         (names (append (cl-loop for name in names
+                                 unless (memq name avy-migemo-function-names)
+                                 collect name)
+                        avy-migemo-function-names)))
+    `(progn (custom-set-variables '(avy-migemo-function-names ',names))
+            avy-migemo-function-names)))
+
+;;;###autoload
+(defmacro avy-migemo-remove-names (&rest names)
+  "Remove NAMES from `avy-migemo-function-names'."
+  (let* ((names (mapcar (lambda(name)
+                          (if (eq (car-safe name) 'quote)
+                              (cadr name) name))
+                        names))
+         (names (cl-loop for name in avy-migemo-function-names
+                         unless (memq name names)
+                         collect name)))
+    `(progn (custom-set-variables '(avy-migemo-function-names ',names))
+            avy-migemo-function-names)))
+
 ;;;###autoload
 (define-minor-mode avy-migemo-mode
   "Override avy's functions."
