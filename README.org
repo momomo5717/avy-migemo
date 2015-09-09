@@ -8,6 +8,7 @@
     + avy-migemo-goto-char-2
     + avy-migemo-goto-char-in-line
     + avy-migemo-goto-char-timer
+    + avy-migemo-goto-subword-1
     + avy-migemo-goto-word-1
     + avy-migemo-isearch
     + avy-migemo--overlay-at
