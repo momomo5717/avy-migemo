@@ -311,15 +311,11 @@ STR is compared with string width of OLD-STR+."
 (defun avy-migemo-goto-char-timer (&optional arg)
   "The same as `avy-goto-char-timer' except for the candidates via migemo."
   (interactive "P")
-  (let ((c1 (read-char "char 1: " t))
-        (c2 (read-char "char 2: " t avy-timeout-seconds)))
+  (let ((str (avy--read-string-timer)))
     (avy-with avy-goto-char-timer
       (avy--generic-jump
        ;; Adapt for migemo
-       (funcall avy-migemo-get-function
-                (if c2
-                    (string c1 c2)
-                  (string c1)))
+       (funcall avy-migemo-get-function str)
        arg
        avy-style))))
 
