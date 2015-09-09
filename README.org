@@ -64,7 +64,8 @@
       You can add avy functions which are adapted for migemo like the following.
 
       #+BEGIN_SRC emacs-lisp
-        ;; If you use zzz-to-char (which can be installed from MELPA), you can adapt it for migemo.
+        ;; If you use zzz-to-char (which can be installed from MELPA),
+        ;; you can adapt it for migemo.
         (require 'zzz-to-char)
 
         ;; You need to add "-migemo" to the original name.
