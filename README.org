@@ -108,7 +108,7 @@
       Other functions not using avy can be added like the following.
 
       #+BEGIN_SRC emacs-lisp
-        ;; If you use swipper (which can be installed from MELPA),
+        ;; If you use swiper (which can be installed from MELPA),
         ;; you can adapt it for migemo.
 
         (require 'swiper)

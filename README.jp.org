@@ -109,7 +109,7 @@
       avy を使用していない関数に対しても migemo版を以下のように追加することができます．
 
       #+BEGIN_SRC emacs-lisp
-        ;; If you use swipper (which can be installed from MELPA),
+        ;; If you use swiper (which can be installed from MELPA),
         ;; you can adapt it for migemo.
 
         (require 'swiper)
