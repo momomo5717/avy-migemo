@@ -31,6 +31,7 @@
 ;;   + avy-migemo-goto-char-2
 ;;   + avy-migemo-goto-char-in-line
 ;;   + avy-migemo-goto-char-timer
+;;   + avy-migemo-goto-subword-1
 ;;   + avy-migemo-goto-word-1
 ;;   + avy-migemo-isearch
 ;;   + avy-migemo--overlay-at
@@ -70,6 +71,7 @@ It takes a string and returns a regular expression."
     avy-migemo-goto-char-2
     avy-migemo-goto-char-in-line
     avy-migemo-goto-char-timer
+    avy-migemo-goto-subword-1
     avy-migemo-goto-word-1
     avy-migemo-isearch
     avy-migemo--overlay-at
@@ -320,6 +322,20 @@ STR is compared with string width of OLD-STR+."
                   (string c1)))
        arg
        avy-style))))
+
+;;;###autoload
+(defun avy-migemo-goto-subword-1 (char &optional arg)
+  "The same as `avy-goto-subword-1' except for the candidates via migemo."
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (avy-with avy-goto-subword-1
+    (let ((char (downcase char))
+          ;; Adapt for migemo
+          (regex (funcall avy-migemo-get-function (string char))))
+      (avy-goto-subword-0
+       arg (lambda () (let ((char-after (char-after)))
+                    (or (eq (downcase char-after) char)
+                        (string-match-p regex (string char-after)))))))))
 
 ;;;###autoload
 (defun avy-migemo-goto-word-1 (char &optional arg)
