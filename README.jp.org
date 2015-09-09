@@ -1,0 +1,154 @@
+* avy-migemo
+
+  avy-migemo は avy 関数の migemo版に切り替えるためのマイナーモードです．
+
+  このパッケージでは，以下の関数が定義されています．
+
+    + avy-migemo-goto-char
+    + avy-migemo-goto-char-2
+    + avy-migemo-goto-char-in-line
+    + avy-migemo-goto-char-timer
+    + avy-migemo-goto-subword-1
+    + avy-migemo-goto-word-1
+    + avy-migemo-isearch
+    + avy-migemo--overlay-at
+    + avy-migemo--overlay-at-full
+
+  上記のほとんどは [[https://github.com/abo-abo/avy][avy.el]] で定義されている関数の =regexp-quote= の箇所を migemo に置き換えたのものです．
+
+** Requirements
+
+   + GNU Emacs 24.4 or later
+   + [[https://github.com/abo-abo/avy][avy]] 0.3 or later
+   + [[https://github.com/emacs-jp/migemo][migemo]] 1.9 or later
+
+** Setup
+
+   #+BEGIN_SRC emacs-lisp
+     (add-to-list 'load-path "/path/to/avy-migemo")
+     (require 'avy-migemo)
+     ;; If you override avy's predefined functions using `advice-add',
+     (avy-migemo-mode 1)
+   #+END_SRC
+
+    M-x =avy-migemo-mode= で切り替えることができます．
+
+** Customization
+
+***** User Option: =avy-migemo-get-function=
+
+      この変数の型は関数で，初期値は =migemo-search-pattern-get= に設定されています．
+
+      引数として文字列を取って，正規表現を返す関数を設定することができます．
+
+***** User Option: =avy-migemo-function-names=
+
+      avy-migemo の関数名のリストです．初期値では全ての関数名が含まれています．
+
+      この変数を変更する場合は， =setq= ではなく =custom-set-variables= を使用してください．
+      =setq= を使用すると，オーバーライドする関数との整合性が取れなくなります．
+
+      =avy-goto-char-timer= のみをオーバーライドして使用する場合は，以下のようになります．
+
+      #+BEGIN_SRC emacs-lisp
+        ;; Override only `avy-goto-char-timer' when `avy-migemo-mode' is enabled.
+        (custom-set-variables
+         '(avy-migemo-function-names
+           '(avy-migemo-goto-char-timer)))
+      #+END_SRC
+
+***** Macro: =avy-migemo-remove-names= /&rest/ /names/
+
+      =avy-migemo-function-names= から /names/ を取り除くためのマクロです．
+
+      #+BEGIN_SRC emacs-lisp
+        ;; Remove only `avy-migemo-goto-char' from `avy-migemo-function-names'.
+        (avy-migemo-remove-names avy-migemo-goto-char)
+      #+END_SRC
+
+***** Macro: =avy-migemo-add-names= /&rest/ /names/
+
+      =avy-migemo-function-names= に /names/ を追加するためのマクロです．
+
+      以下のように，avy を使用している関数の migemo版を新たに追加することができます．
+      既存の関数名に =-migemo= を加えた関数を新たに定義して，追加します．
+
+      #+BEGIN_SRC emacs-lisp
+        ;; If you use zzz-to-char (which can be installed from MELPA),
+        ;; you can adapt it for migemo.
+        (require 'zzz-to-char)
+
+        ;; You need to add "-migemo" to the original name.
+        (defun zzz-to-char--base-migemo (char n-shift)
+            "The same as `zzz-to-char--base' except for using migemo."
+            (let ((p (point))
+                  (avy-all-windows nil))
+              (avy-with zzz-to-char
+                (avy--generic-jump
+                 (if (= 13 char)
+                     "\n"
+                   ;; Adapt for migemo
+                   (funcall avy-migemo-get-function (string char)))
+                 nil
+                 avy-style
+                 (- p zzz-to-char-reach)
+                 (+ p zzz-to-char-reach)))
+              (let ((n (point)))
+                (when (/= n p)
+                  (cl-destructuring-bind (beg . end)
+                      (if (> n p)
+                          (cons p (- (1+ n) n-shift))
+                        (cons (+ n n-shift) p))
+                    (goto-char end)
+                    (kill-region beg end))))))
+
+        (avy-migemo-add-names zzz-to-char--base-migemo)
+
+      #+END_SRC
+
+      avy を使用していない関数に対しても migemo版を以下のように追加することができます．
+
+      #+BEGIN_SRC emacs-lisp
+        ;; If you use swipper (which can be installed from MELPA),
+        ;; you can adapt it for migemo.
+
+        (require 'swiper)
+
+        (defun ivy--regex-migemo (str &optional greedy)
+          "The same as `ivy--regex' except for using migemo."
+          (let ((hashed (unless greedy
+                          (gethash str ivy--regex-hash))))
+            (if hashed
+                (prog1 (cdr hashed)
+                  (setq ivy--subexps (car hashed)))
+              (when (string-match "\\([^\\]\\|^\\)\\\\$" str)
+                (setq str (substring str 0 -1)))
+              (cdr (puthash str
+                            (let ((subs
+                                   ;; Adapt for mgiemo
+                                   (mapcar
+                                    (lambda (str) (funcall avy-migemo-get-function str))
+                                    (ivy--split str))))
+                              (if (= (length subs) 1)
+                                  (cons
+                                   (setq ivy--subexps 0)
+                                   (car subs))
+                                (cons
+                                 (setq ivy--subexps (length subs))
+                                 (mapconcat
+                                  (lambda (x)
+                                    (if (string-match "\\`\\\\(.*\\\\)\\'" x)
+                                        x
+                                      (format "\\(%s\\)" x)))
+                                  subs
+                                  (if greedy
+                                      ".*"
+                                    ".*?")))))
+                            ivy--regex-hash)))))
+
+        (avy-migemo-add-names ivy--regex-migemo)
+
+        (add-hook 'avy-migemo-mode-hook
+                  (lambda () (setq ivy--regex-hash (make-hash-table :test #'equal))))
+
+      #+END_SRC
