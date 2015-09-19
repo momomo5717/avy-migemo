@@ -13,6 +13,7 @@
     + avy-migemo-isearch
     + avy-migemo--overlay-at
     + avy-migemo--overlay-at-full
+    + avy-migemo--read-string-timer
 
   These are the same as [[https://github.com/abo-abo/avy][avy]]'s predefined functions
   except for adding candidates via [[https://github.com/emacs-jp/migemo][migemo]] (simply using migemo as =regexp-quote=).
