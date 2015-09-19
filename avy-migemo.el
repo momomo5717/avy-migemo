@@ -305,7 +305,7 @@ LEN is compared with string width of OLD-STR+."
 
 (defun avy-migemo--read-string-timer ()
   "The same as `avy--read-string-timer' except for candidates via migemo."
-  (let ((str "") char break overlays)
+  (let ((str "") char break overlays regex)
     (unwind-protect
         (progn
           (while (and (not break)
@@ -336,13 +336,13 @@ LEN is compared with string width of OLD-STR+."
               (save-excursion
                (goto-char (window-start))
                ;; Adapt for migemo
-               (let ((regex (funcall avy-migemo-get-function str)))
-                (while (re-search-forward regex (window-end) t)
-                  (unless (get-char-property (point) 'invisible)
-                    (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
-                      (push ov overlays)
-                      (overlay-put ov 'window (selected-window))
-                      (overlay-put ov 'face 'avy-goto-char-timer-face))))))))
+               (setq regex (funcall avy-migemo-get-function str))
+               (while (re-search-forward regex (window-end) t)
+                 (unless (get-char-property (point) 'invisible)
+                   (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
+                     (push ov overlays)
+                     (overlay-put ov 'window (selected-window))
+                     (overlay-put ov 'face 'avy-goto-char-timer-face)))))))
           str)
       (dolist (ov overlays)
         (delete-overlay ov)))))
