@@ -127,27 +127,27 @@ It takes a string and returns a regular expression."
 
 ;; avy functions for migemo
 
-(defun avy-migemo--rest-old-str (old-str+ str)
-  "Retrun a new string which is a part of  OLD-STR+.
-STR is compared with string width of OLD-STR+."
+(defun avy-migemo--rest-old-str (old-str+ len)
+  "Retrun a new character list which is a part of OLD-STR+.
+LEN is compared with string width of OLD-STR+."
   (cl-loop
    with old-ls = (string-to-list old-str+)
-   with new-ls = (string-to-list str)
    with pre-width  = 0
    with char-count = 0
-   until (null new-ls) do
+   until (zerop len) do
    (cond
     ((and (zerop char-count) (car old-ls))
      (setq pre-width (max (char-width (pop old-ls)) 1))
-     (cl-incf char-count (max (char-width (pop new-ls)) 1)))
+     (cl-decf len)
+     (cl-incf char-count))
     ((> pre-width char-count)
-     (cl-incf char-count (max (char-width (pop new-ls)) 1)))
+     (cl-decf len)
+     (cl-incf char-count))
     ((null old-ls)
-     (setq new-ls nil pre-width 0 char-count 0))
+     (setq len 0 pre-width 0 char-count 0))
     (t (setq char-count 0)))
    finally return
-   (apply #'string
-          (nconc (make-list (- pre-width char-count) ? ) old-ls))))
+   (nconc (make-list (- pre-width char-count) ? ) old-ls)))
 
 (defun avy-migemo--overlay-at (path leaf)
   "The same as `avy--overlay-at' except adapting it for migemo."
@@ -172,12 +172,9 @@ STR is compared with string width of OLD-STR+."
                  (if (string= old-str "\n")
                      (concat str "\n")
                    ;; Adapt for migemo
-                   (let* ((old-str+ (with-selected-window wnd
-                                        (buffer-substring
-                                         pt (1+ pt)))))
-                     (if (= (max (string-width old-str+) 1) 1)
-                         str
-                       (concat str (avy-migemo--rest-old-str old-str+ str))))))
+                   (if (= (max (string-width old-str) 1) 1)
+                       str
+                     (concat str (avy-migemo--rest-old-str old-str 1)))))
     (push ol avy--overlays-lead)))
 
 (defun avy-migemo--overlay-at-full (path leaf)
@@ -242,9 +239,6 @@ STR is compared with string width of OLD-STR+."
                     beg end
                     (current-buffer)))
                (old-str (buffer-substring beg (1+ beg))))
-          (when avy-background
-            (setq old-str (propertize
-                           old-str 'face 'avy-background-face)))
           (overlay-put ol 'window wnd)
           (overlay-put ol 'category 'avy)
           (overlay-put ol 'display
@@ -256,15 +250,15 @@ STR is compared with string width of OLD-STR+."
                               (let* ((other-char-p
                                       (cl-loop for c across str
                                                for i from 0
-                                               unless (memq c avy-keys)
+                                               unless (or (memq c avy-keys) (eq c ? ))
                                                return i))
                                      (str (if other-char-p
-                                          (substring str 0 other-char-p) str))
-                                     (new-width (string-width str))
+                                              (substring str 0 other-char-p) str))
+                                     (len (if other-char-p (length str) len))
                                      (old-str+ (buffer-substring beg end)))
-                                (if (= (string-width old-str+) new-width)
+                                (if (= (string-width old-str+) len)
                                     str
-                                  (concat str (avy-migemo--rest-old-str old-str+ str)))))))
+                                  (concat str (avy-migemo--rest-old-str old-str+ len)))))))
           (push ol avy--overlays-lead))))))
 
 ;;;###autoload
