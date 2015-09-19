@@ -4,16 +4,16 @@
 
   The following functions are provided:
 
-    + avy-migemo-goto-char
-    + avy-migemo-goto-char-2
-    + avy-migemo-goto-char-in-line
-    + avy-migemo-goto-char-timer
-    + avy-migemo-goto-subword-1
-    + avy-migemo-goto-word-1
-    + avy-migemo-isearch
-    + avy-migemo--overlay-at
-    + avy-migemo--overlay-at-full
-    + avy-migemo--read-string-timer
+    + =avy-migemo-goto-char=
+    + =avy-migemo-goto-char-2=
+    + =avy-migemo-goto-char-in-line=
+    + =avy-migemo-goto-char-timer=
+    + =avy-migemo-goto-subword-1=
+    + =avy-migemo-goto-word-1=
+    + =avy-migemo-isearch=
+    + =avy-migemo--overlay-at=
+    + =avy-migemo--overlay-at-full=
+    + =avy-migemo--read-string-timer=
 
   These are the same as [[https://github.com/abo-abo/avy][avy]]'s predefined functions
   except for adding candidates via [[https://github.com/emacs-jp/migemo][migemo]] (simply using migemo as =regexp-quote=).
