@@ -144,8 +144,8 @@
                                    ;; Adapt for mgiemo
                                    (mapcar
                                     (lambda (str)
-                                      (concat str "\\|"
-                                              (funcall avy-migemo-get-function str)))
+                                      (concat (funcall avy-migemo-get-function str)
+                                              "\\|" str))
                                     (ivy--split str))))
                               (if (= (length subs) 1)
                                   (cons
