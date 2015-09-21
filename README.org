@@ -18,6 +18,18 @@
   These are the same as [[https://github.com/abo-abo/avy][avy]]'s predefined functions
   except for adding candidates via [[https://github.com/emacs-jp/migemo][migemo]] (simply using migemo as =regexp-quote=).
 
+** Table of contents
+
+  + [[#requirements][Requirements]]
+  + [[#setup][Setup]]
+  + [[#customization][Customization]]
+    + [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
+    + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
+    + [[#macro-avy-migemo-remove-names-rest-names][Macro: =avy-migemo-remove-names= /&rest/ /names/ ]]
+    + [[#macro-avy-migemo-add-names-rest-names][Macro: =avy-migemo-add-names= /&rest/ /names/ ]]
+    + [[#an-example-of-setting-for-zzz-to-char][An example of setting for zzz-to-char]]
+    + [[#an-example-of-setting-for-swiper][An example of setting for swiper]]
+
 ** Requirements
 
    + GNU Emacs 24.4 or later
@@ -71,7 +83,9 @@
 
       This macro adds /names/ to =avy-migemo-function-names=.
 
-      You can add avy functions which are adapted for migemo like the following.
+***** An example of setting for zzz-to-char
+
+      You can add a function which uses avy by adapting it for migemo.
 
       #+BEGIN_SRC emacs-lisp
         ;; If you use zzz-to-char (which can be installed from MELPA),
@@ -106,14 +120,16 @@
 
       #+END_SRC
 
-      Other functions not using avy can be added like the following.
+***** An example of setting for swiper
+
+      You can add a function which doesn't use avy by adapting it for migemo.
 
       #+BEGIN_SRC emacs-lisp
         ;; If you use swiper (which can be installed from MELPA),
         ;; you can adapt it for migemo.
-
         (require 'swiper)
 
+        ;; You need to add "-migemo" to the original name.
         (defun ivy--regex-migemo (str &optional greedy)
           "The same as `ivy--regex' except for using migemo."
           (let ((hashed (unless greedy

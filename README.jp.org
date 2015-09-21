@@ -4,17 +4,30 @@
 
   このパッケージでは，以下の関数が定義されています．
 
-    + avy-migemo-goto-char
-    + avy-migemo-goto-char-2
-    + avy-migemo-goto-char-in-line
-    + avy-migemo-goto-char-timer
-    + avy-migemo-goto-subword-1
-    + avy-migemo-goto-word-1
-    + avy-migemo-isearch
-    + avy-migemo--overlay-at
-    + avy-migemo--overlay-at-full
+    + =avy-migemo-goto-char=
+    + =avy-migemo-goto-char-2=
+    + =avy-migemo-goto-char-in-line=
+    + =avy-migemo-goto-char-timer=
+    + =avy-migemo-goto-subword-1=
+    + =avy-migemo-goto-word-1=
+    + =avy-migemo-isearch=
+    + =avy-migemo--overlay-at=
+    + =avy-migemo--overlay-at-full=
+    + =avy-migemo--read-string-timer=
 
   上記のほとんどは [[https://github.com/abo-abo/avy][avy.el]] で定義されている関数の =regexp-quote= の箇所を migemo に置き換えたのものです．
+
+** Table of contents
+
+  + [[#requirements][Requirements]]
+  + [[#setup][Setup]]
+  + [[#customization][Customization]]
+    + [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
+    + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
+    + [[#macro-avy-migemo-remove-names-rest-names][Macro: =avy-migemo-remove-names= /&rest/ /names/ ]]
+    + [[#macro-avy-migemo-add-names-rest-names][Macro: =avy-migemo-add-names= /&rest/ /names/ ]]
+    + [[#an-example-of-setting-for-zzz-to-char][An example of setting for zzz-to-char]]
+    + [[#an-example-of-setting-for-swiper][An example of setting for swiper]]
 
 ** Requirements
 
@@ -70,6 +83,8 @@
 
       =avy-migemo-function-names= に /names/ を追加するためのマクロです．
 
+***** An example of setting for zzz-to-char
+
       以下のように，avy を使用している関数の migemo版を新たに追加することができます．
       既存の関数名に =-migemo= を加えた関数を新たに定義して，追加します．
 
@@ -106,6 +121,8 @@
 
       #+END_SRC
 
+***** An example of setting for swiper
+
       avy を使用していない関数に対しても migemo版を以下のように追加することができます．
 
       #+BEGIN_SRC emacs-lisp
@@ -114,6 +131,7 @@
 
         (require 'swiper)
 
+        ;; You need to add "-migemo" to the original name.
         (defun ivy--regex-migemo (str &optional greedy)
           "The same as `ivy--regex' except for using migemo."
           (let ((hashed (unless greedy
