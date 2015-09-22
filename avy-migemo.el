@@ -247,7 +247,7 @@ LEN is compared with string width of OLD-STR+."
                        (cond ((string= old-str "\n")
                               (concat str "\n"))
                              ((string= old-str "\t")
-                              (concat str (make-string (- tab-width len) ?\ )))
+                              (concat str (make-string (max (- tab-width len) 0) ?\ )))
                              (t ;; Adapt for migemo
                               (let* ((other-char-p
                                       (cl-loop for c across str
