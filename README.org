@@ -27,8 +27,8 @@
     + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
     + [[#macro-avy-migemo-remove-names-rest-names][Macro: =avy-migemo-remove-names= /&rest/ /names/ ]]
     + [[#macro-avy-migemo-add-names-rest-names][Macro: =avy-migemo-add-names= /&rest/ /names/ ]]
-    + [[#an-example-of-setting-for-zzz-to-char][An example of setting for zzz-to-char]]
-    + [[#an-example-of-setting-for-swiper][An example of setting for swiper]]
+    + [[#an-example-of-setting-for-zzz-to-char--zzz-to-char--base-][An example of setting for zzz-to-char ( =zzz-to-char--base= )]]
+    + [[#an-example-of-setting-for-swiper--ivy--regex-][An example of setting for swiper ( =ivy--regex= )]]
 
 ** Requirements
 
@@ -83,7 +83,7 @@
 
       This macro adds /names/ to =avy-migemo-function-names=.
 
-***** An example of setting for zzz-to-char
+***** An example of setting for zzz-to-char ( =zzz-to-char--base= )
 
       You can add a function which uses avy by adapting it for migemo.
 
@@ -120,7 +120,7 @@
 
       #+END_SRC
 
-***** An example of setting for swiper
+***** An example of setting for swiper ( =ivy--regex= )
 
       You can add a function which doesn't use avy by adapting it for migemo.
 

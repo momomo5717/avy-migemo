@@ -26,8 +26,8 @@
     + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
     + [[#macro-avy-migemo-remove-names-rest-names][Macro: =avy-migemo-remove-names= /&rest/ /names/ ]]
     + [[#macro-avy-migemo-add-names-rest-names][Macro: =avy-migemo-add-names= /&rest/ /names/ ]]
-    + [[#an-example-of-setting-for-zzz-to-char][An example of setting for zzz-to-char]]
-    + [[#an-example-of-setting-for-swiper][An example of setting for swiper]]
+    + [[#an-example-of-setting-for-zzz-to-char--zzz-to-char--base-][An example of setting for zzz-to-char ( =zzz-to-char--base= )]]
+    + [[#an-example-of-setting-for-swiper--ivy--regex-][An example of setting for swiper ( =ivy--regex= )]]
 
 ** Requirements
 
@@ -83,7 +83,7 @@
 
       =avy-migemo-function-names= に /names/ を追加するためのマクロです．
 
-***** An example of setting for zzz-to-char
+***** An example of setting for zzz-to-char ( =zzz-to-char--base= )
 
       以下のように，avy を使用している関数の migemo版を新たに追加することができます．
       既存の関数名に =-migemo= を加えた関数を新たに定義して，追加します．
@@ -121,7 +121,7 @@
 
       #+END_SRC
 
-***** An example of setting for swiper
+***** An example of setting for swiper ( =ivy--regex= )
 
       avy を使用していない関数に対しても migemo版を以下のように追加することができます．
 
