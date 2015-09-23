@@ -42,7 +42,7 @@
 ;;  except for adding candidates via migemo (simply using migemo as `regexp-quote').
 ;;
 ;; Further information is available from:
-;; https://github.com/momomo5717/avy-migemo  (README.org)
+;; https://github.com/momomo5717/avy-migemo  (README.org or README.jp.org)
 
 ;; Setup:
 ;; (add-to-list 'load-path "/path/to/avy-migemo")
