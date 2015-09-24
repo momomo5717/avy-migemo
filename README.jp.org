@@ -24,8 +24,8 @@
   + [[#customization][Customization]]
     + [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
     + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
-    + [[#macro-avy-migemo-remove-names-rest-names][Macro: =avy-migemo-remove-names= /&rest/ /names/ ]]
-    + [[#macro-avy-migemo-add-names-rest-names][Macro: =avy-migemo-add-names= /&rest/ /names/ ]]
+    + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
+    + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
     + [[#an-example-of-setting-for-zzz-to-char--zzz-to-char--base-][An example of setting for zzz-to-char ( =zzz-to-char--base= )]]
     + [[#an-example-of-setting-for-swiper--ivy--regex-][An example of setting for swiper ( =ivy--regex= )]]
 
@@ -70,18 +70,18 @@
            '(avy-migemo-goto-char-timer)))
       #+END_SRC
 
-***** Macro: =avy-migemo-remove-names= /&rest/ /names/
+***** Function: =avy-migemo-remove-names= /&rest/ /names/
 
-      =avy-migemo-function-names= から /names/ を取り除くためのマクロです．
+      =avy-migemo-function-names= から /names/ を取り除くための関数です．
 
       #+BEGIN_SRC emacs-lisp
         ;; Remove only `avy-migemo-goto-char' from `avy-migemo-function-names'.
-        (avy-migemo-remove-names avy-migemo-goto-char)
+        (avy-migemo-remove-names 'avy-migemo-goto-char)
       #+END_SRC
 
-***** Macro: =avy-migemo-add-names= /&rest/ /names/
+***** Function: =avy-migemo-add-names= /&rest/ /names/
 
-      =avy-migemo-function-names= に /names/ を追加するためのマクロです．
+      =avy-migemo-function-names= に /names/ を追加するための関数です．
 
 ***** An example of setting for zzz-to-char ( =zzz-to-char--base= )
 
@@ -117,7 +117,7 @@
                     (goto-char end)
                     (kill-region beg end))))))
 
-        (avy-migemo-add-names zzz-to-char--base-migemo)
+        (avy-migemo-add-names 'zzz-to-char--base-migemo)
 
       #+END_SRC
 
@@ -166,7 +166,7 @@
                                     ".*?")))))
                             ivy--regex-hash)))))
 
-        (avy-migemo-add-names ivy--regex-migemo)
+        (avy-migemo-add-names 'ivy--regex-migemo)
 
         (add-hook 'avy-migemo-mode-hook
                   (lambda () (setq ivy--regex-hash (make-hash-table :test #'equal))))
