@@ -25,6 +25,14 @@
 
 ;; This package is a minor mode of avy for using migemo.
 ;;
+;; Migemo which is a library for incremental search has only Japanese dictionaries,
+;; but it could be used as abbreviation matching for other languages
+;; by preparing user's migemo dictionaries or customizing `avy-migemo-get-function'.
+;;
+;; For example, if url is defined in a migemo dictionary as ftp, http, and so on,
+;; these words also can be added to avy's candidates.
+;;
+;;
 ;; The following functions are provided:
 ;;
 ;;   + avy-migemo-goto-char
@@ -39,7 +47,7 @@
 ;;   + avy-migemo--read-string-timer
 ;;
 ;;  These are the same as avy's predefined functions
-;;  except for adding candidates via migemo (simply using migemo as `regexp-quote').
+;;  except for adding candidates via migemo (simply using migemo instead of `regexp-quote').
 ;;
 ;; Further information is available from:
 ;; https://github.com/momomo5717/avy-migemo  (README.org or README.jp.org)
