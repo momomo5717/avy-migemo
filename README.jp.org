@@ -17,6 +17,12 @@
 
   上記のほとんどは [[https://github.com/abo-abo/avy][avy.el]] で定義されている関数の =regexp-quote= の箇所を migemo に置き換えたのものです．
 
+  また以下の拡張パッケージは avy.el の拡張ではないですが，
+  =avy-migemo-mode= で切り替えて使用できるように定義されています．
+
+    + avy-migemo-e.g.zzz-to-char.el
+    + avy-migemo-e.g.swiper.el
+
 ** Table of contents
 
   + [[#requirements][Requirements]]

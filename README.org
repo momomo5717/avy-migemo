@@ -18,6 +18,11 @@
   These are the same as [[https://github.com/abo-abo/avy][avy]]'s predefined functions
   except for adding candidates via [[https://github.com/emacs-jp/migemo][migemo]] (simply using migemo instead of =regexp-quote=).
 
+  The following extensions are available:
+
+    + avy-migemo-e.g.zzz-to-char.el
+    + avy-migemo-e.g.swiper.el
+
 ** Table of contents
 
   + [[#requirements][Requirements]]
