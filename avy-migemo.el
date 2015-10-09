@@ -49,6 +49,10 @@
 ;;  These are the same as avy's predefined functions
 ;;  except for adding candidates via migemo (simply using migemo instead of `regexp-quote').
 ;;
+;; The following extensions are available:
+;;   + avy-migemo-e.g.zzz-to-char.el
+;;   + avy-migemo-e.g.swiper.el
+;;
 ;; Further information is available from:
 ;; https://github.com/momomo5717/avy-migemo  (README.org or README.jp.org)
 
