@@ -1,4 +1,4 @@
-;;; avy-migemo-e.g.zzz-to-char.el --- A setting example of avy-migemo for zzz-to-char  -*- lexical-binding: t -*-
+;;; avy-migemo-e.g.zzz-to-char.el --- A setting example of avy-migemo for zzz-to-char  -*- lexical-binding: t; no-byte-compile: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
@@ -23,38 +23,43 @@
 ;; This package is a setting example of avy-migemo for zzz-to-char.
 ;;
 ;; (require 'avy-migemo-e.g.zzz-to-char)
-;; ;; If you remove it from `avy-migemo-function-names',
-;; ;; (avy-migemo-remove-names 'zzz-to-char--base-migemo)
+;;
+;; ;; If you remove it from `avy-migemo-function-names' in a init file,
+;; ;; (with-eval-after-load 'zzz-to-char--base-migemo
+;; ;;   (avy-migemo-remove-names 'zzz-to-char--base-migemo))
 
 ;;; Code:
-(require 'avy-migemo)
 
-;; For using zzz-to-char ( `zzz-to-char--base-migemo' ) with migemo
-(with-eval-after-load "zzz-to-char"
-  (defun zzz-to-char--base-migemo (char n-shift)
-    "The same as `zzz-to-char--base' except for using migemo."
-    (let ((p (point))
-          (avy-all-windows nil))
-      (avy-with zzz-to-char
-        (avy--generic-jump
-         (if (= 13 char)
-             "\n"
-           ;; Adapt for migemo
-           (funcall avy-migemo-get-function (string char)))
-         nil
-         avy-style
-         (- p zzz-to-char-reach)
-         (+ p zzz-to-char-reach)))
-      (let ((n (point)))
-        (when (/= n p)
-          (cl-destructuring-bind (beg . end)
-              (if (> n p)
-                  (cons p (- (1+ n) n-shift))
-                (cons (+ n n-shift) p))
-            (goto-char end)
-            (kill-region beg end))))))
+;; For using zzz-to-char ( `zzz-to-char--base' ) with migemo
+(with-eval-after-load "avy-migemo"
+  (with-eval-after-load "zzz-to-char"
+    (defun zzz-to-char--base-migemo (char n-shift)
+      "The same as `zzz-to-char--base' except for using migemo."
+      (let ((p (point))
+            (avy-all-windows nil))
+        (avy-with zzz-to-char
+          (avy--generic-jump
+           (if (= 13 char)
+               "\n"
+             ;; Adapt for migemo
+             (funcall avy-migemo-get-function (string char)))
+           nil
+           avy-style
+           (- p zzz-to-char-reach)
+           (+ p zzz-to-char-reach)))
+        (let ((n (point)))
+          (when (/= n p)
+            (cl-destructuring-bind (beg . end)
+                (if (> n p)
+                    (cons p (- (1+ n) n-shift))
+                  (cons (+ n n-shift) p))
+              (goto-char end)
+              (kill-region beg end))))))
+    (byte-compile 'zzz-to-char--base-migemo)
 
-  (avy-migemo-add-names 'zzz-to-char--base-migemo))
+    (avy-migemo-add-names 'zzz-to-char--base-migemo)
+
+    (provide 'zzz-to-char--base-migemo)))
 
 (provide 'avy-migemo-e.g.zzz-to-char)
 ;;; avy-migemo-e.g.zzz-to-char.el ends here

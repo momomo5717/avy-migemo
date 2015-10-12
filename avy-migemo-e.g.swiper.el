@@ -1,4 +1,4 @@
-;;; avy-migemo-e.g.swiper.el --- A setting example of avy-migemo for swiper -*- lexical-binding: t -*-
+;;; avy-migemo-e.g.swiper.el --- A setting example of avy-migemo for swiper -*- lexical-binding: t; no-byte-compile: t -*-
 
 ;; Copyright (C) 2015 momomo5717
 
@@ -24,56 +24,60 @@
 ;;
 ;; (require 'avy-migemo-e.g.swiper)
 ;;
-;; ;; If you remove it from `avy-migemo-function-names',
-;; ;; (avy-migemo-remove-names 'ivy--regex-migemo)
-;; ;; (remove-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
-;; 
+;; ;; If you remove it from `avy-migemo-function-names' in a init file,
+;; ;; (with-eval-after-load 'ivy--regex-migemo
+;; ;;   (avy-migemo-remove-names 'ivy--regex-migemo)
+;; ;;   (remove-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash))
 
 ;;; Code:
-(require 'avy-migemo)
 
 ;; For using swiper ( `ivy--regex' ) with migemo
-(with-eval-after-load "ivy"
-  (defun ivy--regex-migemo (str &optional greedy)
-    "The same as `ivy--regex' except for using migemo."
-    (let ((hashed (unless greedy
-                    (gethash str ivy--regex-hash))))
-      (if hashed
-          (prog1 (cdr hashed)
-            (setq ivy--subexps (car hashed)))
-        (when (string-match "\\([^\\]\\|^\\)\\\\$" str)
-          (setq str (substring str 0 -1)))
-        (cdr (puthash str
-                      (let ((subs
-                             ;; Adapt for mgiemo
-                             (mapcar
-                              (lambda (str)
-                                (concat (funcall avy-migemo-get-function str)
-                                        "\\|" str))
-                              (ivy--split str))))
-                        (if (= (length subs) 1)
+(with-eval-after-load "avy-migemo"
+  (with-eval-after-load "ivy"
+    (defun ivy--regex-migemo (str &optional greedy)
+      "The same as `ivy--regex' except for using migemo."
+      (let ((hashed (unless greedy
+                      (gethash str ivy--regex-hash))))
+        (if hashed
+            (prog1 (cdr hashed)
+              (setq ivy--subexps (car hashed)))
+          (when (string-match "\\([^\\]\\|^\\)\\\\$" str)
+            (setq str (substring str 0 -1)))
+          (cdr (puthash str
+                        (let ((subs
+                               ;; Adapt for mgiemo
+                               (mapcar
+                                (lambda (str)
+                                  (concat (funcall avy-migemo-get-function str)
+                                          "\\|" str))
+                                (ivy--split str))))
+                          (if (= (length subs) 1)
+                              (cons
+                               (setq ivy--subexps 0)
+                               (car subs))
                             (cons
-                             (setq ivy--subexps 0)
-                             (car subs))
-                          (cons
-                           (setq ivy--subexps (length subs))
-                           (mapconcat
-                            (lambda (x)
-                              (if (string-match "\\`\\\\(.*\\\\)\\'" x)
-                                  x
-                                (format "\\(%s\\)" x)))
-                            subs
-                            (if greedy
-                                ".*"
-                              ".*?")))))
-                      ivy--regex-hash)))))
+                             (setq ivy--subexps (length subs))
+                             (mapconcat
+                              (lambda (x)
+                                (if (string-match "\\`\\\\(.*\\\\)\\'" x)
+                                    x
+                                  (format "\\(%s\\)" x)))
+                              subs
+                              (if greedy
+                                  ".*"
+                                ".*?")))))
+                        ivy--regex-hash)))))
+    (byte-compile 'ivy--regex-migemo)
 
-  (avy-migemo-add-names 'ivy--regex-migemo)
+    (avy-migemo-add-names 'ivy--regex-migemo)
 
-  (defun avy-migemo-clear-ivy--regex-hash ()
-    (setq ivy--regex-hash (make-hash-table :test #'equal)))
+    (defun avy-migemo-clear-ivy--regex-hash ()
+      (setq ivy--regex-hash (make-hash-table :test #'equal)))
+    (byte-compile 'avy-migemo-clear-ivy--regex-hash)
   
-  (add-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash))
+    (add-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
+
+    (provide 'ivy--regex-migemo)))
 
 (provide 'avy-migemo-e.g.swiper)
 ;;; avy-migemo-e.g.swiper.el ends here
