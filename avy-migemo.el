@@ -3,7 +3,7 @@
 ;; Copyright (C) 2015 momomo5717
 
 ;; Keywords: avy, migemo
-;; Version: 0.2.1
+;; Version: 0.2.2
 ;; Package-Requires:((emacs "24.4") (avy "0.3") (migemo "1.9"))
 ;; URL: https://github.com/momomo5717/avy-migemo
 
@@ -25,8 +25,8 @@
 
 ;; This package is a minor mode of avy for using migemo.
 ;;
-;; Migemo which is a library for incremental search has only Japanese dictionaries,
-;; but it could be used as abbreviation matching for other languages
+;; Migemo which is a library for incremental search has only Japanese dictionaries.
+;; It could be used as abbreviation matching for other languages
 ;; by preparing user's migemo dictionaries or customizing `avy-migemo-get-function'.
 ;;
 ;; For example, if url is defined in a migemo dictionary as ftp, http, and so on,
