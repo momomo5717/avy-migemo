@@ -1,3 +1,6 @@
+[[https://melpa.org/#/avy-migemo][file:https://melpa.org/packages/avy-migemo-badge.svg]]
+[[https://stable.melpa.org/#/avy-migemo][file:https://stable.melpa.org/packages/avy-migemo-badge.svg]]
+
 * avy-migemo
 
   avy-migemo は avy 関数の migemo版に切り替えるためのマイナーモードです．

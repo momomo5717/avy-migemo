@@ -1,3 +1,6 @@
+[[https://melpa.org/#/avy-migemo][file:https://melpa.org/packages/avy-migemo-badge.svg]]
+[[https://stable.melpa.org/#/avy-migemo][file:https://stable.melpa.org/packages/avy-migemo-badge.svg]]
+
 * avy-migemo
 
   This package is a minor mode of avy for using migemo.
