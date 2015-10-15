@@ -69,13 +69,27 @@
                         ivy--regex-hash)))))
     (byte-compile 'ivy--regex-migemo)
 
-    (avy-migemo-add-names 'ivy--regex-migemo)
-
     (defun avy-migemo-clear-ivy--regex-hash ()
       (setq ivy--regex-hash (make-hash-table :test #'equal)))
     (byte-compile 'avy-migemo-clear-ivy--regex-hash)
-  
+
+    (defvar avy-migemo--ivy-display-style-default ivy-display-style)
+
+    (defun avy-migemo--backup-ivy-display-style ()
+      "Set `ivy-display-style' to nil, if `avy-migemo-mode' is non-nil."
+      (if avy-migemo-mode
+          (setq avy-migemo--ivy-display-style-default
+                (or ivy-display-style avy-migemo--ivy-display-style-default)
+                ivy-display-style nil)
+        (setq ivy-display-style
+              (or ivy-display-style
+                  avy-migemo--ivy-display-style-default)
+              avy-migemo--ivy-display-style-default nil)))
+    (byte-compile 'avy-migemo--backup-ivy-display-style)
+
     (add-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
+    (add-hook 'avy-migemo-mode-hook 'avy-migemo--backup-ivy-display-style)
+    (avy-migemo-add-names 'ivy--regex-migemo)
 
     (provide 'ivy--regex-migemo)))
 
