@@ -140,7 +140,7 @@ It takes a string and returns a regular expression."
 
 ;;;###autoload
 (defun avy-migemo-regex-concat (pattern)
-  "Return migemo's regexp which includes PATTERN at last.
+  "Return migemo's regexp which includes PATTERN in last place.
 Return PATTERN if migemo's regexp is invalid."
   (let ((regex (funcall avy-migemo-get-function pattern)))
     (if (avy-migemo-check-regex regex)
@@ -149,7 +149,7 @@ Return PATTERN if migemo's regexp is invalid."
 
 ;;;###autoload
 (defun avy-migemo-regex-quote-concat (pattern)
-  "Return migemo's regexp which includes quoted PATTERN at last.
+  "Return migemo's regexp which includes quoted PATTERN in last place.
 Return quoted PATTERN if migemo's regexp is invalid."
   (let ((regex (funcall avy-migemo-get-function pattern)))
     (if (avy-migemo-check-regex regex)
