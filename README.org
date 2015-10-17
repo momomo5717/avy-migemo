@@ -95,45 +95,48 @@
 
       You can add a function which uses avy by adapting it for migemo.
 
+      avy-migemo-e.g.zzz-to-char.el provides the example.
+
       #+BEGIN_SRC emacs-lisp
-        ;; If you use zzz-to-char (which can be installed from MELPA),
+        ;; If you use zzz-to-char (which can be installed from MELPA or El-Get),
         ;; you can adapt it for migemo.
         (require 'zzz-to-char)
 
         ;; You need to add "-migemo" to the original name.
         (defun zzz-to-char--base-migemo (char n-shift)
-            "The same as `zzz-to-char--base' except for using migemo."
-            (let ((p (point))
-                  (avy-all-windows nil))
-              (avy-with zzz-to-char
-                (avy--generic-jump
-                 (if (= 13 char)
-                     "\n"
-                   ;; Adapt for migemo
-                   (funcall avy-migemo-get-function (string char)))
-                 nil
-                 avy-style
-                 (- p zzz-to-char-reach)
-                 (+ p zzz-to-char-reach)))
-              (let ((n (point)))
-                (when (/= n p)
-                  (cl-destructuring-bind (beg . end)
-                      (if (> n p)
-                          (cons p (- (1+ n) n-shift))
-                        (cons (+ n n-shift) p))
-                    (goto-char end)
-                    (kill-region beg end))))))
+          "The same as `zzz-to-char--base' except for using migemo."
+          (let ((p (point))
+                (avy-all-windows nil))
+            (avy-with zzz-to-char
+              (avy--generic-jump
+               (if (= 13 char)
+                   "\n"
+                 ;; Adapt for migemo
+                 (avy-migemo-regex-quote-concat (string char)))
+               nil
+               avy-style
+               (- p zzz-to-char-reach)
+               (+ p zzz-to-char-reach)))
+            (let ((n (point)))
+              (when (/= n p)
+                (cl-destructuring-bind (beg . end)
+                    (if (> n p)
+                        (cons p (- (1+ n) n-shift))
+                      (cons (+ n n-shift) p))
+                  (goto-char end)
+                  (kill-region beg end))))))
 
         (avy-migemo-add-names 'zzz-to-char--base-migemo)
-
       #+END_SRC
 
 ***** An example of setting for swiper ( =ivy--regex= )
 
       You can add a function which doesn't use avy by adapting it for migemo.
 
+      avy-migemo-e.g.swiper.el provides the example.
+
       #+BEGIN_SRC emacs-lisp
-        ;; If you use swiper (which can be installed from MELPA),
+        ;; If you use swiper (which can be installed from MELPA or El-Get),
         ;; you can adapt it for migemo.
         (require 'swiper)
 
@@ -151,9 +154,8 @@
                             (let ((subs
                                    ;; Adapt for mgiemo
                                    (mapcar
-                                    (lambda (str)
-                                      (concat (funcall avy-migemo-get-function str)
-                                              "\\|" str))
+                                    (mapcar #'avy-migemo-regex-concat
+                                            (ivy--split str))
                                     (ivy--split str))))
                               (if (= (length subs) 1)
                                   (cons
@@ -172,9 +174,26 @@
                                     ".*?")))))
                             ivy--regex-hash)))))
 
+        (defun avy-migemo-clear-ivy--regex-hash ()
+          (setq ivy--regex-hash (make-hash-table :test #'equal)))
+
+        (add-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
+
+        ;; Error occurs in ivy-display-style's fancy when avy-migemo-mode is enabled.
+        ;; So ivy-display-style is set to nil, when avy-migemo-mode is enabled.
+        (defvar avy-migemo--ivy-display-style-default ivy-display-style)
+        (defun avy-migemo--backup-ivy-display-style ()
+          "Set `ivy-display-style' to nil, if `avy-migemo-mode' is non-nil."
+          (if avy-migemo-mode
+              (setq avy-migemo--ivy-display-style-default
+                    (or ivy-display-style avy-migemo--ivy-display-style-default)
+                    ivy-display-style nil)
+            (setq ivy-display-style
+                  (or ivy-display-style
+                      avy-migemo--ivy-display-style-default)
+                  avy-migemo--ivy-display-style-default nil)))
+
+        (add-hook 'avy-migemo-mode-hook 'avy-migemo--backup-ivy-display-style)
+
         (avy-migemo-add-names 'ivy--regex-migemo)
-
-        (add-hook 'avy-migemo-mode-hook
-                  (lambda () (setq ivy--regex-hash (make-hash-table :test #'equal))))
-
       #+END_SRC
