@@ -42,7 +42,7 @@
            (if (= 13 char)
                "\n"
              ;; Adapt for migemo
-             (funcall avy-migemo-get-function (string char)))
+             (avy-migemo-regex-quote-concat (string char)))
            nil
            avy-style
            (- p zzz-to-char-reach)

@@ -27,7 +27,8 @@
 ;; ;; If you remove it from `avy-migemo-function-names' in a init file,
 ;; ;; (with-eval-after-load 'ivy--regex-migemo
 ;; ;;   (avy-migemo-remove-names 'ivy--regex-migemo)
-;; ;;   (remove-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash))
+;; ;;   (remove-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
+;; ;;   (remove-hook 'avy-migemo-mode-hook 'avy-migemo--backup-ivy-display-style))
 
 ;;; Code:
 
@@ -46,11 +47,8 @@
           (cdr (puthash str
                         (let ((subs
                                ;; Adapt for mgiemo
-                               (mapcar
-                                (lambda (str)
-                                  (concat (funcall avy-migemo-get-function str)
-                                          "\\|" str))
-                                (ivy--split str))))
+                               (mapcar #'avy-migemo-regex-concat
+                                       (ivy--split str))))
                           (if (= (length subs) 1)
                               (cons
                                (setq ivy--subexps 0)
