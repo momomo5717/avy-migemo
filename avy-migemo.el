@@ -131,6 +131,30 @@ It takes a string and returns a regular expression."
            (advice-add predefined-name :override name))
         (advice-remove predefined-name name)))))
 
+;;;###autoload
+(defun avy-migemo-check-regex (regex)
+  "Retrun nil if REGEX is invalid."
+  (ignore-errors
+    (string-match regex "")
+    regex))
+
+;;;###autoload
+(defun avy-migemo-regex-concat (pattern)
+  "Return migemo's regexp which includes PATTERN at last.
+Return PATTERN if migemo's regexp is invalid."
+  (let ((regex (funcall avy-migemo-get-function pattern)))
+    (if (avy-migemo-check-regex regex)
+        (concat regex "\\|" pattern)
+      pattern)))
+
+;;;###autoload
+(defun avy-migemo-regex-quote-concat (pattern)
+  "Return migemo's regexp which includes quoted PATTERN at last.
+Return quoted PATTERN if migemo's regexp is invalid."
+  (let ((regex (funcall avy-migemo-get-function pattern)))
+    (if (avy-migemo-check-regex regex)
+        (concat regex "\\|" (regexp-quote pattern))
+      (regexp-quote pattern))))
 
 ;; avy functions for migemo
 
@@ -278,7 +302,7 @@ LEN is compared with string width of OLD-STR+."
      (if (= 13 char)
          "\n"
        ;; Adapt for migemo
-       (funcall avy-migemo-get-function (string char)))
+       (avy-migemo-regex-quote-concat (string char)))
      arg
      avy-style)))
 
@@ -291,7 +315,7 @@ LEN is compared with string width of OLD-STR+."
   (avy-with avy-goto-char-2
     (avy--generic-jump
      ;; Adapt for migemo
-     (funcall avy-migemo-get-function (string char1 char2))
+     (avy-migemo-regex-quote-concat (string char1 char2))
      arg
      avy-style)))
 
@@ -302,7 +326,7 @@ LEN is compared with string width of OLD-STR+."
   (avy-with avy-goto-char
     (avy--generic-jump
      ;; Adapt for migemo
-     (funcall avy-migemo-get-function (string char))
+     (avy-migemo-regex-quote-concat (string char))
      avy-all-windows
      avy-style
      (line-beginning-position)
@@ -340,7 +364,7 @@ LEN is compared with string width of OLD-STR+."
             ;; Highlight
             (when (>= (length str) 1)
               ;; Adapt for migemo
-              (setq regex (funcall avy-migemo-get-function str))
+              (setq regex (avy-migemo-regex-quote-concat str))
               (dolist (win (if avy-all-windows
                                (window-list)
                              (list (selected-window))))
@@ -366,7 +390,7 @@ LEN is compared with string width of OLD-STR+."
     (avy-with avy-goto-char-timer
       (avy--generic-jump
        ;; Adapt for migemo
-       (funcall avy-migemo-get-function str)
+       (avy-migemo-regex-quote-concat str)
        arg
        avy-style))))
 
@@ -378,9 +402,9 @@ LEN is compared with string width of OLD-STR+."
   (avy-with avy-goto-subword-1
     (let ((char (downcase char))
           ;; Adapt for migemo
-          (regex (funcall avy-migemo-get-function (string char))))
+          (regex (avy-migemo-regex-quote-concat (string char))))
       (avy-goto-subword-0
-       arg (lambda () (let ((char-after (char-after)))
+       arg (lambda () (let ((char-after (char-after))) ; Adapt for migemo
                     (or (eq (downcase char-after) char)
                         (string-match-p regex (string char-after)))))))))
 
@@ -396,11 +420,11 @@ LEN is compared with string width of OLD-STR+."
                         ((and avy-word-punc-regexp
                               (string-match avy-word-punc-regexp str))
                          ;; Adapt for migemo
-                         (funcall avy-migemo-get-function str))
+                         (avy-migemo-regex-quote-concat str))
                         (t ;; Adapt for migemo
                          (concat
                           "\\b"
-                          (funcall avy-migemo-get-function str))))))
+                          (avy-migemo-regex-concat str))))))
       (avy--generic-jump regex arg avy-style))))
 
 ;;;###autoload
@@ -412,8 +436,7 @@ LEN is compared with string width of OLD-STR+."
       (avy--process
        (avy--regex-candidates
         ;; Adapt for migemo
-        (concat isearch-string "\\|"
-                (funcall avy-migemo-get-function isearch-string)))
+        (avy-migemo-regex-concat isearch-string))
        (avy--style-fn avy-style))
       (isearch-done))))
 
