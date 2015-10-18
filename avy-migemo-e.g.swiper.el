@@ -77,7 +77,7 @@
             (setq start (match-end 0))
             ;; Adapt for migemo's regex
             (let ((i 0) (i-face 0)
-                  mbeg mend0 (l-mend 0)
+                  mbeg mend (l-mend 0)
                   (re-depth (regexp-opt-depth ivy--old-re)))
               (while (<= i re-depth)
                 (setq mbeg (match-beginning i)
