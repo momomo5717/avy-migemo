@@ -131,30 +131,51 @@ It takes a string and returns a regular expression."
            (advice-add predefined-name :override name))
         (advice-remove predefined-name name)))))
 
+(defvar avy-migemo--regex-cache
+  (make-hash-table :test #'equal)
+  "Migemo's regexp cache.")
+
 ;;;###autoload
-(defun avy-migemo-check-regex (regex)
+(defun avy-migemo-regex-cache-clear ()
+  "Clear `avy-migemo--regex-cache'."
+  (interactive)
+  (setq avy-migemo--regex-cache (make-hash-table :test #'equal)))
+
+;;;###autoload
+(defun avy-migemo-regex-p (regex)
   "Retrun nil if REGEX is invalid."
   (ignore-errors
     (string-match regex "")
     regex))
 
+(define-obsolete-function-alias 'avy-migemo-check-regex 'avy-migemo-regex-p "0.2.5")
+
 ;;;###autoload
 (defun avy-migemo-regex-concat (pattern)
   "Return migemo's regexp which includes PATTERN in last place.
 Return PATTERN if migemo's regexp is invalid."
-  (let ((regex (funcall avy-migemo-get-function pattern)))
-    (if (avy-migemo-check-regex regex)
-        (concat regex "\\|" pattern)
-      pattern)))
+  (let ((cache (gethash pattern avy-migemo--regex-cache)))
+    (if cache cache
+      (puthash pattern
+               (let ((regex (funcall avy-migemo-get-function pattern)))
+                 (if (avy-migemo-regex-p regex)
+                     (concat regex "\\|" pattern)
+                   pattern))
+               avy-migemo--regex-cache))))
 
 ;;;###autoload
 (defun avy-migemo-regex-quote-concat (pattern)
   "Return migemo's regexp which includes quoted PATTERN in last place.
 Return quoted PATTERN if migemo's regexp is invalid."
-  (let ((regex (funcall avy-migemo-get-function pattern)))
-    (if (avy-migemo-check-regex regex)
-        (concat regex "\\|" (regexp-quote pattern))
-      (regexp-quote pattern))))
+  (let* ((quoted-pattern (regexp-quote pattern))
+         (cache (gethash quoted-pattern avy-migemo--regex-cache)))
+    (if cache cache
+      (puthash quoted-pattern
+               (let ((regex (funcall avy-migemo-get-function pattern)))
+                 (if (avy-migemo-regex-p regex)
+                     (concat regex "\\|" quoted-pattern)
+                   quoted-pattern))
+               avy-migemo--regex-cache))))
 
 ;; avy functions for migemo
 
