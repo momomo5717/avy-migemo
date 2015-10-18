@@ -26,9 +26,8 @@
 ;;
 ;; ;; If you remove it from `avy-migemo-function-names' in a init file,
 ;; ;; (with-eval-after-load 'ivy--regex-migemo
-;; ;;   (avy-migemo-remove-names 'ivy--regex-migemo)
-;; ;;   (remove-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
-;; ;;   (remove-hook 'avy-migemo-mode-hook 'avy-migemo--backup-ivy-display-style))
+;; ;;   (avy-migemo-remove-names 'ivy--regex-migemo 'ivy--format-minibuffer-line-migemo)
+;; ;;   (remove-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash))
 
 ;;; Code:
 
@@ -67,27 +66,55 @@
                         ivy--regex-hash)))))
     (byte-compile 'ivy--regex-migemo)
 
+    (defun ivy--format-minibuffer-line-migemo (str)
+      (let ((start 0)
+            (str (copy-sequence str)))
+        (when (eq ivy-display-style 'fancy)
+          (unless ivy--old-re
+            (setq ivy--old-re (funcall ivy--regex-function ivy-text)))
+          (while (and (string-match ivy--old-re str start)
+                      (> (- (match-end 0) (match-beginning 0)) 0))
+            (setq start (match-end 0))
+            ;; Adapt for migemo's regex
+            (let ((i 0) (i-face 0)
+                  mbeg mend (l-mend 0))
+              (while (<= i (regexp-opt-depth ivy--old-re))
+                (setq mbeg (match-beginning i)
+                      mend (match-end i))
+                (let ((face
+                       (cond ((zerop ivy--subexps)
+                              (cadr swiper-minibuffer-faces))
+                             ((zerop i)
+                              (car swiper-minibuffer-faces))
+                             (t
+                              (nth (1+ (mod (+ i-face 2) (1- (length swiper-minibuffer-faces))))
+                                   swiper-minibuffer-faces)))))
+                  (when (and (numberp mbeg) (<= l-mend mbeg))
+                    (if (fboundp 'add-face-text-property)
+                        (add-face-text-property
+                         mbeg
+                         (if (zerop i) mend (setq l-mend mend))
+                         face
+                         nil
+                         str)
+                      (font-lock-append-text-property
+                       mbeg
+                       (if (zerop i) mend (setq l-mend mend))
+                       'face
+                       face
+                       str))
+                    (cl-incf i-face)))
+                (cl-incf i)))))
+        str))
+    (byte-compile 'ivy--format-minibuffer-line-migemo)
+
     (defun avy-migemo-clear-ivy--regex-hash ()
       (setq ivy--regex-hash (make-hash-table :test #'equal)))
     (byte-compile 'avy-migemo-clear-ivy--regex-hash)
 
-    (defvar avy-migemo--ivy-display-style-default ivy-display-style)
-
-    (defun avy-migemo--backup-ivy-display-style ()
-      "Set `ivy-display-style' to nil, if `avy-migemo-mode' is non-nil."
-      (if avy-migemo-mode
-          (setq avy-migemo--ivy-display-style-default
-                (or ivy-display-style avy-migemo--ivy-display-style-default)
-                ivy-display-style nil)
-        (setq ivy-display-style
-              (or ivy-display-style
-                  avy-migemo--ivy-display-style-default)
-              avy-migemo--ivy-display-style-default nil)))
-    (byte-compile 'avy-migemo--backup-ivy-display-style)
-
     (add-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
-    (add-hook 'avy-migemo-mode-hook 'avy-migemo--backup-ivy-display-style)
-    (avy-migemo-add-names 'ivy--regex-migemo)
+    (avy-migemo-add-names 'ivy--regex-migemo
+                          'ivy--format-minibuffer-line-migemo)
 
     (provide 'ivy--regex-migemo)))
 
