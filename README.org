@@ -177,23 +177,12 @@
         (defun avy-migemo-clear-ivy--regex-hash ()
           (setq ivy--regex-hash (make-hash-table :test #'equal)))
 
+        ;; If you need to ivy-display-style's fancy,
+        ;; you can use `ivy--format-minibuffer-line-migemo' in avy-migemo-e.g.swiper.el.
+        (defun ivy--format-minibuffer-line-migemo (str)
+          "you can see `ivy--format-minibuffer-line-migemo' in avy-migemo-e.g.swiper.el"
+          (copy-sequence str))
+
         (add-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
-
-        ;; Error occurs in ivy-display-style's fancy when avy-migemo-mode is enabled.
-        ;; So ivy-display-style is set to nil, when avy-migemo-mode is enabled.
-        (defvar avy-migemo--ivy-display-style-default ivy-display-style)
-        (defun avy-migemo--backup-ivy-display-style ()
-          "Set `ivy-display-style' to nil, if `avy-migemo-mode' is non-nil."
-          (if avy-migemo-mode
-              (setq avy-migemo--ivy-display-style-default
-                    (or ivy-display-style avy-migemo--ivy-display-style-default)
-                    ivy-display-style nil)
-            (setq ivy-display-style
-                  (or ivy-display-style
-                      avy-migemo--ivy-display-style-default)
-                  avy-migemo--ivy-display-style-default nil)))
-
-        (add-hook 'avy-migemo-mode-hook 'avy-migemo--backup-ivy-display-style)
-
-        (avy-migemo-add-names 'ivy--regex-migemo)
+        (avy-migemo-add-names 'ivy--regex-migemo 'ivy--format-minibuffer-line-migemo)
       #+END_SRC
