@@ -26,7 +26,9 @@
 ;;
 ;; ;; If you remove it from `avy-migemo-function-names' in a init file,
 ;; ;; (with-eval-after-load 'ivy--regex-migemo
-;; ;;   (avy-migemo-remove-names 'ivy--regex-migemo 'ivy--format-minibuffer-line-migemo)
+;; ;;   (avy-migemo-remove-names 'ivy--regex-migemo
+;; ;;                            'swiper--add-overlays-migemo
+;; ;;                            'ivy--format-minibuffer-line-migemo)
 ;; ;;   (remove-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash))
 
 ;;; Code:
@@ -65,6 +67,70 @@
                                 ".*?")))))
                         ivy--regex-hash)))))
     (byte-compile 'ivy--regex-migemo)
+
+    (defvar avy-migemo--swiper-old-re "")
+    (defvar avy-migemo--swiper-old-re-depth 0)
+    (defun swiper--add-overlays-migemo (re &optional beg end)
+      "The same as `swiper--add-overlays' except adapting it for migemo's regexp."
+      (let ((ov (if visual-line-mode
+                    (make-overlay
+                     (save-excursion
+                       (beginning-of-visual-line)
+                       (point))
+                     (save-excursion
+                       (end-of-visual-line)
+                       (point)))
+                  (make-overlay
+                   (line-beginning-position)
+                   (1+ (line-end-position))))))
+        (overlay-put ov 'face 'swiper-line-face)
+        (overlay-put ov 'window (ivy-state-window ivy-last))
+        (push ov swiper--overlays)
+        (let* ((wh (window-height))
+               (beg (or beg (save-excursion
+                              (forward-line (- wh))
+                              (point))))
+               (end (or end (save-excursion
+                              (forward-line wh)
+                              (point)))))
+          (when (>= (length re) swiper-min-highlight)
+            (save-excursion
+              (goto-char beg)
+              ;; RE can become an invalid regexp
+              (while (and (ignore-errors (re-search-forward re end t))
+                          (> (- (match-end 0) (match-beginning 0)) 0))
+                ;; Adapt for migemo's regexp.
+                (let ((i 0) (i-face 0)
+                      mbeg mend (l-mend 0)
+                      (re-depth+1 (if (zerop ivy--subexps)
+                                      1
+                                    (1+ (if (eq avy-migemo--swiper-old-re re)
+                                            avy-migemo--swiper-old-re-depth
+                                          (setq avy-migemo--swiper-old-re re
+                                                avy-migemo--swiper-old-re-depth
+                                                (regexp-opt-depth re)))))))
+                  (while (< i re-depth+1)
+                    (setq mbeg (match-beginning i)
+                          mend (match-end i))
+                    (when (and mbeg (<= l-mend mbeg) mend)
+                      (let ((overlay (make-overlay
+                                      mbeg
+                                      (if (> i 0) (setq l-mend mend) mend)))
+                            (face
+                             (cond ((zerop ivy--subexps)
+                                    (cadr swiper-faces))
+                                   ((zerop i)
+                                    (car swiper-faces))
+                                   (t
+                                    (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
+                                         swiper-faces)))))
+                        (push overlay swiper--overlays)
+                        (overlay-put overlay 'face face)
+                        (overlay-put overlay 'window (ivy-state-window ivy-last))
+                        (overlay-put overlay 'priority i-face))
+                      (cl-incf i-face))
+                    (cl-incf i)))))))))
+    (byte-compile 'swiper--add-overlays-migemo)
 
     (defvar avy-migemo--ivy-old-re "")
     (defvar avy-migemo--ivy-old-re-depth 0)
@@ -124,6 +190,7 @@
 
     (add-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
     (avy-migemo-add-names 'ivy--regex-migemo
+                          'swiper--add-overlays-migemo
                           'ivy--format-minibuffer-line-migemo)
 
     (provide 'ivy--regex-migemo)))
