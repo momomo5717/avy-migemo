@@ -66,7 +66,10 @@
                         ivy--regex-hash)))))
     (byte-compile 'ivy--regex-migemo)
 
+    (defvar avy-migemo--ivy-old-re "")
+    (defvar avy-migemo--ivy-old-re-depth 0)
     (defun ivy--format-minibuffer-line-migemo (str)
+      "The same as `ivy--format-minibuffer-line' except adapting it for migemo's regexp."
       (let ((start 0)
             (str (copy-sequence str)))
         (when (eq ivy-display-style 'fancy)
@@ -75,32 +78,38 @@
           (while (and (string-match ivy--old-re str start)
                       (> (- (match-end 0) (match-beginning 0)) 0))
             (setq start (match-end 0))
-            ;; Adapt for migemo's regex
+            ;; Adapt for migemo's regexp
             (let ((i 0) (i-face 0)
                   mbeg mend (l-mend 0)
-                  (re-depth (regexp-opt-depth ivy--old-re)))
-              (while (<= i re-depth)
+                  (re-depth+1 (if (zerop ivy--subexps)
+                                  1
+                                (1+ (if (eq avy-migemo--ivy-old-re ivy--old-re)
+                                        avy-migemo--ivy-old-re-depth
+                                      (setq avy-migemo--ivy-old-re ivy--old-re
+                                            avy-migemo--ivy-old-re-depth
+                                            (regexp-opt-depth ivy--old-re)))))))
+              (while (< i re-depth+1)
                 (setq mbeg (match-beginning i)
                       mend (match-end i))
-                (let ((face
-                       (cond ((zerop ivy--subexps)
-                              (cadr swiper-minibuffer-faces))
-                             ((zerop i)
-                              (car swiper-minibuffer-faces))
-                             (t
-                              (nth (1+ (mod (+ i-face 2) (1- (length swiper-minibuffer-faces))))
-                                   swiper-minibuffer-faces)))))
-                  (when (and (numberp mbeg) (<= l-mend mbeg))
+                (when (and mbeg (<= l-mend mbeg) mend)
+                  (let ((face
+                         (cond ((zerop ivy--subexps)
+                                (cadr swiper-minibuffer-faces))
+                               ((zerop i)
+                                (car swiper-minibuffer-faces))
+                               (t
+                                (nth (1+ (mod (+ i-face 2) (1- (length swiper-minibuffer-faces))))
+                                     swiper-minibuffer-faces)))))
                     (if (fboundp 'add-face-text-property)
                         (add-face-text-property
                          mbeg
-                         (if (zerop i) mend (setq l-mend mend))
+                         (if (> i 0) (setq l-mend mend) mend)
                          face
                          nil
                          str)
                       (font-lock-append-text-property
                        mbeg
-                       (if (zerop i) mend (setq l-mend mend))
+                       (if (> i 0) (setq l-mend mend) mend)
                        'face
                        face
                        str))
