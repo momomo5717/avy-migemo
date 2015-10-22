@@ -16,6 +16,7 @@
     + =avy-migemo-isearch=
     + =avy-migemo--overlay-at=
     + =avy-migemo--overlay-at-full=
+    + =avy-migemo--read-candidates=
 
   These are the same as [[https://github.com/abo-abo/avy][avy]]'s predefined functions
   except for adding candidates via [[https://github.com/emacs-jp/migemo][migemo]] (simply using migemo instead of =regexp-quote=).
@@ -140,11 +141,16 @@
         ;; you can adapt it for migemo.
         (require 'swiper)
 
+
+        (defvar avy-migemo--ivy--regex-hash
+          (make-hash-table :test #'equal)
+          "avy-migemo's `ivy--regex-hash'.")
+
         ;; You need to add "-migemo" to the original name.
         (defun ivy--regex-migemo (str &optional greedy)
           "The same as `ivy--regex' except for using migemo."
           (let ((hashed (unless greedy
-                          (gethash str ivy--regex-hash))))
+                          (gethash str avy-migemo--ivy--regex-hash))))
             (if hashed
                 (prog1 (cdr hashed)
                   (setq ivy--subexps (car hashed)))
@@ -172,10 +178,7 @@
                                   (if greedy
                                       ".*"
                                     ".*?")))))
-                            ivy--regex-hash)))))
-
-        (defun avy-migemo-clear-ivy--regex-hash ()
-          (setq ivy--regex-hash (make-hash-table :test #'equal)))
+                            avy-migemo--ivy--regex-hash)))))
 
         ;; If you need to ivy-display-style's fancy,
         ;; you can use `ivy--format-minibuffer-line-migemo' in avy-migemo-e.g.swiper.el.
@@ -183,6 +186,5 @@
           "you can see `ivy--format-minibuffer-line-migemo' in avy-migemo-e.g.swiper.el"
           (copy-sequence str))
 
-        (add-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
         (avy-migemo-add-names 'ivy--regex-migemo 'ivy--format-minibuffer-line-migemo)
       #+END_SRC
