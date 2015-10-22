@@ -383,27 +383,31 @@ LEN is compared with string width of OLD-STR+."
             (when (>= (length str) 1)
               ;; Adapt for migemo
               (setq regex (avy-migemo-regex-quote-concat str))
-              (dolist (win (avy-window-list))
-                (with-selected-window win
-                  (dolist (pair (avy--find-visible-regions
-                                 (window-start)
-                                 (window-end win t)))
-                    (save-excursion
-                      (goto-char (car pair))
-                      (while (re-search-forward regex (cdr pair) t)
-                        (unless (get-char-property (1- (point)) 'invisible)
-                          (let ((ov (make-overlay
-                                     (match-beginning 0)
-                                     (match-end 0))))
-                            (push ov overlays)
-                            (overlay-put ov 'window win)
-                            (overlay-put ov 'face 'avy-goto-char-timer-face))))))))))
+              (let (found)
+                (dolist (win (avy-window-list))
+                  (with-selected-window win
+                    (dolist (pair (avy--find-visible-regions
+                                   (window-start)
+                                   (window-end win t)))
+                      (save-excursion
+                        (goto-char (car pair))
+                        (while (re-search-forward regex (cdr pair) t)
+                          (unless (get-char-property (1- (point)) 'invisible)
+                            (let ((ov (make-overlay
+                                       (match-beginning 0)
+                                       (match-end 0))))
+                              (setq found t)
+                              (push ov overlays)
+                              (overlay-put ov 'window win)
+                              (overlay-put ov 'face 'avy-goto-char-timer-face))))))))
+                ;; No matches at all, so there's surely a typo in the input.
+                (unless found (beep)))))
           (nreverse
            (mapcar (lambda (ov)
                      (cons (cons (overlay-start ov)
                                  (overlay-end ov))
                            (overlay-get ov 'window)))
-                  overlays)))
+                   overlays)))
       (dolist (ov overlays)
         (delete-overlay ov)))))
 
