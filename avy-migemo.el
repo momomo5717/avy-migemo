@@ -44,7 +44,6 @@
 ;;   + avy-migemo-isearch
 ;;   + avy-migemo--overlay-at
 ;;   + avy-migemo--overlay-at-full
-;;   + avy-migemo--read-string-timer
 ;;
 ;;  These are the same as avy's predefined functions
 ;;  except for adding candidates via migemo (simply using migemo instead of `regexp-quote').
@@ -88,8 +87,7 @@ It takes a string and returns a regular expression."
     avy-migemo-goto-word-1
     avy-migemo-isearch
     avy-migemo--overlay-at
-    avy-migemo--overlay-at-full
-    avy-migemo--read-string-timer)
+    avy-migemo--overlay-at-full)
   "Function names for overriding avy's functions."
   :set (lambda (symbol value)
          (if (and (boundp symbol) (boundp 'avy-migemo-mode))
@@ -353,20 +351,20 @@ LEN is compared with string width of OLD-STR+."
      (line-beginning-position)
      (line-end-position))))
 
-(defun avy-migemo--read-string-timer ()
-  "The same as `avy--read-string-timer' except for candidates via migemo."
-  (let* ((str "")
-         char break overlays regex we)
+(defun avy-migemo--read-candidates ()
+  "The same as `avy--read-candidates' except for the candidates via migemo."
+  (let ((str "") char break overlays regex)
     (unwind-protect
         (progn
           (while (and (not break)
-                      (setq char (read-char (format "char%s: "
-                                                    (if (string= str "")
-                                                        str
-                                                      (format " (%s)" str)))
-                                            t
-                                            (and (not (string= str ""))
-                                                 avy-timeout-seconds))))
+                      (setq char
+                            (read-char (format "char%s: "
+                                               (if (string= str "")
+                                                   str
+                                                 (format " (%s)" str)))
+                                       t
+                                       (and (not (string= str ""))
+                                            avy-timeout-seconds))))
             ;; Unhighlight
             (dolist (ov overlays)
               (delete-overlay ov))
@@ -386,20 +384,27 @@ LEN is compared with string width of OLD-STR+."
             (when (>= (length str) 1)
               ;; Adapt for migemo
               (setq regex (avy-migemo-regex-quote-concat str))
-              (dolist (win (if avy-all-windows
-                               (window-list)
-                             (list (selected-window))))
+              (dolist (win (avy-window-list))
                 (with-selected-window win
-                  (save-excursion
-                    (setq we (window-end win t))
-                    (goto-char (window-start))
-                    (while (re-search-forward regex we t)
-                      (unless (get-char-property (point) 'invisible)
-                        (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
-                          (push ov overlays)
-                          (overlay-put ov 'window win)
-                          (overlay-put ov 'face 'avy-goto-char-timer-face)))))))))
-          str)
+                  (dolist (pair (avy--find-visible-regions
+                                 (window-start)
+                                 (window-end win t)))
+                    (save-excursion
+                      (goto-char (car pair))
+                      (while (re-search-forward regex (cdr pair) t)
+                        (unless (get-char-property (1- (point)) 'invisible)
+                          (let ((ov (make-overlay
+                                     (match-beginning 0)
+                                     (match-end 0))))
+                            (push ov overlays)
+                            (overlay-put ov 'window win)
+                            (overlay-put ov 'face 'avy-goto-char-timer-face))))))))))
+          (nreverse
+           (mapcar (lambda (ov)
+                     (cons (cons (overlay-start ov)
+                                 (overlay-end ov))
+                           (overlay-get ov 'window)))
+                  overlays)))
       (dolist (ov overlays)
         (delete-overlay ov)))))
 
@@ -407,13 +412,14 @@ LEN is compared with string width of OLD-STR+."
 (defun avy-migemo-goto-char-timer (&optional arg)
   "The same as `avy-goto-char-timer' except for the candidates via migemo."
   (interactive "P")
-  (let ((str (avy--read-string-timer)))
+  (let ((avy-all-windows (if arg
+                             (not avy-all-windows)
+                           avy-all-windows)))
     (avy-with avy-goto-char-timer
-      (avy--generic-jump
+      (avy--process
        ;; Adapt for migemo
-       (avy-migemo-regex-quote-concat str)
-       arg
-       avy-style))))
+       (avy-migemo--read-candidates)
+       (avy--style-fn avy-style)))))
 
 ;;;###autoload
 (defun avy-migemo-goto-subword-1 (char &optional arg)
