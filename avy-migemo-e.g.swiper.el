@@ -191,6 +191,9 @@
                           'swiper--add-overlays-migemo
                           'ivy--format-minibuffer-line-migemo)
 
+    (define-obsolete-function-alias 'avy-migemo-clear-ivy--regex-hash
+      'identity "0.2.9")
+
     (provide 'ivy--regex-migemo)))
 
 (provide 'avy-migemo-e.g.swiper)

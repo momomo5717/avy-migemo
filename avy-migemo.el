@@ -3,7 +3,7 @@
 ;; Copyright (C) 2015 momomo5717
 
 ;; Keywords: avy, migemo
-;; Version: 0.2.8
+;; Version: 0.2.9
 ;; Package-Requires:((emacs "24.4") (avy "0.3") (migemo "1.9"))
 ;; URL: https://github.com/momomo5717/avy-migemo
 
@@ -44,6 +44,7 @@
 ;;   + avy-migemo-isearch
 ;;   + avy-migemo--overlay-at
 ;;   + avy-migemo--overlay-at-full
+;;   + avy-migemo--read-candidates
 ;;
 ;;  These are the same as avy's predefined functions
 ;;  except for adding candidates via migemo (simply using migemo instead of `regexp-quote').
@@ -145,8 +146,6 @@ It takes a string and returns a regular expression."
   (ignore-errors
     (string-match regex "")
     regex))
-
-(define-obsolete-function-alias 'avy-migemo-check-regex 'avy-migemo-regex-p "0.2.5")
 
 ;;;###autoload
 (defun avy-migemo-regex-concat (pattern)
@@ -467,5 +466,10 @@ LEN is compared with string width of OLD-STR+."
        (avy--style-fn avy-style))
       (isearch-done))))
 
+(define-obsolete-function-alias 'avy-migemo-check-regex
+  'avy-migemo-regex-p "0.2.5")
+
+(define-obsolete-function-alias 'avy-migemo--read-string-timer
+  'avy-migemo--read-candidates "0.2.9")
 (provide 'avy-migemo)
 ;;; avy-migemo.el ends here
