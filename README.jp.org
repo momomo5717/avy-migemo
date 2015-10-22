@@ -16,7 +16,6 @@
     + =avy-migemo-isearch=
     + =avy-migemo--overlay-at=
     + =avy-migemo--overlay-at-full=
-    + =avy-migemo--read-string-timer=
 
   上記のほとんどは [[https://github.com/abo-abo/avy][avy.el]] で定義されている関数の =regexp-quote= の箇所を migemo に置き換えたのものです．
 
@@ -76,8 +75,7 @@
         ;; Override only `avy-goto-char-timer' when `avy-migemo-mode' is enabled.
         (custom-set-variables
          '(avy-migemo-function-names
-           '(avy-migemo-goto-char-timer
-             avy-migemo--read-string-timer)))
+           '(avy-migemo-goto-char-timer)))
 
       #+END_SRC
 
