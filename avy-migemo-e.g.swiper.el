@@ -28,18 +28,21 @@
 ;; ;; (with-eval-after-load 'ivy--regex-migemo
 ;; ;;   (avy-migemo-remove-names 'ivy--regex-migemo
 ;; ;;                            'swiper--add-overlays-migemo
-;; ;;                            'ivy--format-minibuffer-line-migemo)
-;; ;;   (remove-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash))
+;; ;;                            'ivy--format-minibuffer-line-migemo))
 
 ;;; Code:
 
 ;; For using swiper ( `ivy--regex' ) with migemo
 (with-eval-after-load "avy-migemo"
   (with-eval-after-load "ivy"
+    (defvar avy-migemo--ivy--regex-hash
+      (make-hash-table :test #'equal)
+      "avy-migemo's `ivy--regex-hash'.")
+
     (defun ivy--regex-migemo (str &optional greedy)
       "The same as `ivy--regex' except for using migemo."
       (let ((hashed (unless greedy
-                      (gethash str ivy--regex-hash))))
+                      (gethash str avy-migemo--ivy--regex-hash))))
         (if hashed
             (prog1 (cdr hashed)
               (setq ivy--subexps (car hashed)))
@@ -65,7 +68,7 @@
                               (if greedy
                                   ".*"
                                 ".*?")))))
-                        ivy--regex-hash)))))
+                        avy-migemo--ivy--regex-hash)))))
     (byte-compile 'ivy--regex-migemo)
 
     (defvar avy-migemo--swiper-old-re "")
@@ -184,11 +187,6 @@
         str))
     (byte-compile 'ivy--format-minibuffer-line-migemo)
 
-    (defun avy-migemo-clear-ivy--regex-hash ()
-      (setq ivy--regex-hash (make-hash-table :test #'equal)))
-    (byte-compile 'avy-migemo-clear-ivy--regex-hash)
-
-    (add-hook 'avy-migemo-mode-hook 'avy-migemo-clear-ivy--regex-hash)
     (avy-migemo-add-names 'ivy--regex-migemo
                           'swiper--add-overlays-migemo
                           'ivy--format-minibuffer-line-migemo)
