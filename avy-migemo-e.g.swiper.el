@@ -192,7 +192,7 @@
                           'ivy--format-minibuffer-line-migemo)
 
     (define-obsolete-function-alias 'avy-migemo-clear-ivy--regex-hash
-      'identity "0.2.9")
+      '(lambda (&rest _)) "0.2.9")
 
     (provide 'ivy--regex-migemo)))
 
