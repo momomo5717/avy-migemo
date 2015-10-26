@@ -50,7 +50,7 @@
             (setq str (substring str 0 -1)))
           (cdr (puthash str
                         (let ((subs
-                               ;; Adapt for mgiemo
+                               ;; Adapt for migemo
                                (mapcar #'avy-migemo-regex-concat
                                        (ivy--split str))))
                           (if (= (length subs) 1)
