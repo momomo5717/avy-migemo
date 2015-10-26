@@ -203,28 +203,19 @@ LEN is compared with string width of OLD-STR+."
   (let* ((path (mapcar #'avy--key-to-char path))
          (str (propertize
                (string (car (last path)))
-               'face 'avy-lead-face))
-         (pt (+ (if (consp (car leaf))
-                    (caar leaf)
-                  (car leaf))
-                avy--overlay-offset))
-         (wnd (cdr leaf))
-         (ol (make-overlay pt (1+ pt)
-                           (window-buffer wnd)))
-         (old-str (with-selected-window wnd
-                    (buffer-substring pt (1+ pt)))))
-    (when avy-background
-      (setq old-str (propertize
-                     old-str 'face 'avy-background-face)))
-    (overlay-put ol 'window wnd)
-    (overlay-put ol 'display
-                 (if (string= old-str "\n")
-                     (concat str "\n")
-                   ;; Adapt for migemo
-                   (if (= (max (string-width old-str) 1) 1)
-                       str
-                     (concat str (avy-migemo--rest-old-str old-str 1)))))
-    (push ol avy--overlays-lead)))
+               'face 'avy-lead-face)))
+    (avy--overlay
+     str
+     (avy-candidate-beg leaf) nil
+     (avy-candidate-wnd leaf)
+     (lambda (str old-str)
+       (cond ((string= old-str "\n")
+              (concat str "\n"))
+             ;; Adapt for migemo
+             ((= (max (string-width old-str) 1) 1)
+              str)
+             (t
+              (concat str (avy-migemo--rest-old-str old-str 1))))))))
 
 (defun avy-migemo--overlay-at-full (path leaf)
   "The same as `avy--overlay-at-full' except adapting it for migemo."
@@ -233,11 +224,11 @@ LEN is compared with string width of OLD-STR+."
                (apply #'string (reverse path))
                'face 'avy-lead-face))
          (len (length path))
-         (beg (if (consp (car leaf))
-                  (caar leaf)
-                (car leaf)))
+         (beg (avy-candidate-beg leaf))
          (wnd (cdr leaf))
-         oov)
+         end
+         ;; Adapt for migemo
+         (old-str+ ""))
     (dotimes (i len)
       (set-text-properties (- len i 1) (- len i)
                            `(face ,(nth i avy-lead-faces))
@@ -251,64 +242,55 @@ LEN is compared with string width of OLD-STR+."
     (with-selected-window wnd
       (save-excursion
         (goto-char beg)
-        (when (setq oov
-                    (delq nil
-                          (mapcar
-                           (lambda (o)
-                             (and (eq (overlay-get o 'category) 'avy)
-                                  (eq (overlay-get o 'window) wnd)
-                                  (overlay-start o)))
-                           (overlays-in (point) (min (+ (point) len)
-                                                     (line-end-position))))))
-          (setq len (- (apply #'min oov) beg))
-          (setq str (substring str 0 len)))
-        (let ((other-ov (cl-find-if
-                         (lambda (o)
-                           (and (eq (overlay-get o 'category) 'avy)
-                                (eq (overlay-start o) beg)
-                                (not (eq (overlay-get o 'window) wnd))))
-                         (overlays-in (point) (min (+ (point) len)
-                                                   (line-end-position))))))
-          (when (and other-ov
-                     (> (overlay-end other-ov)
-                        (+ beg len)))
-            (setq str (concat str (buffer-substring
-                                   (+ beg len)
-                                   (overlay-end other-ov))))
-            (setq len (- (overlay-end other-ov)
-                         beg))))
-        (let* ((end (if (= beg (line-end-position))
+        (let* ((lep (if (bound-and-true-p visual-line-mode)
+                        (save-excursion
+                          (end-of-visual-line)
+                          (point))
+                      (line-end-position)))
+               (len-and-str (avy--update-offset-and-str len str lep)))
+          (setq len (car len-and-str))
+          (setq str (cdr len-and-str))
+          (setq end (if (= beg lep)
                         (1+ beg)
                       (min (+ beg
                               (if (eq (char-after) ?\t)
                                   1
                                 len))
-                           (line-end-position))))
-               (ol (make-overlay
-                    beg end
-                    (current-buffer)))
-               (old-str (buffer-substring beg (1+ beg))))
-          (overlay-put ol 'window wnd)
-          (overlay-put ol 'category 'avy)
-          (overlay-put ol 'display
-                       (cond ((string= old-str "\n")
-                              (concat str "\n"))
-                             ((string= old-str "\t")
-                              (concat str (make-string (max (- tab-width len) 0) ?\ )))
-                             (t ;; Adapt for migemo
-                              (let* ((other-char-p
-                                      (cl-loop for c across str
-                                               for i from 0
-                                               unless (or (memq c avy-keys) (eq c ? ))
-                                               return i))
-                                     (str (if other-char-p
-                                              (substring str 0 other-char-p) str))
-                                     (len (if other-char-p (length str) len))
-                                     (old-str+ (buffer-substring beg end)))
-                                (if (= (string-width old-str+) len)
-                                    str
-                                  (concat str (avy-migemo--rest-old-str old-str+ len)))))))
-          (push ol avy--overlays-lead))))))
+                           lep)))
+          (setq old-str+ (buffer-substring beg end))
+          (when (and (bound-and-true-p visual-line-mode)
+                     (> len (- end beg)))
+            (setq len (- end beg))
+            (let ((old-str (apply #'string (reverse path))))
+              (setq str
+                    (substring
+                     (propertize
+                      old-str
+                      'face
+                      (if (= (length old-str) 1)
+                          'avy-lead-face
+                        'avy-lead-face-0))
+                     0 len)))))))
+    (avy--overlay
+     str beg end wnd
+     (lambda (str old-str)
+       (cond ((string= old-str "\n")
+              (concat str "\n"))
+             ((string= old-str "\t")
+              (concat str (make-string (max (- tab-width len) 0) ?\ )))
+             (t
+              ;; Adapt for migemo
+              (let* ((other-char-p
+                      (cl-loop for c across str
+                               for i from 0
+                               unless (or (memq c avy-keys) (eq c ? ))
+                               return i))
+                     (str (if other-char-p
+                              (substring str 0 other-char-p) str))
+                     (len (if other-char-p (length str) len)))
+                (if (= (string-width old-str+) len)
+                    str
+                  (concat str (avy-migemo--rest-old-str old-str+ len))))))))))
 
 ;;;###autoload
 (defun avy-migemo-goto-char (char &optional arg)
