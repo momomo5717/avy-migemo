@@ -163,12 +163,12 @@
                 (when (and mbeg (<= l-mend mbeg) mend)
                   (let ((face
                          (cond ((zerop ivy--subexps)
-                                (cadr swiper-minibuffer-faces))
+                                (cadr ivy-minibuffer-faces))
                                ((zerop i)
-                                (car swiper-minibuffer-faces))
+                                (car ivy-minibuffer-faces))
                                (t
-                                (nth (1+ (mod (+ i-face 2) (1- (length swiper-minibuffer-faces))))
-                                     swiper-minibuffer-faces)))))
+                                (nth (1+ (mod (+ i-face 2) (1- (length ivy-minibuffer-faces))))
+                                     ivy-minibuffer-faces)))))
                     (if (fboundp 'add-face-text-property)
                         (add-face-text-property
                          mbeg
