@@ -26,6 +26,8 @@
     + avy-migemo-e.g.zzz-to-char.el
     + avy-migemo-e.g.swiper.el
 
+    [[file:image/image.gif]]
+
 ** Table of contents
 
   + [[#requirements][Requirements]]
@@ -140,7 +142,6 @@
         ;; If you use swiper (which can be installed from MELPA or El-Get),
         ;; you can adapt it for migemo.
         (require 'swiper)
-
 
         (defvar avy-migemo--ivy--regex-hash
           (make-hash-table :test #'equal)

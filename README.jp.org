@@ -26,6 +26,8 @@
     + avy-migemo-e.g.zzz-to-char.el
     + avy-migemo-e.g.swiper.el
 
+    [[file:image/image.gif]]
+
 ** Table of contents
 
   + [[#requirements][Requirements]]
@@ -59,9 +61,9 @@
 
 ***** User Option: =avy-migemo-get-function=
 
-      この変数の型は関数で，初期値は =migemo-search-pattern-get= に設定されています．
+      この変数の型は関数です．初期値は =migemo-search-pattern-get= に設定されています．
 
-      引数として文字列を取って，正規表現を返す関数を設定することができます．
+      引数として文字列を取り，正規表現を返す関数を設定することができます．
 
 ***** User Option: =avy-migemo-function-names=
 
@@ -96,7 +98,7 @@
 ***** An example of setting for zzz-to-char ( =zzz-to-char--base= )
 
       以下のように，avy を使用している関数の migemo版を新たに追加することができます．
-      既存の関数名に =-migemo= を加えた関数を新たに定義して，追加します．
+      既存の関数名に =-migemo= を加えた関数を新たに定義し，追加します．
 
       以下の設定例は avy-migemo-e.g.zzz-to-char.el をロードすることで使用することができます．
 
@@ -142,7 +144,6 @@
         ;; If you use swiper (which can be installed from MELPA or El-Get),
         ;; you can adapt it for migemo.
         (require 'swiper)
-
 
         (defvar avy-migemo--ivy--regex-hash
           (make-hash-table :test #'equal)
