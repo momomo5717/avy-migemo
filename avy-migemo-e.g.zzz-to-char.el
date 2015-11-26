@@ -20,13 +20,13 @@
 
 ;;; Commentary:
 
-;; This package is a setting example of avy-migemo for zzz-to-char.
+;; This file is a setting example of avy-migemo for zzz-to-char.
 ;;
 ;; (require 'avy-migemo-e.g.zzz-to-char)
 ;;
-;; ;; If you remove it from `avy-migemo-function-names' in a init file,
-;; ;; (with-eval-after-load 'zzz-to-char--base-migemo
-;; ;;   (avy-migemo-remove-names 'zzz-to-char--base-migemo))
+;; ;; If you want to remove this config from `avy-migemo-function-names' in a init file,
+;; (with-eval-after-load 'zzz-to-char--base-migemo
+;;   (avy-migemo-remove-names 'zzz-to-char--base-migemo))
 
 ;;; Code:
 
