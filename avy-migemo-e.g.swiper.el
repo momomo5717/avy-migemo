@@ -20,15 +20,16 @@
 
 ;;; Commentary:
 
-;; This package is a setting example of avy-migemo for swiper
+;; This file is a setting example of avy-migemo for swiper
 ;;
 ;; (require 'avy-migemo-e.g.swiper)
 ;;
-;; ;; If you remove it from `avy-migemo-function-names' in a init file,
-;; ;; (with-eval-after-load 'ivy--regex-migemo
-;; ;;   (avy-migemo-remove-names 'ivy--regex-migemo
-;; ;;                            'swiper--add-overlays-migemo
-;; ;;                            'ivy--format-minibuffer-line-migemo))
+;; ;; If you want to remove this config from `avy-migemo-function-names' in a init file,
+;; (with-eval-after-load 'ivy--regex-migemo
+;;   (avy-migemo-remove-names 'ivy--regex-migemo
+;;                            'ivy--format-minibuffer-line-migemo))
+;; (with-eval-after-load 'swiper--add-overlays-migemo
+;;   (avy-migemo-remove-names 'swiper--add-overlays-migemo))
 
 ;;; Code:
 
@@ -71,6 +72,67 @@
                         avy-migemo--ivy--regex-hash)))))
     (byte-compile 'ivy--regex-migemo)
 
+    (defvar avy-migemo--ivy-old-re "")
+    (defvar avy-migemo--ivy-old-re-depth 0)
+    (defun ivy--format-minibuffer-line-migemo (str)
+      "The same as `ivy--format-minibuffer-line' except adapting it for migemo's regexp."
+      (let ((start 0)
+            (str (copy-sequence str)))
+        (when (eq ivy-display-style 'fancy)
+          (unless ivy--old-re
+            (setq ivy--old-re (funcall ivy--regex-function ivy-text)))
+          (while (and (string-match ivy--old-re str start)
+                      (> (- (match-end 0) (match-beginning 0)) 0))
+            (setq start (match-end 0))
+            ;; Adapt for migemo's regexp
+            (let ((i 0) (i-face 0)
+                  mbeg mend (l-mend 0)
+                  (re-depth+1 (if (zerop ivy--subexps)
+                                  1
+                                (1+ (if (eq avy-migemo--ivy-old-re ivy--old-re)
+                                        avy-migemo--ivy-old-re-depth
+                                      (setq avy-migemo--ivy-old-re ivy--old-re
+                                            avy-migemo--ivy-old-re-depth
+                                            (regexp-opt-depth ivy--old-re)))))))
+              (while (and (< i re-depth+1) (< l-mend start))
+                (setq mbeg (match-beginning i)
+                      mend (match-end i))
+                (when (and mbeg (<= l-mend mbeg) mend)
+                  (let ((face
+                         (cond ((zerop ivy--subexps)
+                                (cadr ivy-minibuffer-faces))
+                               ((zerop i)
+                                (car ivy-minibuffer-faces))
+                               (t
+                                (nth (1+ (mod (+ i-face 2) (1- (length ivy-minibuffer-faces))))
+                                     ivy-minibuffer-faces)))))
+                    (if (fboundp 'add-face-text-property)
+                        (add-face-text-property
+                         mbeg
+                         (if (> i 0) (setq l-mend mend) mend)
+                         face
+                         nil
+                         str)
+                      (font-lock-append-text-property
+                       mbeg
+                       (if (> i 0) (setq l-mend mend) mend)
+                       'face
+                       face
+                       str))
+                    (cl-incf i-face)))
+                (cl-incf i)))))
+        str))
+    (byte-compile 'ivy--format-minibuffer-line-migemo)
+
+    (avy-migemo-add-names 'ivy--regex-migemo
+                          'ivy--format-minibuffer-line-migemo)
+
+    (define-obsolete-function-alias 'avy-migemo-clear-ivy--regex-hash
+      '(lambda (&rest _)) "0.2.9")
+
+    (provide 'ivy--regex-migemo))
+
+  (with-eval-after-load "swiper"
     (defvar avy-migemo--swiper-old-re "")
     (defvar avy-migemo--swiper-old-re-depth 0)
     (defun swiper--add-overlays-migemo (re &optional beg end)
@@ -104,7 +166,7 @@
                           (> (- (match-end 0) (match-beginning 0)) 0))
                 ;; Adapt for migemo's regexp.
                 (let ((i 0) (i-face 0)
-                      mbeg mend (l-mend 0)
+                      mbeg mend (l-mend 0) (end-0 (match-end 0))
                       (re-depth+1 (if (zerop ivy--subexps)
                                       1
                                     (1+ (if (eq avy-migemo--swiper-old-re re)
@@ -112,7 +174,7 @@
                                           (setq avy-migemo--swiper-old-re re
                                                 avy-migemo--swiper-old-re-depth
                                                 (regexp-opt-depth re)))))))
-                  (while (< i re-depth+1)
+                  (while (and (< i re-depth+1) (< l-mend end-0))
                     (setq mbeg (match-beginning i)
                           mend (match-end i))
                     (when (and mbeg (<= l-mend mbeg) mend)
@@ -133,68 +195,12 @@
                         (overlay-put overlay 'priority i-face))
                       (cl-incf i-face))
                     (cl-incf i)))))))))
+
     (byte-compile 'swiper--add-overlays-migemo)
 
-    (defvar avy-migemo--ivy-old-re "")
-    (defvar avy-migemo--ivy-old-re-depth 0)
-    (defun ivy--format-minibuffer-line-migemo (str)
-      "The same as `ivy--format-minibuffer-line' except adapting it for migemo's regexp."
-      (let ((start 0)
-            (str (copy-sequence str)))
-        (when (eq ivy-display-style 'fancy)
-          (unless ivy--old-re
-            (setq ivy--old-re (funcall ivy--regex-function ivy-text)))
-          (while (and (string-match ivy--old-re str start)
-                      (> (- (match-end 0) (match-beginning 0)) 0))
-            (setq start (match-end 0))
-            ;; Adapt for migemo's regexp
-            (let ((i 0) (i-face 0)
-                  mbeg mend (l-mend 0)
-                  (re-depth+1 (if (zerop ivy--subexps)
-                                  1
-                                (1+ (if (eq avy-migemo--ivy-old-re ivy--old-re)
-                                        avy-migemo--ivy-old-re-depth
-                                      (setq avy-migemo--ivy-old-re ivy--old-re
-                                            avy-migemo--ivy-old-re-depth
-                                            (regexp-opt-depth ivy--old-re)))))))
-              (while (< i re-depth+1)
-                (setq mbeg (match-beginning i)
-                      mend (match-end i))
-                (when (and mbeg (<= l-mend mbeg) mend)
-                  (let ((face
-                         (cond ((zerop ivy--subexps)
-                                (cadr ivy-minibuffer-faces))
-                               ((zerop i)
-                                (car ivy-minibuffer-faces))
-                               (t
-                                (nth (1+ (mod (+ i-face 2) (1- (length ivy-minibuffer-faces))))
-                                     ivy-minibuffer-faces)))))
-                    (if (fboundp 'add-face-text-property)
-                        (add-face-text-property
-                         mbeg
-                         (if (> i 0) (setq l-mend mend) mend)
-                         face
-                         nil
-                         str)
-                      (font-lock-append-text-property
-                       mbeg
-                       (if (> i 0) (setq l-mend mend) mend)
-                       'face
-                       face
-                       str))
-                    (cl-incf i-face)))
-                (cl-incf i)))))
-        str))
-    (byte-compile 'ivy--format-minibuffer-line-migemo)
+    (avy-migemo-add-names 'swiper--add-overlays-migemo)
 
-    (avy-migemo-add-names 'ivy--regex-migemo
-                          'swiper--add-overlays-migemo
-                          'ivy--format-minibuffer-line-migemo)
-
-    (define-obsolete-function-alias 'avy-migemo-clear-ivy--regex-hash
-      '(lambda (&rest _)) "0.2.9")
-
-    (provide 'ivy--regex-migemo)))
+    (provide 'swiper--add-overlays-migemo)))
 
 (provide 'avy-migemo-e.g.swiper)
 ;;; avy-migemo-e.g.swiper.el ends here
