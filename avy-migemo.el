@@ -130,6 +130,17 @@ It takes a string and returns a regular expression."
            (advice-add predefined-name :override name))
         (advice-remove predefined-name name)))))
 
+;;;###autoload
+(defun avy-migemo-disable-around (origin-f &rest origin-args)
+  "Advice for a function incompatible with `avy-migemo-mode'.
+e.g. \(advice-add 'counsel-locate :around #'avy-migemo-disable-around\)"
+  (if (not avy-migemo-mode)
+      (apply origin-f origin-args)
+    (avy-migemo-mode -1)
+    (unwind-protect
+        (apply origin-f origin-args)
+      (avy-migemo-mode 1))))
+
 (defvar avy-migemo--regex-cache
   (make-hash-table :test #'equal)
   "Migemo's regexp cache.")
