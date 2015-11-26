@@ -50,8 +50,10 @@
 ;;  except for adding candidates via migemo (simply using migemo instead of `regexp-quote').
 ;;
 ;; The following extensions are available:
+;;
 ;;   + avy-migemo-e.g.zzz-to-char.el
 ;;   + avy-migemo-e.g.swiper.el
+;;   + avy-migemo-e.g.counsel.el
 ;;
 ;; Further information is available from:
 ;; https://github.com/momomo5717/avy-migemo  (README.org or README.jp.org)
@@ -59,10 +61,9 @@
 ;; Setup:
 ;; (add-to-list 'load-path "/path/to/avy-migemo")
 ;; (require 'avy-migemo)
-;; ;; If you override avy's predefined functions using `advice-add',
+;; ;; `avy-migemo-mode' overrides avy's predefined functions using `advice-add'.
 ;; (avy-migemo-mode 1)
-;;
-;; ;; You can toggle `avy-migemo-mode' by M-x avy-migemo-mode.
+;; (global-set-key (kbd "M-g m") 'avy-migemo-mode)
 
 ;;; Code:
 (require 'avy)
