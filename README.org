@@ -25,6 +25,7 @@
 
     + avy-migemo-e.g.zzz-to-char.el
     + avy-migemo-e.g.swiper.el
+    + avy-migemo-e.g.counsel.el
 
     [[file:image/image.gif]]
 
@@ -39,6 +40,7 @@
     + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
     + [[#an-example-of-setting-for-zzz-to-char--zzz-to-char--base-][An example of setting for zzz-to-char ( =zzz-to-char--base= )]]
     + [[#an-example-of-setting-for-swiper--ivy--regex-][An example of setting for swiper ( =ivy--regex= )]]
+    + [[#an-example-of-setting-for-counsel][An example of setting for counsel]]
 
 ** Requirements
 
@@ -51,11 +53,10 @@
    #+BEGIN_SRC emacs-lisp
      (add-to-list 'load-path "/path/to/avy-migemo")
      (require 'avy-migemo)
-     ;; If you override avy's predefined functions using `advice-add',
+     ;; `avy-migemo-mode' overrides avy's predefined functions using `advice-add'.
      (avy-migemo-mode 1)
+     (global-set-key (kbd "M-g m") 'avy-migemo-mode)
    #+END_SRC
-
-   You can toggle =avy-migemo-mode= by M-x =avy-migemo-mode=.
 
 ** Customization
 
@@ -189,3 +190,11 @@
 
         (avy-migemo-add-names 'ivy--regex-migemo 'ivy--format-minibuffer-line-migemo)
       #+END_SRC
+***** An example of setting for counsel
+
+      avy-migemo-e.g.counsel.el is a setting file for counsel.el.
+
+      + =counsel-grep-function-migemo=
+      + =counsel-pt-migemo= (which depends on [[https://github.com/monochromegane/the_platinum_searcher][pt(The Platinum Searcher)]] )
+      + Turning off avy-migemo-mode while =counsel-ag= is running.
+      + Turning off avy-migemo-mode while =counsel-locate= is running.
