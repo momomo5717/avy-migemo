@@ -271,7 +271,8 @@ LEN is compared with string width of OLD-STR+."
                            lep)))
           (setq old-str+ (buffer-substring beg end))
           (when (and (bound-and-true-p visual-line-mode)
-                     (> len (- end beg)))
+                     (> len (- end beg))
+                     (not (eq lep beg)))
             (setq len (- end beg))
             (let ((old-str (apply #'string (reverse path))))
               (setq str
@@ -377,7 +378,9 @@ LEN is compared with string width of OLD-STR+."
             (when (>= (length str) 1)
               ;; Adapt for migemo
               (setq regex (avy-migemo-regex-quote-concat str))
-              (let (found)
+              (let ((case-fold-search
+                     (or avy-case-fold-search (string= str (downcase str))))
+                    found)
                 (avy-dowindows nil
                   (dolist (pair (avy--find-visible-regions
                                  (window-start)
