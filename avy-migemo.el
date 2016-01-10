@@ -25,7 +25,7 @@
 
 ;; This package is a minor mode of avy for using migemo.
 ;;
-;; Migemo which is a library for incremental search has only Japanese dictionaries.
+;; Migemo which is a library for incremental search has Japanese dictionaries.
 ;; It could be used as abbreviation matching for other languages
 ;; by preparing user's migemo dictionaries or customizing `avy-migemo-get-function'.
 ;;
@@ -64,6 +64,10 @@
 ;; ;; `avy-migemo-mode' overrides avy's predefined functions using `advice-add'.
 ;; (avy-migemo-mode 1)
 ;; (global-set-key (kbd "M-g m") 'avy-migemo-mode)
+;;
+;; ;; If you would like to restrict the length of displayed keys within 2
+;; ;; for `avy-style' of at-full, `avy-migemo-at-full-max' provides it.
+;; (custom-set-variables '(avy-migemo-at-full-max 2))
 
 ;;; Code:
 (require 'avy)
