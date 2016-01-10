@@ -38,9 +38,10 @@
     + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
     + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
     + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
-    + [[#an-example-of-setting-for-zzz-to-char--zzz-to-char--base-][An example of setting for zzz-to-char ( =zzz-to-char--base= )]]
-    + [[#an-example-of-setting-for-swiper--ivy--regex-][An example of setting for swiper ( =ivy--regex= )]]
-    + [[#an-example-of-setting-for-counsel][An example of setting for counsel]]
+    + [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-full-max= ]]
+    + [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= )]]
+    + [[#an-example-config-for-swiper--ivy--regex-][An example config for swiper ( =ivy--regex= )]]
+    + [[#an-example-config-for-counsel][An example config for counsel]]
 
 ** Requirements
 
@@ -96,7 +97,15 @@
 
       =avy-migemo-function-names= に /names/ を追加するための関数です．
 
-***** An example of setting for zzz-to-char ( =zzz-to-char--base= )
+***** User Option: =avy-migemo-at-full-max=
+
+      この変数に整数を指定すると，候補上に表示されるキーの長さを制限することができます．
+      初期値は =nil= に設定されています．
+      #+BEGIN_SRC emacs-lisp
+        (custom-set-variables '(avy-migemo-at-full-max 2))
+      #+END_SRC
+
+***** An example config for zzz-to-char ( =zzz-to-char--base= )
 
       以下のように，avy を使用している関数の migemo版を新たに追加することができます．
       既存の関数名に =-migemo= を加えた関数を新たに定義し，追加します．
@@ -135,7 +144,7 @@
         (avy-migemo-add-names 'zzz-to-char--base-migemo)
       #+END_SRC
 
-***** An example of setting for swiper ( =ivy--regex= )
+***** An example config for swiper ( =ivy--regex= )
 
       avy を使用していない関数に対しても migemo版を以下のように追加することができます．
 
@@ -192,7 +201,7 @@
 
         (avy-migemo-add-names 'ivy--regex-migemo 'ivy--format-minibuffer-line-migemo)
       #+END_SRC
-***** An example of setting for counsel
+***** An example config for counsel
 
       avy-migemo-e.g.counsel.el は counsel.el のための設定ファイルです．
 

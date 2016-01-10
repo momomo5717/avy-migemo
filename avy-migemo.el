@@ -25,7 +25,7 @@
 
 ;; This package is a minor mode of avy for using migemo.
 ;;
-;; Migemo which is a library for incremental search has only Japanese dictionaries.
+;; Migemo which is a library for incremental search has Japanese dictionaries.
 ;; It could be used as abbreviation matching for other languages
 ;; by preparing user's migemo dictionaries or customizing `avy-migemo-get-function'.
 ;;
@@ -64,6 +64,10 @@
 ;; ;; `avy-migemo-mode' overrides avy's predefined functions using `advice-add'.
 ;; (avy-migemo-mode 1)
 ;; (global-set-key (kbd "M-g m") 'avy-migemo-mode)
+;;
+;; ;; If you would like to restrict the length of displayed keys within 2
+;; ;; for `avy-style' of at-full, `avy-migemo-at-full-max' provides it.
+;; (custom-set-variables '(avy-migemo-at-full-max 2))
 
 ;;; Code:
 (require 'avy)
@@ -132,14 +136,14 @@ It takes a string and returns a regular expression."
         (advice-remove predefined-name name)))))
 
 ;;;###autoload
-(defun avy-migemo-disable-around (origin-f &rest origin-args)
+(defun avy-migemo-disable-around (orig-f &rest orig-args)
   "Advice for a function incompatible with `avy-migemo-mode'.
 e.g. \(advice-add 'counsel-locate :around #'avy-migemo-disable-around\)"
   (if (not avy-migemo-mode)
-      (apply origin-f origin-args)
+      (apply orig-f orig-args)
     (avy-migemo-mode -1)
     (unwind-protect
-        (apply origin-f origin-args)
+        (apply orig-f orig-args)
       (avy-migemo-mode 1))))
 
 (defvar avy-migemo--regex-cache
@@ -188,8 +192,29 @@ Return quoted PATTERN if migemo's regexp is invalid."
 
 ;; avy functions for migemo
 
+(defcustom avy-migemo-at-full-max nil
+  "Max length of keys."
+  :type '(choice (integer :tag "Restrict the length of displayed keys for `avy-style' of at-full.")
+                 boolean))
+
+(defcustom avy-migemo-padding-char (string-to-char " ")
+  "Padding char."
+  :type 'character)
+
+(defcustom avy-migemo-padding-char-visual-line-mode ?_
+  "Padding char for `visual-line-mode'."
+  :type 'character)
+
+(defvar avy-migemo--padding-style nil)
+
+(defun avy-migemo--padding-char (&optional style)
+  "Return a padding character of STYLE."
+  (cl-case (or style avy-migemo--padding-style)
+    (visual-line-mode avy-migemo-padding-char-visual-line-mode)
+    (otherwise avy-migemo-padding-char)))
+
 (defun avy-migemo--rest-old-str (old-str+ len)
-  "Retrun a new character list which is a part of OLD-STR+.
+  "Return a new character list which is a part of OLD-STR+.
 LEN is compared with string width of OLD-STR+."
   (cl-loop
    with old-ls = (string-to-list old-str+)
@@ -208,14 +233,18 @@ LEN is compared with string width of OLD-STR+."
      (setq len 0 pre-width 0 char-count 0))
     (t (setq char-count 0)))
    finally return
-   (nconc (make-list (- pre-width char-count) ? ) old-ls)))
+   (nconc (make-list (- pre-width char-count) (avy-migemo--padding-char)) old-ls)))
 
 (defun avy-migemo--overlay-at (path leaf)
   "The same as `avy--overlay-at' except adapting it for migemo."
   (let* ((path (mapcar #'avy--key-to-char path))
          (str (propertize
                (string (car (last path)))
-               'face 'avy-lead-face)))
+               'face 'avy-lead-face))
+         (avy-migemo--padding-style
+          (when (with-selected-window (avy-candidate-wnd leaf)
+                  (bound-and-true-p visual-line-mode))
+            'visual-line-mode)))
     (avy--overlay
      str
      (avy-candidate-beg leaf) nil
@@ -229,6 +258,117 @@ LEN is compared with string width of OLD-STR+."
              (t
               (concat str (avy-migemo--rest-old-str old-str 1))))))))
 
+;; Dynamically bound in `avy-migemo--overlay-at-full'.
+(defvar avy-migemo--vbeg)
+(defvar avy-migemo--vend)
+(defvar avy-migemo--vend-pre)
+(defvar avy-migemo--vwbeg)
+(defvar avy-migemo--visual-line-mode-p)
+
+(defun avy-migemo--ovl-vbeg (ovl)
+  "Return the beginning position of the visual line of OVL."
+  (overlay-get ovl 'avy-migemo--vbeg))
+
+(defun avy-migemo--ovl-vend (ovl)
+  "Return the end position of the visual line of OVL."
+  (overlay-get ovl 'avy-migemo--vend))
+
+(defun avy-migemo--ovl-vwnd (ovl)
+  "Return the window of OVL."
+  (overlay-get ovl 'window))
+
+(defun avy-migemo--ovl-vwbeg (ovl)
+  "Return the beginning position of the window of OVL."
+  (overlay-get ovl 'avy-migemo--vwbeg))
+
+(defun avy-migemo--overlay-at-full-vend-position (beg)
+  "Return the point of the end of the visual line for `visual-line-mode'.
+
+Set variables for distinguish the beginning position of the visual line."
+  (let* ((ovl (car-safe avy--overlays-lead))
+         (vbeg (when ovl (avy-migemo--ovl-vbeg ovl)))
+         (vend (when ovl (avy-migemo--ovl-vend ovl)))
+         (vwnd (when ovl (avy-migemo--ovl-vwnd ovl)))
+         (vwbeg (when ovl (avy-migemo--ovl-vwbeg ovl))))
+    (setq avy-migemo--visual-line-mode-p t)
+    (setq avy-migemo--vend-pre nil)
+    (save-excursion
+      (unless (eq beg (point)) (goto-char beg))
+      (prog2
+          (end-of-visual-line)
+          (setq avy-migemo--vend (point))
+        (if (and (eq (selected-window) vwnd)
+                 (eq avy-migemo--vend vend))
+            (setq avy-migemo--vbeg vbeg
+                  avy-migemo--vwbeg vwbeg)
+          (goto-char beg)
+          (beginning-of-visual-line)
+          (setq avy-migemo--vbeg (point)
+                avy-migemo--vwbeg (window-start)))
+        (when (and (eq beg avy-migemo--vbeg)
+                   (> beg avy-migemo--vwbeg))
+          (goto-char (1- beg))
+          (end-of-visual-line)
+          (setq avy-migemo--vend-pre (point)))))))
+
+(defun avy-migemo--overlay-at-full-vpre-space (beg)
+  "Return one space for `visual-line-mode'.
+
+if BEG is equal to `avy-migemo--vend-pre'."
+  (if (and (eq avy-style 'at-full)
+           avy-migemo--vend-pre
+           (eq beg avy-migemo--vend-pre))
+      " " ""))
+
+(defun avy-migemo--overlay-at-full-vlen (beg len str)
+  "Restrict len for `visual-line-mode' via BEG LEN STR.
+
+Also restrict LEN if `avy-migemo-at-full-max' is an integer,"
+  (if (eq avy-style 'at-full)
+      (let ((len (cond ((and avy-migemo--visual-line-mode-p
+                             (eq beg avy-migemo--vend))
+                        (char-width (aref str 0)))
+                       ((and avy-migemo--visual-line-mode-p
+                             (> beg avy-migemo--vend))
+                        (min len (- beg avy-migemo--vend)))
+                       (t len))))
+        (if (integerp avy-migemo-at-full-max)
+            (min len avy-migemo-at-full-max) len))
+    len))
+
+(defun avy-migemo--overlay-at-full-concat (str old-str+ beg len)
+  "Return a string.
+
+STR / OLD-STR+ is a string.
+BEG / LEN is an integer."
+  (let* ((other-char-p
+          (cl-loop for c across str
+                   for i from 0
+                   unless (or (memq c avy-keys) (eq c ? ))
+                   return i))
+         (str (if other-char-p
+                  (substring str 0 other-char-p) str))
+         (len (if other-char-p (length str) len))
+         (vlen (avy-migemo--overlay-at-full-vlen beg len str))
+         (vstr (if (eq len vlen) str (substring str 0 vlen)))
+         (avy-migemo--padding-style
+          (when avy-migemo--visual-line-mode-p 'visual-line-mode)))
+    (concat vstr (avy-migemo--rest-old-str old-str+ vlen))))
+
+(defun avy-migemo--overlay-at-full-add-vpoint (ovl-list)
+  "Add point for distinguish the beg/end of visual line."
+  (when avy-migemo--visual-line-mode-p
+    (let* ((ovl (car ovl-list))
+           (pre-space (avy-migemo--overlay-at-full-vpre-space (overlay-start ovl))))
+      (overlay-put ovl 'avy-migemo--vbeg avy-migemo--vbeg)
+      (overlay-put ovl 'avy-migemo--vend avy-migemo--vend)
+      (overlay-put ovl 'avy-migemo--vwbeg avy-migemo--vwbeg)
+      (unless (string= pre-space "")
+        ;; One space is added at the beginning position of the visual line
+        ;; for keeping layout as much as possible.
+        (overlay-put ovl 'before-string pre-space))))
+  ovl-list)
+
 (defun avy-migemo--overlay-at-full (path leaf)
   "The same as `avy--overlay-at-full' except adapting it for migemo."
   (let* ((path (mapcar #'avy--key-to-char path))
@@ -240,7 +380,10 @@ LEN is compared with string width of OLD-STR+."
          (wnd (cdr leaf))
          end
          ;; Adapt for migemo
-         (old-str+ ""))
+         avy-migemo--old-str+
+         avy-migemo--visual-line-mode-p
+         avy-migemo--vbeg  avy-migemo--vend
+         avy-migemo--vwbeg)
     (dotimes (i len)
       (set-text-properties (- len i 1) (- len i)
                            `(face ,(nth i avy-lead-faces))
@@ -255,9 +398,7 @@ LEN is compared with string width of OLD-STR+."
       (save-excursion
         (goto-char beg)
         (let* ((lep (if (bound-and-true-p visual-line-mode)
-                        (save-excursion
-                          (end-of-visual-line)
-                          (point))
+                        (avy-migemo--overlay-at-full-vend-position beg)
                       (line-end-position)))
                (len-and-str (avy--update-offset-and-str len str lep)))
           (setq len (car len-and-str))
@@ -269,7 +410,7 @@ LEN is compared with string width of OLD-STR+."
                                   1
                                 len))
                            lep)))
-          (setq old-str+ (buffer-substring beg end))
+          (setq avy-migemo--old-str+ (buffer-substring beg end))
           (when (and (bound-and-true-p visual-line-mode)
                      (> len (- end beg))
                      (not (eq lep beg)))
@@ -284,26 +425,17 @@ LEN is compared with string width of OLD-STR+."
                           'avy-lead-face
                         'avy-lead-face-0))
                      0 len)))))))
-    (avy--overlay
-     str beg end wnd
-     (lambda (str old-str)
-       (cond ((string= old-str "\n")
-              (concat str "\n"))
-             ((string= old-str "\t")
-              (concat str (make-string (max (- tab-width len) 0) ?\ )))
-             (t
-              ;; Adapt for migemo
-              (let* ((other-char-p
-                      (cl-loop for c across str
-                               for i from 0
-                               unless (or (memq c avy-keys) (eq c ? ))
-                               return i))
-                     (str (if other-char-p
-                              (substring str 0 other-char-p) str))
-                     (len (if other-char-p (length str) len)))
-                (if (= (string-width old-str+) len)
-                    str
-                  (concat str (avy-migemo--rest-old-str old-str+ len))))))))))
+    (avy-migemo--overlay-at-full-add-vpoint
+     (avy--overlay
+      str beg end wnd
+      (lambda (str old-str)
+        (cond ((string= old-str "\n")
+               (concat str "\n"))
+              ((string= old-str "\t")
+               (concat str (make-string (max (- tab-width len) 0) ?\ )))
+              (t
+               ;; Adapt for migemo
+               (avy-migemo--overlay-at-full-concat str avy-migemo--old-str+ beg len))))))))
 
 ;;;###autoload
 (defun avy-migemo-goto-char (char &optional arg)
