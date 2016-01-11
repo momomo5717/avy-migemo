@@ -197,24 +197,31 @@ Return quoted PATTERN if migemo's regexp is invalid."
   :type '(choice (integer :tag "Restrict the length of displayed keys for `avy-style' of at-full.")
                  boolean))
 
-(defcustom avy-migemo-padding-char (string-to-char " ")
-  "Padding char."
+(defcustom avy-migemo-pad-char (string-to-char " ")
+  "Pad char."
   :type 'character)
 
-(defcustom avy-migemo-padding-char-visual-line-mode ?_
-  "Padding char for `visual-line-mode'."
+(defcustom avy-migemo-pad-char-visual-line-mode ?_
+  "Pad char for `visual-line-mode'."
   :type 'character)
 
-(defvar avy-migemo--padding-style nil)
+(defvar avy-migemo--pad-style nil)
 
-(defun avy-migemo--padding-char (&optional style)
-  "Return a padding character of STYLE."
-  (cl-case (or style avy-migemo--padding-style)
-    (visual-line-mode avy-migemo-padding-char-visual-line-mode)
-    (otherwise avy-migemo-padding-char)))
+(defun avy-migemo--pad-char (&optional style)
+  "Return a pad character of STYLE."
+  (cl-case (or style avy-migemo--pad-style)
+    (visual-line-mode avy-migemo-pad-char-visual-line-mode)
+    (otherwise avy-migemo-pad-char)))
+
+(defun avy-migemo--pad-string (c n)
+  "Retrun a pad string of C of length N."
+  (let ((pad-str (make-string n c)))
+    (if (or avy-background (not (eq c ? )))
+        (propertize pad-str 'face 'avy-background-face)
+      pad-str)))
 
 (defun avy-migemo--rest-old-str (old-str+ len)
-  "Return a new character list which is a part of OLD-STR+.
+  "Return the padded string of a part of OLD-STR+.
 LEN is compared with string width of OLD-STR+."
   (cl-loop
    with old-ls = (string-to-list old-str+)
@@ -233,7 +240,9 @@ LEN is compared with string width of OLD-STR+."
      (setq len 0 pre-width 0 char-count 0))
     (t (setq char-count 0)))
    finally return
-   (nconc (make-list (- pre-width char-count) (avy-migemo--padding-char)) old-ls)))
+   (concat (avy-migemo--pad-string (avy-migemo--pad-char)
+                                   (- pre-width char-count))
+           old-ls)))
 
 (defun avy-migemo--overlay-at (path leaf)
   "The same as `avy--overlay-at' except adapting it for migemo."
@@ -241,7 +250,7 @@ LEN is compared with string width of OLD-STR+."
          (str (propertize
                (string (car (last path)))
                'face 'avy-lead-face))
-         (avy-migemo--padding-style
+         (avy-migemo--pad-style
           (when (with-selected-window (avy-candidate-wnd leaf)
                   (bound-and-true-p visual-line-mode))
             'visual-line-mode)))
@@ -351,7 +360,7 @@ BEG / LEN is an integer."
          (len (if other-char-p (length str) len))
          (vlen (avy-migemo--overlay-at-full-vlen beg len str))
          (vstr (if (eq len vlen) str (substring str 0 vlen)))
-         (avy-migemo--padding-style
+         (avy-migemo--pad-style
           (when avy-migemo--visual-line-mode-p 'visual-line-mode)))
     (concat vstr (avy-migemo--rest-old-str old-str+ vlen))))
 
