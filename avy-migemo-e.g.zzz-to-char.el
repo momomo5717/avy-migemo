@@ -35,12 +35,8 @@
   (with-eval-after-load "zzz-to-char"
     (defun zzz-to-char--base-migemo (char n-shift)
       "The same as `zzz-to-char--base' except for using migemo."
-      (let* ((p (point))
-             (avy-all-windows nil)
-             (ws (window-start))
-             (we (window-end (selected-window) t))
-             (beg (- p zzz-to-char-reach))
-             (end (+ p zzz-to-char-reach)))
+      (let ((p (point))
+            (avy-all-windows nil))
         (avy-with zzz-to-char
           (avy--generic-jump
            (if (= 13 char)
@@ -48,8 +44,10 @@
              ;; Adapt for migemo
              (avy-migemo-regex-quote-concat (string char)))
            nil avy-style
-           (if (< beg ws) ws beg)
-           (if (> end we) we end)))
+           (max (- p zzz-to-char-reach)
+                (window-start))
+           (min (+ p zzz-to-char-reach)
+                (window-end (selected-window) t))))
         (let ((n (point)))
           (when (/= n p)
             (cl-destructuring-bind (beg . end)
