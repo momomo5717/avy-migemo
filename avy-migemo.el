@@ -95,6 +95,7 @@ It takes a string and returns a regular expression."
     avy-migemo--overlay-at
     avy-migemo--overlay-at-full)
   "Function names for overriding avy's functions."
+  :type '(list function)
   :set (lambda (symbol value)
          (if (and (boundp symbol) (boundp 'avy-migemo-mode))
              (let ((avy-migemo-mode-p avy-migemo-mode))
@@ -200,7 +201,7 @@ Return quoted PATTERN if migemo's regexp is invalid."
 (defcustom avy-migemo-at-full-max nil
   "Max length of keys."
   :type '(choice (integer :tag "Restrict the length of displayed keys for `avy-style' of at-full.")
-                 boolean))
+                 (const :tag "Disabled" nil)))
 
 (defcustom avy-migemo-pad-char (string-to-char " ")
   "Pad char."
