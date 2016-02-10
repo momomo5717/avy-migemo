@@ -103,6 +103,10 @@ It takes a string and returns a regular expression."
                (ignore-errors (when avy-migemo-mode-p (avy-migemo-mode 1))))
            (set symbol value))))
 
+(defcustom avy-migemo-regex-cache-clear-hook nil
+  "Normal hook run at the end of `avy-migemo-regex-cache-clear'."
+  :type 'hook)
+
 ;;;###autoload
 (defun avy-migemo-add-names (&rest names)
   "Add NAMES to the front of `avy-migemo-function-names'."
@@ -154,7 +158,8 @@ e.g. \(advice-add 'counsel-locate :around #'avy-migemo-disable-around\)"
 (defun avy-migemo-regex-cache-clear ()
   "Clear `avy-migemo--regex-cache'."
   (interactive)
-  (clrhash avy-migemo--regex-cache))
+  (clrhash avy-migemo--regex-cache)
+  (run-hooks 'avy-migemo-regex-cache-clear-hook))
 
 ;;;###autoload
 (defun avy-migemo-regex-p (regex)

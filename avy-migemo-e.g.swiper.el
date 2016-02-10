@@ -40,6 +40,11 @@
       (make-hash-table :test #'equal)
       "avy-migemo's `ivy--regex-hash'.")
 
+    (defun avy-migemo--ivy--regex-hash-clear ()
+      "Clear `avy-migemo--ivy--regex-hash'."
+      (clrhash avy-migemo--ivy--regex-hash))
+    (byte-compile 'avy-migemo--ivy--regex-hash-clear)
+
     (defun ivy--regex-migemo (str &optional greedy)
       "The same as `ivy--regex' except for using migemo."
       (let ((hashed (unless greedy
@@ -132,6 +137,8 @@
 
     (avy-migemo-add-names 'ivy--regex-migemo
                           'ivy--format-minibuffer-line-migemo)
+    (add-hook 'avy-migemo-regex-cache-clear-hook
+              'avy-migemo--ivy--regex-hash-clear)
 
     (define-obsolete-function-alias 'avy-migemo-clear-ivy--regex-hash
       '(lambda (&rest _)) "0.2.9")
