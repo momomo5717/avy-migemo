@@ -1,8 +1,9 @@
 ;;; avy-migemo-e.g.counsel.el --- A setting example of avy-migemo for counsel -*- lexical-binding: t; no-byte-compile: t -*-
 
-;; Copyright (C) 2015 momomo5717
+;; Copyright (C) 2015-2016 momomo5717
 
-;; URL: https://github.com/momomo5717/
+;; Author: momomo5717
+;; URL: https://github.com/momomo5717/avy-migemo
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
