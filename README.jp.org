@@ -39,6 +39,7 @@
     + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
     + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
     + [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-full-max= ]]
+    + [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
     + [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= )]]
     + [[#an-example-config-for-swiper--ivy--regex-][An example config for swiper ( =ivy--regex= )]]
     + [[#an-example-config-for-counsel][An example config for counsel]]
@@ -46,7 +47,7 @@
 ** Requirements
 
    + GNU Emacs 24.4 or later
-   + [[https://github.com/abo-abo/avy][avy]] 0.3 or later
+   + [[https://github.com/abo-abo/avy][avy]] 0.4 or later
    + [[https://github.com/emacs-jp/migemo][migemo]] 1.9 or later
 
 ** Setup
@@ -101,9 +102,16 @@
 
       この変数に整数を指定すると，候補上に表示されるキーの長さを制限することができます．
       初期値は =nil= に設定されています．
+
+      この機能は =avy-migemo--overlay-at-full= に依存しています．
+
       #+BEGIN_SRC emacs-lisp
         (custom-set-variables '(avy-migemo-at-full-max 2))
       #+END_SRC
+
+***** User Option: =avy-migemo-regex-cache-clear-hook=
+
+      =avy-migemo-regex-cache-clear= の呼び出し時に実行されるノーマルフックです．
 
 ***** An example config for zzz-to-char ( =zzz-to-char--base= )
 
