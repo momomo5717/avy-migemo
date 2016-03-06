@@ -179,7 +179,7 @@ Return PATTERN if migemo's regexp is invalid."
       (puthash pattern
                (let ((regex (funcall avy-migemo-get-function pattern)))
                  (if (avy-migemo-regex-p regex)
-                     (concat regex "\\|" pattern)
+                     (concat "\\(" regex "\\|" pattern "\\)")
                    pattern))
                avy-migemo--regex-cache))))
 
@@ -193,7 +193,7 @@ Return quoted PATTERN if migemo's regexp is invalid."
       (puthash quoted-pattern
                (let ((regex (funcall avy-migemo-get-function pattern)))
                  (if (avy-migemo-regex-p regex)
-                     (concat regex "\\|" quoted-pattern)
+                     (concat "\\(" regex "\\|" quoted-pattern "\\)")
                    quoted-pattern))
                avy-migemo--regex-cache))))
 
