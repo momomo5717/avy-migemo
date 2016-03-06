@@ -68,7 +68,7 @@
                              (setq ivy--subexps (length subs))
                              (mapconcat
                               (lambda (x)
-                                (if (string-match "\\`\\\\(.*\\\\)\\'" x)
+                                (if (string-match "\\`\\\\([^?].*\\\\)\\'" x)
                                     x
                                   (format "\\(%s\\)" x)))
                               subs
