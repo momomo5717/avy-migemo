@@ -529,7 +529,7 @@ BEG / LEN is an integer."
               (let ((case-fold-search
                      (or avy-case-fold-search (string= str (downcase str))))
                     found)
-                (avy-dowindows nil
+                (avy-dowindows current-prefix-arg
                   (dolist (pair (avy--find-visible-regions
                                  (window-start)
                                  (window-end (selected-window) t)))
