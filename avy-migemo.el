@@ -3,8 +3,8 @@
 ;; Copyright (C) 2015-2016 momomo5717
 
 ;; Keywords: avy, migemo
-;; Version: 0.3
-;; Package-Requires:((emacs "24.4") (avy "0.4") (migemo "1.9"))
+;; Version: 0.3.1
+;; Package-Requires:((emacs "24.4") (avy "0.4.0") (migemo "1.9"))
 ;; Author: momomo5717
 ;; URL: https://github.com/momomo5717/avy-migemo
 
