@@ -3,8 +3,8 @@
 ;; Copyright (C) 2015-2016 momomo5717
 
 ;; Keywords: avy, migemo
-;; Version: 0.3
-;; Package-Requires:((emacs "24.4") (avy "0.4") (migemo "1.9"))
+;; Version: 0.3.1
+;; Package-Requires:((emacs "24.4") (avy "0.4.0") (migemo "1.9"))
 ;; Author: momomo5717
 ;; URL: https://github.com/momomo5717/avy-migemo
 
@@ -179,7 +179,7 @@ Return PATTERN if migemo's regexp is invalid."
       (puthash pattern
                (let ((regex (funcall avy-migemo-get-function pattern)))
                  (if (avy-migemo-regex-p regex)
-                     (concat regex "\\|" pattern)
+                     (concat "\\(" regex "\\|" pattern "\\)")
                    pattern))
                avy-migemo--regex-cache))))
 
@@ -193,7 +193,7 @@ Return quoted PATTERN if migemo's regexp is invalid."
       (puthash quoted-pattern
                (let ((regex (funcall avy-migemo-get-function pattern)))
                  (if (avy-migemo-regex-p regex)
-                     (concat regex "\\|" quoted-pattern)
+                     (concat "\\(" regex "\\|" quoted-pattern "\\)")
                    quoted-pattern))
                avy-migemo--regex-cache))))
 
@@ -529,7 +529,7 @@ BEG / LEN is an integer."
               (let ((case-fold-search
                      (or avy-case-fold-search (string= str (downcase str))))
                     found)
-                (avy-dowindows nil
+                (avy-dowindows current-prefix-arg
                   (dolist (pair (avy--find-visible-regions
                                  (window-start)
                                  (window-end (selected-window) t)))
