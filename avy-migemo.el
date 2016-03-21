@@ -426,7 +426,7 @@ BEG / LEN is an integer."
                                   1
                                 len))
                            lep)))
-          (setq avy-migemo--old-str+ (buffer-substring beg end))
+          (setq avy-migemo--old-str+ (buffer-substring beg (min end (point-max))))
           (when (and (bound-and-true-p visual-line-mode)
                      (> len (- end beg))
                      (not (eq lep beg)))
