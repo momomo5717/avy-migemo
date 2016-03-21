@@ -38,6 +38,7 @@
     + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
     + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
     + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
+    + [[#user-option-avy-migemo-use-isearch-search-fun][User Option: =avy-migemo-use-isearch-search-fun= ]]
     + [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-full-max= ]]
     + [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
     + [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= )]]
@@ -97,6 +98,11 @@
 ***** Function: =avy-migemo-add-names= /&rest/ /names/
 
       =avy-migemo-function-names= に /names/ を追加するための関数です．
+
+***** User Option: =avy-migemo-use-isearch-search-fun=
+
+      =non-nil= の場合， =avy-migemo-isearch= 時に =isearch-search-fun= を使用して候補を集めます．
+      初期値は =nil= に設定されています．
 
 ***** User Option: =avy-migemo-at-full-max=
 
