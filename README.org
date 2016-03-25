@@ -38,6 +38,7 @@
     + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
     + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
     + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
+    + [[#user-option-avy-migemo-use-isearch-search-fun][User Option: =avy-migemo-use-isearch-search-fun= ]]
     + [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-full-max= ]]
     + [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
     + [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= )]]
@@ -97,9 +98,14 @@
 
       This function adds /names/ to =avy-migemo-function-names=.
 
+***** User Option: =avy-migemo-use-isearch-search-fun=
+
+      If non-nil, =avy-migemo-isearch= uses =isearch-search-fun= for collecting candidates.
+      Default value is =nil=.
+
 ***** User Option: =avy-migemo-at-full-max=
 
-      If its value is an integer, the length of displayed keys would be restricted to the maximum number.
+      If its value is an integer, the length of displayed keys will be restricted to the maximum number.
       Default value is =nil=.
 
       This feature depends on =avy-migemo--overlay-at-full=.

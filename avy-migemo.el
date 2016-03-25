@@ -600,17 +600,53 @@ BEG / LEN is an integer."
                           (avy-migemo-regex-concat str))))))
       (avy--generic-jump regex arg avy-style))))
 
+(defcustom avy-migemo-use-isearch-search-fun nil
+  "If non-nil, `avy-migemo-isearch' uses `isearch-search-fun'."
+  :type 'boolean)
+
+(defun avy-migemo--isearch-candidates (string &optional beg end pred group)
+  "The same as `avy--regex-candidates' except for using `isearch-search-fun'."
+  (setq group (or group 0))
+  (unless (string= string "")
+    (let* ((case-fold-search isearch-case-fold-search)
+           (migemo-do-isearch migemo-isearch-enable-p)
+           (search-fun (isearch-search-fun))
+           candidates cpt)
+      (when (eq search-fun 'migemo-backward) (setq migemo-do-isearch nil))
+      (avy-dowindows current-prefix-arg
+        (cl-loop
+         for (vbeg . vend)
+         in (funcall (if isearch-forward #'identity #'nreverse)
+                     (avy--find-visible-regions
+                      (or beg (window-start))
+                      (or end (window-end (selected-window) t))))
+         do
+         (save-excursion
+           (setq cpt (goto-char (if isearch-forward vbeg vend)))
+           (while (funcall search-fun string
+                           (if isearch-forward vend vbeg) t)
+             (unless (get-char-property (max (1- (point)) vbeg) 'invisible)
+               (when (or (null pred) (funcall pred))
+                 (push (cons (cons (match-beginning group)
+                                   (match-end group))
+                             wnd) candidates)))
+             (when (eq cpt (point))
+               (error "Point doesn't move: %s" search-fun))
+             (setq cpt (point))))))
+      (funcall (if isearch-forward #'nreverse #'identity) candidates))))
+
 ;;;###autoload
 (defun avy-migemo-isearch ()
   "The same as `avy-isearch' except for the candidates via migemo."
   (interactive)
   (avy-with avy-isearch
     (let ((avy-background nil))
-      (avy--process
-       (avy--regex-candidates
-        ;; Adapt for migemo
-        (avy-migemo-regex-concat isearch-string))
-       (avy--style-fn avy-style))
+      ;; Adapt for migemo
+      (avy--process (if avy-migemo-use-isearch-search-fun
+                        (avy-migemo--isearch-candidates isearch-string)
+                      (avy--regex-candidates
+                       (avy-migemo-regex-concat isearch-string)))
+                    (avy--style-fn avy-style))
       (isearch-done))))
 
 (define-obsolete-function-alias 'avy-migemo-check-regex
