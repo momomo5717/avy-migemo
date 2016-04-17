@@ -620,11 +620,11 @@ BEG / LEN is an integer."
                      (avy--find-visible-regions
                       (or beg (window-start))
                       (or end (window-end (selected-window) t))))
-         do
+         for vstart = (if isearch-forward vbeg vend)
+         for vbound = (if isearch-forward vend vbeg) do
          (save-excursion
-           (setq cpt (goto-char (if isearch-forward vbeg vend)))
-           (while (funcall search-fun string
-                           (if isearch-forward vend vbeg) t)
+           (setq cpt (goto-char vstart))
+           (while (funcall search-fun string vbound t)
              (unless (get-char-property (max (1- (point)) vbeg) 'invisible)
                (when (or (null pred) (funcall pred))
                  (push (cons (cons (match-beginning group)
