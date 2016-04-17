@@ -649,10 +649,5 @@ BEG / LEN is an integer."
                     (avy--style-fn avy-style))
       (isearch-done))))
 
-(define-obsolete-function-alias 'avy-migemo-check-regex
-  'avy-migemo-regex-p "0.2.5")
-
-(define-obsolete-function-alias 'avy-migemo--read-string-timer
-  'avy-migemo--read-candidates "0.2.9")
 (provide 'avy-migemo)
 ;;; avy-migemo.el ends here

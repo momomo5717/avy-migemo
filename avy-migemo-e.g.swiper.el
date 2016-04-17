@@ -141,9 +141,6 @@
     (add-hook 'avy-migemo-regex-cache-clear-hook
               'avy-migemo--ivy--regex-hash-clear)
 
-    (define-obsolete-function-alias 'avy-migemo-clear-ivy--regex-hash
-      '(lambda (&rest _)) "0.2.9")
-
     (provide 'ivy--regex-migemo))
 
   (with-eval-after-load "swiper"
