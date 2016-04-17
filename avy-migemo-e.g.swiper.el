@@ -78,17 +78,6 @@
                         avy-migemo--ivy--regex-hash)))))
     (byte-compile 'ivy--regex-migemo)
 
-    (defvar avy-migemo--ivy-old-re "")
-    (defvar avy-migemo--ivy-old-re-depth 0)
-    (defun avy-migemo--ivy-cal-old-re-depth (re)
-      "Calculate RE (regex) depth."
-      (if (eq avy-migemo--ivy-old-re re)
-          avy-migemo--ivy-old-re-depth
-        (setq avy-migemo--ivy-old-re re
-              avy-migemo--ivy-old-re-depth
-              (regexp-opt-depth re))))
-    (byte-compile 'avy-migemo--ivy-cal-old-re-depth)
-
     (defun ivy--format-minibuffer-line-migemo (str)
       "The same as `ivy--format-minibuffer-line' except adapting it for migemo's regexp."
       (let ((start 0)
@@ -112,27 +101,26 @@
                            (> (- (match-end 0) (match-beginning 0)) 0))
                  (setq start (match-end 0))
                  ;; Adapt for migemo's regexp
-                 (let ((i 0) (i-face 0)
-                       mbeg mend (l-mend 0)
-                       (re-depth+1 (if (zerop ivy--subexps)
-                                       1
-                                     (1+ (avy-migemo--ivy-cal-old-re-depth ivy--old-re)))))
-                   (while (and (< i re-depth+1) (< l-mend start))
-                     (setq mbeg (match-beginning i)
-                           mend (match-end i))
-                     (when (and mbeg (<= l-mend mbeg) mend)
-                       (let ((face
-                              (cond ((zerop ivy--subexps)
-                                     (cadr ivy-minibuffer-faces))
-                                    ((zerop i)
-                                     (car ivy-minibuffer-faces))
-                                    (t
-                                     (nth (1+ (mod (+ i-face 2) (1- (length ivy-minibuffer-faces))))
-                                          ivy-minibuffer-faces)))))
-                         (ivy-add-face-text-property
-                          mbeg (if (> i 0) (setq l-mend mend) mend) face str)
-                         (cl-incf i-face)))
-                     (cl-incf i))))))
+                 (cl-loop
+                  with i-face = 0
+                  with l-mend = 0
+                  for i from 0 below (if (zerop ivy--subexps) 1
+                                       (cl-loop for _ in (match-data) by #'cddr sum 1))
+                  when (>= l-mend start) return nil
+                  for mbeg = (match-beginning i)
+                  for mend = (match-end i)
+                  when (and mbeg (<= l-mend mbeg)) do
+                  (let ((face
+                         (cond ((zerop ivy--subexps)
+                                (cadr ivy-minibuffer-faces))
+                               ((zerop i)
+                                (car ivy-minibuffer-faces))
+                               (t
+                                (nth (1+ (mod (+ i-face 2) (1- (length ivy-minibuffer-faces))))
+                                     ivy-minibuffer-faces)))))
+                    (ivy-add-face-text-property
+                     mbeg (if (> i 0) (setq l-mend mend) mend) face str)
+                    (cl-incf i-face))))))
         str))
     (byte-compile 'ivy--format-minibuffer-line-migemo)
 
@@ -144,17 +132,6 @@
     (provide 'ivy--regex-migemo))
 
   (with-eval-after-load "swiper"
-    (defvar avy-migemo--swiper-old-re "")
-    (defvar avy-migemo--swiper-old-re-depth 0)
-    (defun avy-migemo--swiper-cal-old-re-depth (re)
-      "Calculate RE (regex) depth."
-      (if (eq avy-migemo--swiper-old-re re)
-          avy-migemo--swiper-old-re-depth
-        (setq avy-migemo--swiper-old-re re
-              avy-migemo--swiper-old-re-depth
-              (regexp-opt-depth re))))
-    (byte-compile 'avy-migemo--swiper-cal-old-re-depth)
-
     (defun swiper--add-overlays-migemo (re &optional beg end)
       "The same as `swiper--add-overlays' except adapting it for migemo's regexp."
       (let ((ov (if visual-line-mode
@@ -185,32 +162,32 @@
               (while (and (ignore-errors (re-search-forward re end t))
                           (> (- (match-end 0) (match-beginning 0)) 0))
                 ;; Adapt for migemo's regexp.
-                (let ((i 0) (i-face 0)
-                      mbeg mend (l-mend 0) (end-0 (match-end 0))
-                      (re-depth+1 (if (zerop ivy--subexps)
-                                      1
-                                    (1+ (avy-migemo--swiper-cal-old-re-depth re)))))
-                  (while (and (< i re-depth+1) (< l-mend end-0))
-                    (setq mbeg (match-beginning i)
-                          mend (match-end i))
-                    (when (and mbeg (<= l-mend mbeg) mend)
-                      (let ((overlay (make-overlay
-                                      mbeg
-                                      (if (> i 0) (setq l-mend mend) mend)))
-                            (face
-                             (cond ((zerop ivy--subexps)
-                                    (cadr swiper-faces))
-                                   ((zerop i)
-                                    (car swiper-faces))
-                                   (t
-                                    (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
-                                         swiper-faces)))))
-                        (push overlay swiper--overlays)
-                        (overlay-put overlay 'face face)
-                        (overlay-put overlay 'window (ivy-state-window ivy-last))
-                        (overlay-put overlay 'priority i-face))
-                      (cl-incf i-face))
-                    (cl-incf i)))))))))
+                (cl-loop
+                 with i-face = 0
+                 with l-mend = 0
+                 with mend-0 = (match-end 0)
+                 for i from 0 below (if (zerop ivy--subexps) 1
+                                      (cl-loop for _ in (match-data) by #'cddr sum 1))
+                 when (>= l-mend mend-0) return nil
+                 for mbeg = (match-beginning i)
+                 for mend = (match-end i)
+                 when (and mbeg (<= l-mend mbeg)) do
+                 (let ((overlay (make-overlay
+                                 mbeg
+                                 (if (> i 0) (setq l-mend mend) mend)))
+                       (face
+                        (cond ((zerop ivy--subexps)
+                               (cadr swiper-faces))
+                              ((zerop i)
+                               (car swiper-faces))
+                              (t
+                               (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
+                                    swiper-faces)))))
+                   (push overlay swiper--overlays)
+                   (overlay-put overlay 'face face)
+                   (overlay-put overlay 'window (ivy-state-window ivy-last))
+                   (overlay-put overlay 'priority i-face)
+                   (cl-incf i-face)))))))))
 
     (byte-compile 'swiper--add-overlays-migemo)
 
