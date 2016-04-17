@@ -3,7 +3,7 @@
 
 * avy-migemo
 
-  This package is a minor mode of avy for using migemo.
+  This package is a minor mode of avy for using [[https://github.com/emacs-jp/migemo][migemo]].
 
   The following functions are provided:
 
@@ -39,7 +39,7 @@
     + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
     + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
     + [[#user-option-avy-migemo-use-isearch-search-fun][User Option: =avy-migemo-use-isearch-search-fun= ]]
-    + [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-full-max= ]]
+    + [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-at-full-max= ]]
     + [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
     + [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= )]]
     + [[#an-example-config-for-swiper--ivy--regex-][An example config for swiper ( =ivy--regex= )]]
