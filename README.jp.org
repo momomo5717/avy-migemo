@@ -220,6 +220,10 @@
       avy-migemo-e.g.counsel.el は counsel.el のための設定ファイルです．
 
       + =counsel-grep-function-migemo=
+      + =counsel-grep-base-command-migemo= (Default value: =counsel-grep-base-command= )
+      + =counsel-grep-occur-migemo=
       + =counsel-pt-migemo= (which depends on [[https://github.com/monochromegane/the_platinum_searcher][pt(The Platinum Searcher)]] )
+      + =counsel-pt-migemo-base-command= (Default value: =counsel-pt-base-command= )
+      + =counsel-pt-migemo-occur=
       + =counsel-ag= 動作時における avy-migemo-mode の無効化
       + =counsel-locate= 動作時における avy-migemo-mode の無効化
