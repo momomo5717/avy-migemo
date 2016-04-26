@@ -160,7 +160,7 @@
         (avy-migemo-add-names 'zzz-to-char--base-migemo)
       #+END_SRC
 
-***** An config example for ivy
+***** An example config for ivy
 
       avy-migemo-e.g.ivy.el は ivy.el のための設定ファイルです．
 
@@ -171,7 +171,7 @@
       + =ivy--regex-migemo=
       + =ivy--format-minibuffer-line-migemo=
 
-***** An config example for swiper
+***** An example config for swiper
 
       avy-migemo-e.g.swiper.el は swiper.el のための設定ファイルです．
 
