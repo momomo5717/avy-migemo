@@ -620,11 +620,11 @@ BEG / LEN is an integer."
                      (avy--find-visible-regions
                       (or beg (window-start))
                       (or end (window-end (selected-window) t))))
-         do
+         for vstart = (if isearch-forward vbeg vend)
+         for vbound = (if isearch-forward vend vbeg) do
          (save-excursion
-           (setq cpt (goto-char (if isearch-forward vbeg vend)))
-           (while (funcall search-fun string
-                           (if isearch-forward vend vbeg) t)
+           (setq cpt (goto-char vstart))
+           (while (funcall search-fun string vbound t)
              (unless (get-char-property (max (1- (point)) vbeg) 'invisible)
                (when (or (null pred) (funcall pred))
                  (push (cons (cons (match-beginning group)
@@ -649,10 +649,5 @@ BEG / LEN is an integer."
                     (avy--style-fn avy-style))
       (isearch-done))))
 
-(define-obsolete-function-alias 'avy-migemo-check-regex
-  'avy-migemo-regex-p "0.2.5")
-
-(define-obsolete-function-alias 'avy-migemo--read-string-timer
-  'avy-migemo--read-candidates "0.2.9")
 (provide 'avy-migemo)
 ;;; avy-migemo.el ends here

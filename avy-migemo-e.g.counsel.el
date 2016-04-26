@@ -1,4 +1,4 @@
-;;; avy-migemo-e.g.counsel.el --- A setting example of avy-migemo for counsel -*- lexical-binding: t; no-byte-compile: t -*-
+;;; avy-migemo-e.g.counsel.el --- An example config of avy-migemo for counsel -*- lexical-binding: t; no-byte-compile: t -*-
 
 ;; Copyright (C) 2015-2016 momomo5717
 
@@ -21,71 +21,144 @@
 
 ;;; Commentary:
 
-;; This file is a setting example of avy-migemo for counsel.
+;; This file is an example config of avy-migemo for counsel 0.8.0 or later.
 ;;
-;; (require 'avy-migemo-e.g.swiper)
 ;; (require 'avy-migemo-e.g.counsel)
 ;;
-;; ;; If you want to remove this config from `avy-migemo-function-names' in a init file,
-;; (with-eval-after-load 'avy-migemo-e.g.counsel-loaded
-;;   (avy-migemo-remove-names 'counsel-grep-function-migemo))
+;; Note: This file is not compiled for installing from MELPA.
 
 ;;; Code:
+(require 'counsel)
+(require 'avy-migemo-e.g.swiper)
 
-(with-eval-after-load 'ivy--regex-migemo
-  (with-eval-after-load "counsel"
+;; Customization
+(defcustom counsel-pt-migemo-base-command counsel-pt-base-command
+  "Format string to use in `counsel-pt-migemo'.
+The default is `counsel-pt-base-command'."
+  :type 'string
+  :group 'ivy)
 
-    (defun counsel-pt-function-migemo (string &optional _pred &rest _unused)
-      "pt in the current directory for STRING."
-      (if (< (length string) 3)
-          (counsel-more-chars 3)
-        (let ((default-directory counsel--git-grep-dir)
-              (regex (replace-regexp-in-string
-                      "\\\\|" "|"
-                      (counsel-unquote-regex-parens
-                       (setq ivy--old-re
-                             (ivy--regex-migemo string))))))
-          (counsel--async-command
-           (format "pt --nocolor --nogroup -e %S" regex))
-          nil)))
-    (byte-compile 'counsel-pt-function-migemo)
+(defcustom counsel-grep-base-command-migemo counsel-grep-base-command
+  "Format string to use in `counsel-grep-function-migemo' to construct
+the command. The default is `counsel-grep-base-command'."
+  :type 'string
+  :group 'ivy)
 
-    (defun counsel-pt-migemo (&optional initial-input initial-directory)
-      "The same as `counsel-ag' except for using pt and migemo."
-      (interactive)
-      (setq counsel--git-grep-dir (or initial-directory default-directory))
-      (ivy-read "pt: " 'counsel-pt-function-migemo
-                :initial-input initial-input
-                :dynamic-collection t
-                :history 'counsel-git-grep-history
-                :action #'counsel-git-grep-action
-                :unwind (lambda ()
-                          (counsel-delete-process)
-                          (swiper--cleanup))))
-    (byte-compile 'counsel-pt-migemo)
+;; Helper function
+(defun counsel-unquote-regex-parens-migemo (str)
+  "`counsel-unquote-regex-parens' for migemo."
+  (replace-regexp-in-string "\\\\|" "|" (counsel-unquote-regex-parens str)))
+(byte-compile 'counsel-unquote-regex-parens-migemo)
 
-    (defun counsel-grep-function-migemo (string &optional _pred &rest _unused)
-      "The same as `counsel-grep-function' except for using migemo."
-      (if (< (length string) 3)
-          (counsel-more-chars 3)
-        (let ((regex (replace-regexp-in-string ; Adapt for migemo
-                      "\\\\|" "|"
-                      (counsel-unquote-regex-parens
-                       (setq ivy--old-re
-                             (ivy--regex-migemo string))))))
-          (counsel--async-command
-           (format "grep -nP --ignore-case '%s' %s" regex counsel--git-grep-dir))
-          nil)))
-    (byte-compile 'counsel-grep-function-migemo)
+;; counsel-pt-migemo
+(counsel-set-async-exit-code 'counsel-pt-migemo 1 "No matches found")
+(ivy-set-occur 'counsel-pt-migemo 'counsel-pt-migemo-occur)
+(ivy-set-display-transformer 'counsel-pt-migemo 'counsel-git-grep-transformer)
 
-    (avy-migemo-add-names 'counsel-grep-function-migemo)
+(defun counsel-pt-function-migemo (string)
+  "pt in the current directory for STRING."
+  (if (< (length string) 3)
+      (counsel-more-chars 3)
+    (let ((default-directory counsel--git-grep-dir)
+          (regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
+                  (setq ivy--old-re
+                        (ivy--regex-migemo string)))))
+      (counsel--async-command
+       (format counsel-pt-migemo-base-command (shell-quote-argument regex)))
+      nil)))
+(byte-compile 'counsel-pt-function-migemo)
 
-    ;; `counsel-locate' is incompatible with `avy-migemo-mode'.
-    (advice-add 'counsel-locate :around #'avy-migemo-disable-around)
-    ;; `counsel-ag' is incompatible with `avy-migemo-mode'.
-    (advice-add 'counsel-ag :around #'avy-migemo-disable-around)
+(defun counsel-pt-migemo (&optional initial-input initial-directory)
+  "The same as `counsel-ag' except for using pt and migemo."
+  (interactive
+   (list nil
+         (when current-prefix-arg
+           (read-directory-name "pt in directory: "))))
+  (setq counsel--git-grep-dir (or initial-directory default-directory))
+  (ivy-read "pt: " 'counsel-pt-function-migemo
+            :initial-input initial-input
+            :dynamic-collection t
+            :keymap counsel-ag-map
+            :history 'counsel-git-grep-history
+            :action #'counsel-git-grep-action
+            :unwind (lambda ()
+                      (counsel-delete-process)
+                      (swiper--cleanup))
+            :caller 'counsel-pt-migemo))
+(byte-compile 'counsel-pt-migemo)
 
-    (provide 'avy-migemo-e.g.counsel-loaded)))
+(defun counsel-pt-migemo-occur ()
+  "The same as `counsel-ag-occur' except for using pt and migemo."
+  (unless (eq major-mode 'ivy-occur-grep-mode)
+    (ivy-occur-grep-mode))
+  (setq default-directory counsel--git-grep-dir)
+  (let* ((regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
+                 (setq ivy--old-re
+                       (ivy--regex-migemo
+                        (progn (string-match "\"\\(.*\\)\"" (buffer-name))
+                               (match-string 1 (buffer-name)))))))
+         (cands (split-string
+                 (shell-command-to-string
+                  (format counsel-pt-migemo-base-command (shell-quote-argument regex)))
+                 "\n"
+                 t)))
+    ;; Need precise number of header lines for `wgrep' to work.
+    (insert (format "-*- mode:grep; default-directory: %S -*-\n\n\n"
+                    default-directory))
+    (insert (format "%d candidates:\n" (length cands)))
+    (ivy--occur-insert-lines
+     (mapcar
+      (lambda (cand) (concat "./" cand))
+      cands))))
+(byte-compile 'counsel-pt-migemo-occur)
+
+;; counsel-grep
+(defun counsel-grep-function-migemo (string)
+  "The same as `counsel-grep-function' except for using migemo."
+  (if (< (length string) 3)
+      (counsel-more-chars 3)
+    (let ((regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
+                  (setq ivy--old-re
+                        (ivy--regex-migemo string)))))
+      (counsel--async-command
+       (format counsel-grep-base-command-migemo regex counsel--git-grep-dir))
+      nil)))
+(byte-compile 'counsel-grep-function-migemo)
+
+(defun counsel-grep-occur-migemo ()
+  "Generate a custom occur buffer for `counsel-grep'."
+  (unless (eq major-mode 'ivy-occur-grep-mode)
+    (ivy-occur-grep-mode))
+  (let ((cands
+         (split-string
+          (shell-command-to-string
+           (format counsel-grep-base-command-migemo ; Adapt for migemo
+                   (counsel-unquote-regex-parens-migemo
+                    (setq ivy--old-re
+                          (ivy--regex-migemo
+                           (progn (string-match "\"\\(.*\\)\"" (buffer-name))
+                                  (match-string 1 (buffer-name))))))
+                   counsel--git-grep-dir))
+          "\n" t))
+        (file (file-name-nondirectory counsel--git-grep-dir)))
+    ;; Need precise number of header lines for `wgrep' to work.
+    (insert (format "-*- mode:grep; default-directory: %S -*-\n\n\n"
+                    default-directory))
+    (insert (format "%d candidates:\n" (length cands)))
+    (ivy--occur-insert-lines
+     (mapcar
+      (lambda (cand) (concat "./" file ":" cand))
+      cands))))
+(byte-compile 'counsel-grep-occur-migemo)
+
+;; For using with `avy-migemo-mode'
+(avy-migemo-add-names 'counsel-grep-function-migemo
+                      'counsel-grep-occur-migemo)
+
+;; `counsel-locate' is incompatible with `avy-migemo-mode'.
+(advice-add 'counsel-locate :around #'avy-migemo-disable-around)
+;; `counsel-ag' is incompatible with `avy-migemo-mode'.
+(advice-add 'counsel-ag :around #'avy-migemo-disable-around)
 
 (provide 'avy-migemo-e.g.counsel)
 ;;; avy-migemo-e.g.counsel.el ends here

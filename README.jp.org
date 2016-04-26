@@ -3,7 +3,7 @@
 
 * avy-migemo
 
-  avy-migemo は avy 関数の migemo版に切り替えるためのマイナーモードです．
+  avy-migemo は avy 関数の [[https://github.com/emacs-jp/migemo][migemo]] 版に切り替えるためのマイナーモードです．
 
   このパッケージでは，以下の関数が定義されています．
 
@@ -24,6 +24,7 @@
   =avy-migemo-mode= で切り替えて使用できるように定義されています．
 
     + avy-migemo-e.g.zzz-to-char.el
+    + avy-migemo-e.g.ivy.el
     + avy-migemo-e.g.swiper.el
     + avy-migemo-e.g.counsel.el
 
@@ -39,10 +40,11 @@
     + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
     + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
     + [[#user-option-avy-migemo-use-isearch-search-fun][User Option: =avy-migemo-use-isearch-search-fun= ]]
-    + [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-full-max= ]]
+    + [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-at-full-max= ]]
     + [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
     + [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= )]]
-    + [[#an-example-config-for-swiper--ivy--regex-][An example config for swiper ( =ivy--regex= )]]
+    + [[#an-example-config-for-ivy][An example config for ivy]]
+    + [[#an-example-config-for-swiper][An example config for swiper]]
     + [[#an-example-config-for-counsel][An example config for counsel]]
 
 ** Requirements
@@ -158,68 +160,36 @@
         (avy-migemo-add-names 'zzz-to-char--base-migemo)
       #+END_SRC
 
-***** An example config for swiper ( =ivy--regex= )
+***** An config example for ivy
 
-      avy を使用していない関数に対しても migemo版を以下のように追加することができます．
+      avy-migemo-e.g.ivy.el は ivy.el のための設定ファイルです．
 
-      以下の設定例は avy-migemo-e.g.swiper.el をロードすることで使用することができます．
-
-      #+BEGIN_SRC emacs-lisp
-        ;; If you use swiper (which can be installed from MELPA or El-Get),
-        ;; you can adapt it for migemo.
-        (require 'swiper)
-
-        (defvar avy-migemo--ivy--regex-hash
-          (make-hash-table :test #'equal)
-          "avy-migemo's `ivy--regex-hash'.")
-
-        ;; You need to add "-migemo" to the original name.
-        (defun ivy--regex-migemo (str &optional greedy)
-          "The same as `ivy--regex' except for using migemo."
-          (let ((hashed (unless greedy
-                          (gethash str avy-migemo--ivy--regex-hash))))
-            (if hashed
-                (prog1 (cdr hashed)
-                  (setq ivy--subexps (car hashed)))
-              (when (string-match "\\([^\\]\\|^\\)\\\\$" str)
-                (setq str (substring str 0 -1)))
-              (cdr (puthash str
-                            (let ((subs
-                                   ;; Adapt for migemo
-                                   (mapcar
-                                    (mapcar #'avy-migemo-regex-concat
-                                            (ivy--split str))
-                                    (ivy--split str))))
-                              (if (= (length subs) 1)
-                                  (cons
-                                   (setq ivy--subexps 0)
-                                   (car subs))
-                                (cons
-                                 (setq ivy--subexps (length subs))
-                                 (mapconcat
-                                  (lambda (x)
-                                    (if (string-match "\\`\\\\(.*\\\\)\\'" x)
-                                        x
-                                      (format "\\(%s\\)" x)))
-                                  subs
-                                  (if greedy
-                                      ".*"
-                                    ".*?")))))
-                            avy-migemo--ivy--regex-hash)))))
-
-        ;; If you need to ivy-display-style's fancy,
-        ;; you can use `ivy--format-minibuffer-line-migemo' in avy-migemo-e.g.swiper.el.
-        (defun ivy--format-minibuffer-line-migemo (str)
-          "you can see `ivy--format-minibuffer-line-migemo' in avy-migemo-e.g.swiper.el"
-          (copy-sequence str))
-
-        (avy-migemo-add-names 'ivy--regex-migemo 'ivy--format-minibuffer-line-migemo)
+      #+BEGIN_SRC elisp
+        (require 'avy-migemo-e.g.ivy)
       #+END_SRC
+
+      + =ivy--regex-migemo=
+      + =ivy--format-minibuffer-line-migemo=
+
+***** An config example for swiper
+
+      avy-migemo-e.g.swiper.el は swiper.el のための設定ファイルです．
+
+      #+BEGIN_SRC elisp
+        (require 'avy-migemo-e.g.swiper)
+      #+END_SRC
+
+      + =swiper--add-overlays-migemo=
+
 ***** An example config for counsel
 
       avy-migemo-e.g.counsel.el は counsel.el のための設定ファイルです．
 
       + =counsel-grep-function-migemo=
+      + =counsel-grep-base-command-migemo= (Default value: =counsel-grep-base-command= )
+      + =counsel-grep-occur-migemo=
       + =counsel-pt-migemo= (which depends on [[https://github.com/monochromegane/the_platinum_searcher][pt(The Platinum Searcher)]] )
+      + =counsel-pt-migemo-base-command= (Default value: =counsel-pt-base-command= )
+      + =counsel-pt-migemo-occur=
       + =counsel-ag= 動作時における avy-migemo-mode の無効化
       + =counsel-locate= 動作時における avy-migemo-mode の無効化
