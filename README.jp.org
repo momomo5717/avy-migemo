@@ -185,6 +185,10 @@
 
       avy-migemo-e.g.counsel.el は counsel.el のための設定ファイルです．
 
+      #+BEGIN_SRC elisp
+        (require 'avy-migemo-e.g.counsel)
+      #+END_SRC
+
       + =counsel-grep-function-migemo=
       + =counsel-grep-base-command-migemo= (Default value: =counsel-grep-base-command= )
       + =counsel-grep-occur-migemo=
