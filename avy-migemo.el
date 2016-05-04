@@ -609,10 +609,13 @@ BEG / LEN is an integer."
   (setq group (or group 0))
   (unless (string= string "")
     (let* ((case-fold-search isearch-case-fold-search)
-           (migemo-do-isearch migemo-isearch-enable-p)
+           (use-migemo-p (and migemo-isearch-enable-p
+                              (not isearch-word)
+                              (not isearch-regexp)))
+           (isearch-regexp (if use-migemo-p t isearch-regexp))
+           (string (if use-migemo-p (migemo-search-pattern-get string) string))
            (search-fun (isearch-search-fun))
            candidates cpt)
-      (when (eq search-fun 'migemo-backward) (setq migemo-do-isearch nil))
       (avy-dowindows current-prefix-arg
         (cl-loop
          for (vbeg . vend)
