@@ -31,8 +31,9 @@
 (require 'swiper)
 (require 'avy-migemo-e.g.ivy)
 
-(defun swiper--add-overlays-migemo (re &optional beg end)
+(defun swiper--add-overlays-migemo (re &optional beg end wnd)
   "The same as `swiper--add-overlays' except adapting it for migemo's regexp."
+  (setq wnd (or wnd (ivy-state-window ivy-last)))
   (let ((ov (if visual-line-mode
                 (make-overlay
                  (save-excursion
@@ -45,7 +46,7 @@
                (line-beginning-position)
                (1+ (line-end-position))))))
     (overlay-put ov 'face 'swiper-line-face)
-    (overlay-put ov 'window (ivy-state-window ivy-last))
+    (overlay-put ov 'window wnd)
     (push ov swiper--overlays)
     (let* ((wh (window-height))
            (beg (or beg (save-excursion
@@ -84,7 +85,7 @@
                                 swiper-faces)))))
                (push overlay swiper--overlays)
                (overlay-put overlay 'face face)
-               (overlay-put overlay 'window (ivy-state-window ivy-last))
+               (overlay-put overlay 'window wnd)
                (overlay-put overlay 'priority i-face)
                (cl-incf i-face)))))))))
 (byte-compile 'swiper--add-overlays-migemo)
