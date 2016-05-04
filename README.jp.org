@@ -67,7 +67,7 @@
 
 ***** User Option: =avy-migemo-get-function=
 
-      この変数の型は関数です．初期値は =migemo-search-pattern-get= に設定されています．
+      この変数の型は関数です．初期値は =migemo-get-pattern= に設定されています．
 
       引数として文字列を取り，正規表現を返す関数を設定することができます．
 

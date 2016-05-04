@@ -67,7 +67,7 @@
 
 ***** User Option: =avy-migemo-get-function=
 
-      Its type is function. Default value is =migemo-search-pattern-get=.
+      Its type is function. Default value is =migemo-get-pattern=.
 
       It takes a string and returns a regular expression.
 

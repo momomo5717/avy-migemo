@@ -80,7 +80,7 @@
   :group  'avy
   :prefix "avy-migemo-")
 
-(defcustom avy-migemo-get-function 'migemo-search-pattern-get
+(defcustom avy-migemo-get-function 'migemo-get-pattern
   "Getter function of migemo.
 It takes a string and returns a regular expression."
   :type 'function)
