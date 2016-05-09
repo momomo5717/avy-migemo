@@ -53,6 +53,7 @@
 ;; The following extensions are available:
 ;;
 ;;   + avy-migemo-e.g.zzz-to-char.el
+;;   + avy-migemo-e.g.ivy.el
 ;;   + avy-migemo-e.g.swiper.el
 ;;   + avy-migemo-e.g.counsel.el
 ;;
@@ -95,8 +96,10 @@ It takes a string and returns a regular expression."
     avy-migemo-isearch
     avy-migemo--overlay-at
     avy-migemo--overlay-at-full)
-  "Function names for overriding avy's functions."
-  :type '(list function)
+  "Function names for overriding avy's functions.
+\(orig-fn where advice-fn) like args of `advice-add' is also available."
+  :type '(repeat (choice symbol
+                         (list symbol symbol symbol)))
   :set (lambda (symbol value)
          (if (and (boundp symbol) (boundp 'avy-migemo-mode))
              (let ((avy-migemo-mode-p avy-migemo-mode))
@@ -113,7 +116,7 @@ It takes a string and returns a regular expression."
 (defun avy-migemo-add-names (&rest names)
   "Add NAMES to the front of `avy-migemo-function-names'."
   (let ((names (nconc (cl-loop for name in (cl-delete-duplicates names)
-                               unless (memq name avy-migemo-function-names)
+                               unless (member name avy-migemo-function-names)
                                collect name)
                       avy-migemo-function-names)))
     (custom-set-variables `(avy-migemo-function-names ',names))
@@ -123,7 +126,7 @@ It takes a string and returns a regular expression."
 (defun avy-migemo-remove-names (&rest names)
   "Remove NAMES from `avy-migemo-function-names'."
   (let ((names (cl-loop for name in avy-migemo-function-names
-                        unless (memq name names)
+                        unless (member name names)
                         collect name)))
     (custom-set-variables `(avy-migemo-function-names ',names))
     avy-migemo-function-names))
@@ -132,14 +135,20 @@ It takes a string and returns a regular expression."
 (define-minor-mode avy-migemo-mode
   "Override avy's functions."
   :global t
-  (dolist (name avy-migemo-function-names)
-    (let ((predefined-name
-           (intern (replace-regexp-in-string
-                    "-migemo" "" (symbol-name name)))))
-      (if avy-migemo-mode
-          (unless (eq predefined-name name)
-           (advice-add predefined-name :override name))
-        (advice-remove predefined-name name)))))
+  (cl-loop for e in avy-migemo-function-names
+           for name = (if (listp e) (cl-first e) e)
+           for where = (if (listp e) (cl-second e) :override)
+           for function = (when (listp e) (cl-third e))
+           for predefined-name = (if function name
+                                   (intern (replace-regexp-in-string
+                                            "-migemo" "" (symbol-name name))))
+           do
+           (when (and function (consp function)) (setq function (cadr function)))
+           (if avy-migemo-mode
+               (unless (if function (eq predefined-name function)
+                         (eq predefined-name name))
+                 (advice-add predefined-name where (or function name)))
+             (advice-remove predefined-name (or function name)))))
 
 ;;;###autoload
 (defun avy-migemo-disable-around (orig-f &rest orig-args)
