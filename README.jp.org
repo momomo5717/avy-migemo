@@ -73,7 +73,10 @@
 
 ***** User Option: =avy-migemo-function-names=
 
-      avy-migemo の関数名のリストです．初期値では全ての関数名が含まれています．
+      avy-migemo の関数名のリストです．
+      また =advice-add= の引数のように， =(orig-fn where advice-fn)= と指定することができます．
+
+      初期値では全ての関数名が含まれています．
 
       この変数を変更する場合は， =setq= ではなく =custom-set-variables= を使用してください．
       =setq= を使用すると，オーバーライドする関数との整合性が取れなくなります．
@@ -170,6 +173,8 @@
 
       + =ivy--regex-migemo=
       + =ivy--format-minibuffer-line-migemo=
+      + =ivy-migemo-ignore-functions=
+      + =ivy-migemo-ignore-prompts=
 
 ***** An example config for swiper
 
@@ -195,5 +200,4 @@
       + =counsel-pt-migemo= (which depends on [[https://github.com/monochromegane/the_platinum_searcher][pt(The Platinum Searcher)]] )
       + =counsel-pt-migemo-base-command= (Default value: =counsel-pt-base-command= )
       + =counsel-pt-migemo-occur=
-      + =counsel-ag= 動作時における avy-migemo-mode の無効化
-      + =counsel-locate= 動作時における avy-migemo-mode の無効化
+      + =counsel-ag=, =counsel-locate= などの動作時における avy-migemo-mode の無効化

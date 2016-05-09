@@ -74,9 +74,11 @@
 ***** User Option: =avy-migemo-function-names=
 
       Its value is a list of avy-migemo's function names.
-      Default value has all avy-migemo's function names.
-      Instead of using =setq=, =custom-set-variables= is recommended for changing its value.
+      =(orig-fn where advice-fn)= like args of =advice-add= is also available.
 
+      Default value has all avy-migemo's function names.
+
+      Instead of using =setq=, =custom-set-variables= is recommended for changing its value.
       If you want to override only =avy-goto-char-timer=, you can use =custom-set-variables= as below.
 
       #+BEGIN_SRC emacs-lisp
@@ -168,6 +170,8 @@
 
       + =ivy--regex-migemo=
       + =ivy--format-minibuffer-line-migemo=
+      + =ivy-migemo-ignore-functions=
+      + =ivy-migemo-ignore-prompts=
 
 ***** An example config for swiper
 
@@ -193,5 +197,4 @@
       + =counsel-pt-migemo= (which depends on [[https://github.com/monochromegane/the_platinum_searcher][pt(The Platinum Searcher)]] )
       + =counsel-pt-migemo-base-command= (Default value: =counsel-pt-base-command= )
       + =counsel-pt-migemo-occur=
-      + Turning off avy-migemo-mode while =counsel-ag= is running.
-      + Turning off avy-migemo-mode while =counsel-locate= is running.
+      + Turning off avy-migemo-mode when =counsel-ag=, =counsel-locate=, etc.
