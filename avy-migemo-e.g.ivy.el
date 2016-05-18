@@ -31,6 +31,36 @@
 (require 'ivy)
 (require 'avy-migemo)
 
+(defcustom ivy-migemo-ignore-functions nil
+  "List of function names.
+If `this-command' or caller of `ivy-read' is included,
+`ivy--regex-migemo-around' will not use migemo."
+  :group 'ivy
+  :type '(repeat symbol))
+
+(defcustom ivy-migemo-ignore-prompts (list (regexp-opt '("symbol" "function" "variable" "binding")))
+  "List of regexps.
+If `ivy-state-prompt' of `ivy-last' is matched by a regexp,
+`ivy--regex-migemo-around' will not use migemo.
+The case of the text is ignored."
+  :group 'ivy
+  :type '(repeat regexp))
+
+(defun ivy--migemo-ignore-p ()
+  "Retrun t, if `ivy-last' state is included in `ivy-migemo-ignore-functions' or `ivy-migemo-ignore-prompts'."
+  (let ((collection (ivy-state-collection ivy-last))
+        (caller (ivy-state-caller ivy-last))
+        (prompt (ivy-state-prompt ivy-last))
+        (case-fold-search t))
+    (or (and (functionp collection)
+             (member collection ivy-migemo-ignore-functions))
+        (and caller
+             (member caller ivy-migemo-ignore-functions))
+        (member this-command ivy-migemo-ignore-functions)
+        (cl-loop for re in ivy-migemo-ignore-prompts
+                 thereis (string-match-p re prompt)))))
+(byte-compile 'ivy--migemo-ignore-p)
+
 (defvar avy-migemo--ivy--regex-hash
   (make-hash-table :test #'equal)
   "avy-migemo's `ivy--regex-hash'.")
@@ -71,6 +101,13 @@
                             ".*?")))))
                     avy-migemo--ivy--regex-hash)))))
 (byte-compile 'ivy--regex-migemo)
+
+(defun ivy--regex-migemo-around (fn &rest args)
+  "This functions is an around advice function for `ivy--regex'."
+  (if (ivy--migemo-ignore-p)
+      (apply fn args)
+    (apply #'ivy--regex-migemo args)))
+(byte-compile 'ivy--regex-migemo-around)
 
 (defun ivy--format-minibuffer-line-migemo (str)
   "The same as `ivy--format-minibuffer-line' except adapting it for migemo's regexp."
@@ -125,7 +162,8 @@
 (byte-compile 'ivy--format-minibuffer-line-migemo)
 
 ;; For using with avy-migemo-mode
-(avy-migemo-add-names 'ivy--regex-migemo
+(avy-migemo-remove-names 'ivy--regex-migemo)
+(avy-migemo-add-names '(ivy--regex :around ivy--regex-migemo-around)
                       'ivy--format-minibuffer-line-migemo)
 (add-hook 'avy-migemo-regex-cache-clear-hook
           'avy-migemo--ivy--regex-hash-clear)

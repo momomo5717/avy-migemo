@@ -155,10 +155,20 @@ the command. The default is `counsel-grep-base-command'."
 (avy-migemo-add-names 'counsel-grep-function-migemo
                       'counsel-grep-occur-migemo)
 
-;; `counsel-locate' is incompatible with `avy-migemo-mode'.
-(advice-add 'counsel-locate :around #'avy-migemo-disable-around)
-;; `counsel-ag' is incompatible with `avy-migemo-mode'.
-(advice-add 'counsel-ag :around #'avy-migemo-disable-around)
+(dolist (fn '(counsel-ag
+              counsel-locate
+              counsel-describe-variable
+              counsel-describe-function
+              counsel-M-x))
+  (add-to-list 'ivy-migemo-ignore-functions fn))
+
+(add-to-list 'ivy-migemo-ignore-prompts
+             (concat "^"
+                     (regexp-opt (list "Load library" ; counsel-load-library
+                                       "Load custom theme" ; counsel-load-theme
+                                       ))))
+
+(avy-migemo-add-names '(counsel-clj :around avy-migemo-disable-around))
 
 (provide 'avy-migemo-e.g.counsel)
 ;;; avy-migemo-e.g.counsel.el ends here
