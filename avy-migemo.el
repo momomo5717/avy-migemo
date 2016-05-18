@@ -477,17 +477,19 @@ BEG / LEN is an integer."
      avy-style)))
 
 ;;;###autoload
-(defun avy-migemo-goto-char-2 (char1 char2 &optional arg)
+(defun avy-migemo-goto-char-2 (char1 char2 &optional arg beg end)
   "The same as `avy-goto-char-2' except for the candidates via migemo."
   (interactive (list (read-char "char 1: " t)
                      (read-char "char 2: " t)
-                     current-prefix-arg))
+                     current-prefix-arg
+                     nil nil))
   (avy-with avy-goto-char-2
     (avy--generic-jump
      ;; Adapt for migemo
      (avy-migemo-regex-quote-concat (string char1 char2))
      arg
-     avy-style)))
+     avy-style
+     beg end)))
 
 ;;;###autoload
 (defun avy-migemo-goto-char-in-line (char)
