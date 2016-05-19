@@ -593,7 +593,7 @@ BEG / LEN is an integer."
                         (string-match-p regex (string char-after)))))))))
 
 ;;;###autoload
-(defun avy-migemo-goto-word-1 (char &optional arg)
+(defun avy-migemo-goto-word-1 (char &optional arg beg end)
   "The same as `avy-goto-word-1' except for the candidates via migemo."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
@@ -609,7 +609,7 @@ BEG / LEN is an integer."
                          (concat
                           "\\b"
                           (avy-migemo-regex-concat str))))))
-      (avy--generic-jump regex arg avy-style))))
+      (avy--generic-jump regex arg avy-style beg end))))
 
 (defcustom avy-migemo-use-isearch-search-fun nil
   "If non-nil, `avy-migemo-isearch' uses `isearch-search-fun'."
