@@ -639,7 +639,7 @@ BEG / LEN is an integer."
          (save-excursion
            (setq cpt (goto-char vstart))
            (while (funcall search-fun string vbound t)
-             (unless (get-char-property (max (1- (point)) vbeg) 'invisible)
+             (unless (get-char-property (- (point) (if isearch-forward 1 0)) 'invisible)
                (when (or (null pred) (funcall pred))
                  (push (cons (cons (match-beginning group)
                                    (match-end group))
