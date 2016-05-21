@@ -65,7 +65,7 @@
 ;; (require 'avy-migemo)
 ;; ;; `avy-migemo-mode' overrides avy's predefined functions using `advice-add'.
 ;; (avy-migemo-mode 1)
-;; (global-set-key (kbd "M-g m") 'avy-migemo-mode)
+;; (global-set-key (kbd "M-g m m") 'avy-migemo-mode)
 ;;
 ;; ;; If you would like to restrict the length of displayed keys within 2
 ;; ;; for `avy-style' of at-full, `avy-migemo-at-full-max' provides it.
@@ -80,6 +80,11 @@
   "avy with migemo."
   :group  'avy
   :prefix "avy-migemo-")
+
+(defcustom avy-migemo-lighter nil
+  "Lighter for `avy-migemo-mode'."
+  :type '(choice (const :tag "Not displayed." nil)
+                 string))
 
 (defcustom avy-migemo-get-function 'migemo-get-pattern
   "Getter function of migemo.
@@ -135,6 +140,7 @@ It takes a string and returns a regular expression."
 (define-minor-mode avy-migemo-mode
   "Override avy's functions."
   :global t
+  :lighter avy-migemo-lighter
   (cl-loop for e in avy-migemo-function-names
            for name = (if (listp e) (cl-first e) e)
            for where = (if (listp e) (cl-second e) :override)
