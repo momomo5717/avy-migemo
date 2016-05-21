@@ -33,7 +33,7 @@
 
 (defcustom ivy-migemo-ignore-functions nil
   "List of function names.
-If `this-command' or caller of `ivy-read' is included,
+If `this-command' or caller of `ivy-last' is included,
 `ivy--regex-migemo-around' will not use migemo."
   :group 'ivy
   :type '(repeat symbol))
