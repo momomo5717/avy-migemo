@@ -35,6 +35,7 @@
   + [[#requirements][Requirements]]
   + [[#setup][Setup]]
   + [[#customization][Customization]]
+    + [[#user-option-avy-migemo-lighter][User Option: =avy-migemo-lighter= ]]
     + [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
     + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
     + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
@@ -60,10 +61,14 @@
      (require 'avy-migemo)
      ;; `avy-migemo-mode' overrides avy's predefined functions using `advice-add'.
      (avy-migemo-mode 1)
-     (global-set-key (kbd "M-g m") 'avy-migemo-mode)
+     (global-set-key (kbd "M-g m m") 'avy-migemo-mode)
    #+END_SRC
 
 ** Customization
+
+***** User Option: =avy-migemo-lighter=
+
+      Lighter for =avy-migemo-mode=. Default value is =nil=.
 
 ***** User Option: =avy-migemo-get-function=
 
@@ -197,4 +202,4 @@
       + =counsel-pt-migemo= (which depends on [[https://github.com/monochromegane/the_platinum_searcher][pt(The Platinum Searcher)]] )
       + =counsel-pt-migemo-base-command= (Default value: =counsel-pt-base-command= )
       + =counsel-pt-migemo-occur=
-      + Turning off avy-migemo-mode when =counsel-ag=, =counsel-locate=, etc.
+      + Disabling migemo when =counsel-ag=, =counsel-locate=, etc.
