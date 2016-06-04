@@ -489,10 +489,16 @@ BEG / LEN is an integer."
                      (read-char "char 2: " t)
                      current-prefix-arg
                      nil nil))
+  (when (eq char1 ?)
+    (setq char1 ?\n))
+  (when (eq char2 ?)
+    (setq char2 ?\n))
   (avy-with avy-goto-char-2
     (avy--generic-jump
      ;; Adapt for migemo
-     (avy-migemo-regex-quote-concat (string char1 char2))
+     (if (eq char1 ?\n)
+         (concat (string char1) (avy-migemo-regex-quote-concat (string char2)))
+       (avy-migemo-regex-quote-concat (string char1 char2)))
      arg
      avy-style
      beg end)))
