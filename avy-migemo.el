@@ -605,7 +605,7 @@ BEG / LEN is an integer."
                         (string-match-p regex (string char-after)))))))))
 
 ;;;###autoload
-(defun avy-migemo-goto-word-1 (char &optional arg beg end)
+(defun avy-migemo-goto-word-1 (char &optional arg beg end symbol)
   "The same as `avy-goto-word-1' except for the candidates via migemo."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
@@ -617,6 +617,7 @@ BEG / LEN is an integer."
                               (string-match avy-word-punc-regexp str))
                          ;; Adapt for migemo
                          (avy-migemo-regex-quote-concat str))
+                        (symbol (concat "\\_<" str))
                         (t ;; Adapt for migemo
                          (concat
                           "\\b"
