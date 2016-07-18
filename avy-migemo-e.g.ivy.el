@@ -38,7 +38,8 @@ If `this-command' or caller of `ivy-last' is included,
   :group 'ivy
   :type '(repeat symbol))
 
-(defcustom ivy-migemo-ignore-prompts (list (regexp-opt '("symbol" "function" "variable" "binding")))
+(defcustom ivy-migemo-ignore-prompts
+  (list (regexp-opt '("symbol" "function" "variable" "binding" "face")))
   "List of regexps.
 If `ivy-state-prompt' of `ivy-last' is matched by a regexp,
 `ivy--regex-migemo-around' will not use migemo.
@@ -109,6 +110,24 @@ The case of the text is ignored."
     (apply #'ivy--regex-migemo args)))
 (byte-compile 'ivy--regex-migemo-around)
 
+(defun ivy--regex-ignore-order--part-migemo (str &optional discard)
+  "The same as `ivy--regex-ignore-order--part' except for using migemo."
+  (let* ((subs (split-string str " +" t))
+         (len (length subs)))
+    (cl-case len
+      (0
+       "")
+      (t
+       (mapcar (lambda (x) (cons (avy-migemo-regex-concat x) (not discard)))
+               subs)))))
+(byte-compile 'ivy--regex-ignore-order--part-migemo)
+
+(defun ivy--regex-ignore-order--part-migemo-around (fn &rest args)
+  "This functions is an around advice function for `ivy--regex-ignore-order--part'."
+  (if (ivy--migemo-ignore-p) (apply fn args)
+    (apply #'ivy--regex-ignore-order--part-migemo args)))
+(byte-compile 'ivy--regex-ignore-order--part-migemo-around)
+
 (defun ivy--format-minibuffer-line-migemo (str)
   "The same as `ivy--format-minibuffer-line' except adapting it for migemo's regexp."
   (let ((start
@@ -164,6 +183,9 @@ The case of the text is ignored."
 ;; For using with avy-migemo-mode
 (avy-migemo-remove-names 'ivy--regex-migemo)
 (avy-migemo-add-names '(ivy--regex :around ivy--regex-migemo-around)
+                      '(ivy--regex-ignore-order--part
+                        :around
+                        ivy--regex-ignore-order--part-migemo-around)
                       'ivy--format-minibuffer-line-migemo)
 (add-hook 'avy-migemo-regex-cache-clear-hook
           'avy-migemo--ivy--regex-hash-clear)
