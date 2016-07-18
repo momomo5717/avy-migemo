@@ -600,9 +600,11 @@ BEG / LEN is an integer."
           ;; Adapt for migemo
           (regex (avy-migemo-regex-quote-concat (string char))))
       (avy-goto-subword-0
-       arg (lambda () (let ((char-after (char-after))) ; Adapt for migemo
+       arg (lambda ()
+             (let ((char-after (char-after))) ; Adapt for migemo
+               (and char-after
                     (or (eq (downcase char-after) char)
-                        (string-match-p regex (string char-after)))))))))
+                        (string-match-p regex (string char-after))))))))))
 
 ;;;###autoload
 (defun avy-migemo-goto-word-1 (char &optional arg beg end symbol)
