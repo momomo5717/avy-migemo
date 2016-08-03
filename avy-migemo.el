@@ -619,6 +619,7 @@ BEG / LEN is an integer."
                               (string-match avy-word-punc-regexp str))
                          ;; Adapt for migemo
                          (avy-migemo-regex-quote-concat str))
+                        ((<= char 26) str)
                         (symbol (concat "\\_<" str))
                         (t ;; Adapt for migemo
                          (concat
