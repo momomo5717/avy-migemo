@@ -1,4 +1,4 @@
-;;; avy-migemo-e.g.ivy.el --- An example config of avy-migemo for -*- lexical-binding: t; no-byte-compile: t -*-
+;;; avy-migemo-e.g.ivy.el --- An example config of avy-migemo for ivy -*- lexical-binding: t; no-byte-compile: t -*-
 
 ;; Copyright (C) 2016 momomo5717
 
@@ -104,7 +104,7 @@ The case of the text is ignored."
 (byte-compile 'ivy--regex-migemo)
 
 (defun ivy--regex-migemo-around (fn &rest args)
-  "This functions is an around advice function for `ivy--regex'."
+  "Around advice function for `ivy--regex'."
   (if (ivy--migemo-ignore-p)
       (apply fn args)
     (apply #'ivy--regex-migemo args)))
@@ -123,10 +123,35 @@ The case of the text is ignored."
 (byte-compile 'ivy--regex-ignore-order--part-migemo)
 
 (defun ivy--regex-ignore-order--part-migemo-around (fn &rest args)
-  "This functions is an around advice function for `ivy--regex-ignore-order--part'."
+  "Around advice function for `ivy--regex-ignore-order--part'."
   (if (ivy--migemo-ignore-p) (apply fn args)
     (apply #'ivy--regex-ignore-order--part-migemo args)))
 (byte-compile 'ivy--regex-ignore-order--part-migemo-around)
+
+(defun ivy--regex-plus-migemo (str)
+  "The same as `ivy--regex-plus' except for using migemo."
+  (let ((parts (split-string str "!" t)))
+    (cl-case (length parts)
+      (0
+       "")
+      (1
+       (if (string= (substring str 0 1) "!")
+           (list (cons "" t)
+                 (list (ivy--regex-migemo (car parts))))
+         (ivy--regex-migemo (car parts))))
+      (2
+       (cons
+        (cons (ivy--regex-migemo (car parts)) t)
+        (cl-loop for str in (split-string (cadr parts) " " t)
+                 collect (list (avy-migemo-regex-concat str)))))
+      (t (error "Unexpected: use only one !")))))
+(byte-compile 'ivy--regex-plus-migemo)
+
+(defun ivy--regex-plus-migemo-around (fn &rest args)
+  "Around advice function for `ivy--regex-plus'."
+  (if (ivy--migemo-ignore-p) (apply fn args)
+    (apply #'ivy--regex-plus-migemo args)))
+(byte-compile 'ivy--regex-plus-migemo-around)
 
 (defun ivy--format-minibuffer-line-migemo (str)
   "The same as `ivy--format-minibuffer-line' except adapting it for migemo's regexp."
@@ -186,6 +211,7 @@ The case of the text is ignored."
                       '(ivy--regex-ignore-order--part
                         :around
                         ivy--regex-ignore-order--part-migemo-around)
+                      '(ivy--regex-plus :around ivy--regex-plus-migemo-around)
                       'ivy--format-minibuffer-line-migemo)
 (add-hook 'avy-migemo-regex-cache-clear-hook
           'avy-migemo--ivy--regex-hash-clear)
