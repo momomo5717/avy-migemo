@@ -31,6 +31,58 @@
 (require 'swiper)
 (require 'avy-migemo-e.g.ivy)
 
+(defun swiper--add-overlays-migemo-ignore-order (re-seq &optional beg end wnd)
+  "Add overlays at lines matched by RE-SEQ from BEG to END on WND.
+RE-SEQ is a list of \(regex . boolean)."
+  (setq wnd (or wnd (ivy-state-window ivy-last)))
+  (cl-macrolet ((lbeg-pos () '(if visual-line-mode
+                                  (save-excursion
+                                    (beginning-of-visual-line)
+                                    (point))
+                                (line-beginning-position)))
+                (lend-pos () '(if visual-line-mode
+                                  (save-excursion
+                                    (end-of-visible-line)
+                                    (point))
+                                (line-end-position))))
+    (when (and re-seq
+               (cl-loop for (re . _) in re-seq
+                        always (ignore-errors (string-match re "") t)))
+      (let* ((wh nil)
+             (beg (or beg (save-excursion
+                            (forward-line (- (setq wh (window-height wnd))))
+                            (point))))
+             (end (or end (save-excursion
+                            (forward-line (or wh (window-height wnd)))
+                            (point))))
+             (re (caar re-seq))
+             lbeg lend)
+        (save-excursion
+          (goto-char beg)
+          (while (re-search-forward re end t)
+            (when (ivy-re-match
+                   re-seq (funcall (if (memq major-mode '(org-mode dired-mode))
+                                       #'buffer-substring-no-properties
+                                     #'buffer-substring)
+                                   (setq lbeg (max (lbeg-pos) beg))
+                                   (setq lend (min (lend-pos) end))))
+              (cl-loop
+               with i-face = 1
+               for (re . match-p) in re-seq
+               for face = (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
+                               swiper-faces) do
+               (goto-char lbeg)
+               (while (and match-p
+                           (re-search-forward re lend t))
+                 (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
+                   (push ov swiper--overlays)
+                   (overlay-put ov 'face face)
+                   (overlay-put ov 'window wnd)
+                   (overlay-put ov 'priority i-face)))
+               (when match-p (cl-incf i-face))))
+            (goto-char lend)))))))
+(byte-compile 'swiper--add-overlays-migemo-ignore-order)
+
 (defun swiper--add-overlays-migemo (re &optional beg end wnd)
   "The same as `swiper--add-overlays' except adapting it for migemo's regexp."
   (setq wnd (or wnd (ivy-state-window ivy-last)))
@@ -48,7 +100,7 @@
     (overlay-put ov 'face 'swiper-line-face)
     (overlay-put ov 'window wnd)
     (push ov swiper--overlays)
-    (let* ((wh (window-height))
+    (let* ((wh (window-height wnd))
            (beg (or beg (save-excursion
                           (forward-line (- wh))
                           (point))))
@@ -56,38 +108,41 @@
                           (forward-line wh)
                           (point)))))
       (when (>= (length re) swiper-min-highlight)
-        (save-excursion
-          (goto-char beg)
-          ;; RE can become an invalid regexp
-          (while (and (ignore-errors (re-search-forward re end t))
-                      (> (- (match-end 0) (match-beginning 0)) 0))
-            ;; Adapt for migemo's regexp.
-            (cl-loop
-             with i-face = 0
-             with l-mend = 0
-             with mend-0 = (match-end 0)
-             for i from 0 below (if (zerop ivy--subexps) 1
-                                  (cl-loop for _ in (match-data) by #'cddr sum 1))
-             when (>= l-mend mend-0) return nil
-             for mbeg = (match-beginning i)
-             for mend = (match-end i)
-             when (and mbeg (<= l-mend mbeg)) do
-             (let ((overlay (make-overlay
-                             mbeg
-                             (if (> i 0) (setq l-mend mend) mend)))
-                   (face
-                    (cond ((zerop ivy--subexps)
-                           (cadr swiper-faces))
-                          ((zerop i)
-                           (car swiper-faces))
-                          (t
-                           (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
-                                swiper-faces)))))
-               (push overlay swiper--overlays)
-               (overlay-put overlay 'face face)
-               (overlay-put overlay 'window wnd)
-               (overlay-put overlay 'priority i-face)
-               (cl-incf i-face)))))))))
+        (if (eq ivy--regex-function 'ivy--regex-ignore-order)
+            (swiper--add-overlays-migemo-ignore-order
+             (ivy--regex-ignore-order ivy-text) beg end wnd)
+          (save-excursion
+            (goto-char beg)
+            ;; RE can become an invalid regexp
+            (while (and (ignore-errors (re-search-forward re end t))
+                        (> (- (match-end 0) (match-beginning 0)) 0))
+              ;; Adapt for migemo's regexp.
+              (cl-loop
+               with i-face = 0
+               with l-mend = 0
+               with mend-0 = (match-end 0)
+               for i from 0 below (if (zerop ivy--subexps) 1
+                                    (/ (length (match-data)) 2))
+               when (>= l-mend mend-0) return nil
+               for mbeg = (match-beginning i)
+               for mend = (match-end i)
+               when (and mbeg (<= l-mend mbeg)) do
+               (let ((overlay (make-overlay
+                               mbeg
+                               (if (> i 0) (setq l-mend mend) mend)))
+                     (face
+                      (cond ((zerop ivy--subexps)
+                             (cadr swiper-faces))
+                            ((zerop i)
+                             (car swiper-faces))
+                            (t
+                             (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
+                                  swiper-faces)))))
+                 (push overlay swiper--overlays)
+                 (overlay-put overlay 'face face)
+                 (overlay-put overlay 'window wnd)
+                 (overlay-put overlay 'priority i-face)
+                 (cl-incf i-face))))))))))
 (byte-compile 'swiper--add-overlays-migemo)
 
 ;; For using with avy-migemo-mode
