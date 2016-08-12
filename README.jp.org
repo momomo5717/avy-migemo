@@ -180,6 +180,8 @@
       + =ivy--regex-migemo-around=
       + =ivy--regex-ignore-order--part-migemo=
       + =ivy--regex-ignore-order--part-migemo-around=
+      + =ivy--regex-plus-migemo=
+      + =ivy--regex-plus-migemo-around=
       + =ivy--format-minibuffer-line-migemo=
       + =ivy-migemo-ignore-functions=
       + =ivy-migemo-ignore-prompts=
