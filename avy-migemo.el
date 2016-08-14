@@ -159,7 +159,7 @@ It takes a string and returns a regular expression."
 ;;;###autoload
 (defun avy-migemo-disable-around (orig-f &rest orig-args)
   "Advice for a function incompatible with `avy-migemo-mode'.
-e.g. \(advice-add 'counsel-locate :around #'avy-migemo-disable-around\)"
+e.g. \(advice-add 'counsel-clj :around #'avy-migemo-disable-around\)"
   (if (not avy-migemo-mode)
       (apply orig-f orig-args)
     (avy-migemo-mode -1)
@@ -171,11 +171,26 @@ e.g. \(advice-add 'counsel-locate :around #'avy-migemo-disable-around\)"
   (make-hash-table :test #'equal)
   "Migemo's regexp cache.")
 
+(defvar avy-migemo--regex-quote-cache
+  (make-hash-table :test #'equal)
+  "Migemo's regexp quote cache.")
+
+(defvar avy-migemo--regex-nnl-cache
+  (make-hash-table :test #'equal)
+  "Migemo's regexp cache for nonnewline.")
+
+(defvar avy-migemo--regex-quote-nnl-cache
+  (make-hash-table :test #'equal)
+  "Migemo's regexp quote cache for nonnewline.")
+
 ;;;###autoload
 (defun avy-migemo-regex-cache-clear ()
   "Clear `avy-migemo--regex-cache'."
   (interactive)
   (clrhash avy-migemo--regex-cache)
+  (clrhash avy-migemo--regex-quote-cache)
+  (clrhash avy-migemo--regex-nnl-cache)
+  (clrhash avy-migemo--regex-quote-nnl-cache)
   (run-hooks 'avy-migemo-regex-cache-clear-hook))
 
 ;;;###autoload
@@ -185,32 +200,61 @@ e.g. \(advice-add 'counsel-locate :around #'avy-migemo-disable-around\)"
     (string-match regex "")
     regex))
 
-;;;###autoload
-(defun avy-migemo-regex-concat (pattern)
-  "Return migemo's regexp which includes PATTERN in last place.
-Return PATTERN if migemo's regexp is invalid."
-  (let ((cache (gethash pattern avy-migemo--regex-cache)))
-    (if cache cache
-      (puthash pattern
-               (let ((regex (funcall avy-migemo-get-function pattern)))
-                 (if (avy-migemo-regex-p regex)
-                     (concat "\\(" regex "\\|" pattern "\\)")
-                   pattern))
-               avy-migemo--regex-cache))))
+(defun avy-migemo--rep-wspace-re (regexp)
+  "Replace \\s-* on REGEXP with empty string."
+  (replace-regexp-in-string "\\\\s-\\*" "" regexp))
 
 ;;;###autoload
-(defun avy-migemo-regex-quote-concat (pattern)
-  "Return migemo's regexp which includes quoted PATTERN in last place.
-Return quoted PATTERN if migemo's regexp is invalid."
-  (let* ((quoted-pattern (regexp-quote pattern))
-         (cache (gethash quoted-pattern avy-migemo--regex-cache)))
+(defun avy-migemo-regex-concat (pattern &optional nnl-p)
+  "Return migemo's regexp which includes PATTERN in last place.
+Return PATTERN if migemo's regexp is invalid.
+Return quoted PATTERN if PATTERN is invalid.
+If NNL-P is non-nil, replace \\s-* on migemo's regexp with empty string."
+  (let ((cache (unless nnl-p (gethash pattern avy-migemo--regex-cache))))
     (if cache cache
-      (puthash quoted-pattern
-               (let ((regex (funcall avy-migemo-get-function pattern)))
-                 (if (avy-migemo-regex-p regex)
-                     (concat "\\(" regex "\\|" quoted-pattern "\\)")
-                   quoted-pattern))
-               avy-migemo--regex-cache))))
+      (let ((re (let* ((mre (funcall avy-migemo-get-function pattern))
+                       (regex (if nnl-p (avy-migemo--rep-wspace-re mre) mre))
+                       (regex-p (avy-migemo-regex-p regex))
+                       (pattern-p (avy-migemo-regex-p pattern)))
+                  (cond ((and regex-p pattern-p)
+                         (concat "\\(" regex "\\|" pattern "\\)"))
+                        (regex-p
+                         (concat "\\(" (regexp-quote pattern) "\\|" regex "\\)"))
+                        (pattern-p pattern)
+                        (t (regexp-quote pattern))))))
+        (if nnl-p re (puthash pattern re avy-migemo--regex-cache))))))
+
+;;;###autoload
+(defun avy-migemo-regex-quote-concat (pattern &optional nnl-p)
+  "Return migemo's regexp which includes quoted PATTERN in last place.
+Return quoted PATTERN if migemo's regexp is invalid.
+If NNL-P is non-nil, replace \\s-* on migemo's regexp with empty string."
+  (let ((cache (unless nnl-p (gethash pattern avy-migemo--regex-quote-cache))))
+    (if cache cache
+      (let ((re (let* ((mre (funcall avy-migemo-get-function pattern))
+                       (regex (if nnl-p (avy-migemo--rep-wspace-re mre) mre)))
+                  (if (avy-migemo-regex-p regex)
+                      (concat "\\(" regex "\\|" (regexp-quote pattern) "\\)")
+                    (regexp-quote pattern)))))
+        (if nnl-p re (puthash pattern re avy-migemo--regex-quote-cache))))))
+
+;;;###autoload
+(defun avy-migemo-regex-concat-nnl (pattern)
+  "Return migemo's regexp which includes PATTERN with nonnewline.
+Replace \\s-* on migemo's regexp with empty string."
+  (let ((cache (gethash pattern avy-migemo--regex-nnl-cache)))
+    (if cache cache
+      (puthash pattern (avy-migemo-regex-concat pattern t)
+               avy-migemo--regex-nnl-cache))))
+
+;;;###autoload
+(defun avy-migemo-regex-quote-concat-nnl (pattern)
+  "Return migemo's regexp which includes quoted PATTERN with nonnewline.
+Replace \\s-* on migemo's regexp with empty string."
+  (let ((cache (gethash pattern avy-migemo--regex-quote-nnl-cache)))
+    (if cache cache
+      (puthash pattern (avy-migemo-regex-quote-concat pattern t)
+               avy-migemo--regex-quote-nnl-cache))))
 
 ;; avy functions for migemo
 

@@ -83,7 +83,7 @@ The case of the text is ignored."
       (cdr (puthash str
                     (let ((subs
                            ;; Adapt for migemo
-                           (mapcar #'avy-migemo-regex-concat
+                           (mapcar #'avy-migemo-regex-concat-nnl
                                    (ivy--split str))))
                       (if (= (length subs) 1)
                           (cons
@@ -118,7 +118,7 @@ The case of the text is ignored."
       (0
        "")
       (t
-       (mapcar (lambda (x) (cons (avy-migemo-regex-concat x) (not discard)))
+       (mapcar (lambda (x) (cons (avy-migemo-regex-concat-nnl x) (not discard)))
                subs)))))
 (byte-compile 'ivy--regex-ignore-order--part-migemo)
 
@@ -143,7 +143,7 @@ The case of the text is ignored."
        (cons
         (cons (ivy--regex-migemo (car parts)) t)
         (cl-loop for str in (split-string (cadr parts) " " t)
-                 collect (list (avy-migemo-regex-concat str)))))
+                 collect (list (avy-migemo-regex-concat-nnl str)))))
       (t (error "Unexpected: use only one !")))))
 (byte-compile 'ivy--regex-plus-migemo)
 
