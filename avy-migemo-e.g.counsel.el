@@ -159,7 +159,8 @@ the command. The default is `counsel-grep-base-command'."
               counsel-locate
               counsel-describe-variable
               counsel-describe-function
-              counsel-M-x))
+              counsel-M-x
+              counsel-dpkg))
   (add-to-list 'ivy-migemo-ignore-functions fn))
 
 (add-to-list 'ivy-migemo-ignore-prompts
