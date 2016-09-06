@@ -68,17 +68,15 @@ RE-SEQ is a list of \(regex . boolean)."
                                    (setq lend (min (lend-pos) end))))
               (cl-loop
                with i-face = 1
-               for (re . match-p) in re-seq
-               for face = (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
-                               swiper-faces) do
+               for (re . match-p) in re-seq do
                (goto-char lbeg)
                (while (and match-p
                            (re-search-forward re lend t))
-                 (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
-                   (push ov swiper--overlays)
-                   (overlay-put ov 'face face)
-                   (overlay-put ov 'window wnd)
-                   (overlay-put ov 'priority i-face)))
+                 (swiper--add-overlay
+                  (match-beginning 0) (match-end 0)
+                  (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
+                       swiper-faces)
+                  wnd i-face))
                (when match-p (cl-incf i-face))))
             (goto-char lend)))))))
 (byte-compile 'swiper--add-overlays-migemo-ignore-order)
@@ -116,32 +114,32 @@ RE-SEQ is a list of \(regex . boolean)."
             ;; RE can become an invalid regexp
             (while (and (ignore-errors (re-search-forward re end t))
                         (> (- (match-end 0) (match-beginning 0)) 0))
+              (swiper--add-overlay (match-beginning 0) (match-end 0)
+                                   (if (zerop ivy--subexps)
+                                       (cadr swiper-faces)
+                                     (car swiper-faces))
+                                   wnd 0)
               ;; Adapt for migemo's regexp.
               (cl-loop
-               with i-face = 0
+               with i-face = 1
+               with c-mbeg = nil
                with l-mend = 0
                with mend-0 = (match-end 0)
-               for i from 0 below (if (zerop ivy--subexps) 1
+               for i from 1 below (if (zerop ivy--subexps) 1
                                     (/ (length (match-data)) 2))
                when (>= l-mend mend-0) return nil
-               for mbeg = (match-beginning i)
+               for mbeg = (or c-mbeg (match-beginning i))
                for mend = (match-end i)
-               when (and mbeg (<= l-mend mbeg)) do
-               (let ((overlay (make-overlay
-                               mbeg
-                               (if (> i 0) (setq l-mend mend) mend)))
-                     (face
-                      (cond ((zerop ivy--subexps)
-                             (cadr swiper-faces))
-                            ((zerop i)
-                             (car swiper-faces))
-                            (t
-                             (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
-                                  swiper-faces)))))
-                 (push overlay swiper--overlays)
-                 (overlay-put overlay 'face face)
-                 (overlay-put overlay 'window wnd)
-                 (overlay-put overlay 'priority i-face)
+               when (and mbeg mend (>= mbeg l-mend)) do
+               (setq c-mbeg (or c-mbeg mbeg))
+               (unless (and (match-beginning (1+ i))
+                            (= mend (match-beginning (1+ i))))
+                 (swiper--add-overlay
+                  mbeg (setq l-mend mend)
+                  (nth (1+ (mod (+ i-face 2) (1- (length swiper-faces))))
+                       swiper-faces)
+                  wnd i-face)
+                 (setq c-mbeg nil)
                  (cl-incf i-face))))))))))
 (byte-compile 'swiper--add-overlays-migemo)
 
