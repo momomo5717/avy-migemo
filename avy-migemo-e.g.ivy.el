@@ -161,47 +161,68 @@ The case of the text is ignored."
                   (string-match "^[^:]+:[^:]+:" str))
              (match-end 0)
            0))
-        (str (copy-sequence str)))
-    (cond ((eq ivy--regex-function 'ivy--regex-ignore-order)
-           (when (consp ivy--old-re)
-             (let ((i 1))
-               (dolist (re ivy--old-re)
-                 (when (string-match (car re) str)
-                   (ivy-add-face-text-property
-                    (match-beginning 0) (match-end 0)
-                    (nth (1+ (mod (+ i 2) (1- (length ivy-minibuffer-faces))))
-                         ivy-minibuffer-faces)
-                    str))
-                 (cl-incf i)))))
-          ((and (eq ivy-display-style 'fancy)
-                (not (eq ivy--regex-function 'ivy--regex-fuzzy)))
-           (unless ivy--old-re
-             (setq ivy--old-re (funcall ivy--regex-function ivy-text)))
-           (ignore-errors
-             (while (and (string-match ivy--old-re str start)
-                         (> (- (match-end 0) (match-beginning 0)) 0))
-               (setq start (match-end 0))
-               ;; Adapt for migemo's regexp
-               (cl-loop
-                with i-face = 0
-                with l-mend = 0
-                for i from 0 below (if (zerop ivy--subexps) 1
-                                     (cl-loop for _ in (match-data) by #'cddr sum 1))
-                when (>= l-mend start) return nil
-                for mbeg = (match-beginning i)
-                for mend = (match-end i)
-                when (and mbeg (<= l-mend mbeg)) do
-                (let ((face
-                       (cond ((zerop ivy--subexps)
-                              (cadr ivy-minibuffer-faces))
-                             ((zerop i)
-                              (car ivy-minibuffer-faces))
-                             (t
-                              (nth (1+ (mod (+ i-face 2) (1- (length ivy-minibuffer-faces))))
-                                   ivy-minibuffer-faces)))))
-                  (ivy-add-face-text-property
-                   mbeg (if (> i 0) (setq l-mend mend) mend) face str)
-                  (cl-incf i-face)))))))
+        (str (copy-sequence str))
+        (fuzzy-p (or (eq ivy--regex-function 'ivy--regex-fuzzy)
+                     (and (eq ivy--regex-function 'swiper--re-builder)
+                          (let ((caller (ivy-state-caller ivy-last)))
+                            (eq (or (and caller
+                                         (cdr (assoc caller ivy-re-builders-alist)))
+                                    (cdr (assoc t ivy-re-builders-alist)))
+                                'ivy--regex-fuzzy))))))
+    (when (eq ivy-display-style 'fancy)
+      (cond ((eq ivy--regex-function 'ivy--regex-ignore-order)
+             (when (consp ivy--old-re)
+               (let ((i 1))
+                 (dolist (re ivy--old-re)
+                   (when (string-match (car re) str)
+                     (ivy-add-face-text-property
+                      (match-beginning 0) (match-end 0)
+                      (nth (1+ (mod (+ i 2) (1- (length ivy-minibuffer-faces))))
+                           ivy-minibuffer-faces)
+                      str))
+                   (cl-incf i)))))
+            ((and fuzzy-p
+                  (featurep 'flx))
+             (let ((flx-name (if (string-match "^\\^" ivy-text)
+                                 (substring ivy-text 1)
+                               ivy-text)))
+               (setq str
+                     (ivy--flx-propertize
+                      (cons (flx-score str flx-name ivy--flx-cache) str)))))
+            (t
+             (unless ivy--old-re
+               (setq ivy--old-re (funcall ivy--regex-function ivy-text)))
+             (ignore-errors
+               (while (and (string-match ivy--old-re str start)
+                           (> (- (match-end 0) (match-beginning 0)) 0))
+                 (setq start (match-end 0))
+                 ;; Adapt for migemo's regexp
+                 (cl-loop
+                  with i-face = (if fuzzy-p 1 0)
+                  with c-mbeg = nil
+                  with l-mend = 0
+                  for i from (if fuzzy-p 1 0) below (if (zerop ivy--subexps) 1
+                                                      (/ (length (match-data)) 2))
+                  when (>= l-mend start) return nil
+                  for mbeg = (or c-mbeg (match-beginning i))
+                  for mend = (match-end i)
+                  when (and mbeg mend (<= l-mend mbeg)) do
+                  (setq c-mbeg (or c-mbeg mbeg))
+                  (unless (and (match-beginning (1+ i))
+                               (= mend (match-beginning (1+ i))))
+                    (let ((face
+                           (cond ((zerop ivy--subexps)
+                                  (cadr ivy-minibuffer-faces))
+                                 ((zerop i)
+                                  (car ivy-minibuffer-faces))
+                                 (t
+                                  (nth (1+ (mod (+ i-face 2)
+                                                (1- (length ivy-minibuffer-faces))))
+                                       ivy-minibuffer-faces)))))
+                      (ivy-add-face-text-property
+                       mbeg (if (> i 0) (setq l-mend mend) mend) face str)
+                      (setq c-mbeg nil)
+                      (cl-incf i-face)))))))))
     str))
 (byte-compile 'ivy--format-minibuffer-line-migemo)
 
