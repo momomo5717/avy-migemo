@@ -162,13 +162,7 @@ The case of the text is ignored."
              (match-end 0)
            0))
         (str (copy-sequence str))
-        (fuzzy-p (or (eq ivy--regex-function 'ivy--regex-fuzzy)
-                     (and (eq ivy--regex-function 'swiper--re-builder)
-                          (let ((caller (ivy-state-caller ivy-last)))
-                            (eq (or (and caller
-                                         (cdr (assoc caller ivy-re-builders-alist)))
-                                    (cdr (assoc t ivy-re-builders-alist)))
-                                'ivy--regex-fuzzy))))))
+        fuzzy-p)
     (when (eq ivy-display-style 'fancy)
       (cond ((eq ivy--regex-function 'ivy--regex-ignore-order)
              (when (consp ivy--old-re)
@@ -181,8 +175,15 @@ The case of the text is ignored."
                            ivy-minibuffer-faces)
                       str))
                    (cl-incf i)))))
-            ((and fuzzy-p
-                  (featurep 'flx))
+            ((and (setq fuzzy-p
+                        (or (eq ivy--regex-function 'ivy--regex-fuzzy)
+                            (and (eq ivy--regex-function 'swiper--re-builder)
+                                 (let ((caller (ivy-state-caller ivy-last)))
+                                   (eq (or (and caller
+                                                (cdr (assoc caller ivy-re-builders-alist)))
+                                           (cdr (assoc t ivy-re-builders-alist)))
+                                       'ivy--regex-fuzzy)))))
+                  (fboundp 'flx-score))
              (let ((flx-name (if (string-match "^\\^" ivy-text)
                                  (substring ivy-text 1)
                                ivy-text)))
