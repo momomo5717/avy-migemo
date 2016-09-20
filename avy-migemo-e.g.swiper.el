@@ -143,8 +143,17 @@ RE-SEQ is a list of \(regex . boolean)."
                  (cl-incf i-face))))))))))
 (byte-compile 'swiper--add-overlays-migemo)
 
+(defvar search-default-mode)
+(defun swiper--re-builder-migemo-around (fn &rest args)
+  "Around advice function for `swiper--re-builder'."
+  (let ((search-default-mode nil))
+    (apply fn args)))
+(byte-compile 'swiper--re-builder-migemo-around)
+
 ;; For using with avy-migemo-mode
-(avy-migemo-add-names 'swiper--add-overlays-migemo)
+(avy-migemo-add-names 'swiper--add-overlays-migemo
+                      '(swiper--re-builder
+                        :around swiper--re-builder-migemo-around))
 
 (provide 'avy-migemo-e.g.swiper)
 ;;; avy-migemo-e.g.swiper.el ends here
