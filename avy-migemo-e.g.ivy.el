@@ -183,7 +183,7 @@ The case of the text is ignored."
                                                 (cdr (assoc caller ivy-re-builders-alist)))
                                            (cdr (assoc t ivy-re-builders-alist)))
                                        'ivy--regex-fuzzy)))))
-                  (fboundp 'flx-score))
+                  ivy--flx-featurep)
              (let ((flx-name (if (string-match "^\\^" ivy-text)
                                  (substring ivy-text 1)
                                ivy-text)))
