@@ -675,14 +675,19 @@ BEG / LEN is an integer."
   "If non-nil, `avy-migemo-isearch' uses `isearch-search-fun'."
   :type 'boolean)
 
+(defun avy-migemo--isearch-migemo-enabled-p ()
+  "Return non-nil if migemo is enabled on isearch."
+  (and migemo-isearch-enable-p
+       (not (or (bound-and-true-p isearch-regexp-function)
+                (bound-and-true-p isearch-word)))
+       (not isearch-regexp)))
+
 (defun avy-migemo--isearch-candidates (string &optional beg end pred group)
   "The same as `avy--regex-candidates' except for using `isearch-search-fun'."
   (setq group (or group 0))
   (unless (string= string "")
     (let* ((case-fold-search isearch-case-fold-search)
-           (use-migemo-p (and migemo-isearch-enable-p
-                              (not isearch-word)
-                              (not isearch-regexp)))
+           (use-migemo-p (avy-migemo--isearch-migemo-enabled-p))
            (isearch-regexp (if use-migemo-p t isearch-regexp))
            (string (if use-migemo-p (migemo-search-pattern-get string) string))
            (search-fun (isearch-search-fun))
