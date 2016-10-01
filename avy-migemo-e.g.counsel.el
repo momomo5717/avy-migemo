@@ -55,27 +55,39 @@ the command. The default is `counsel-grep-base-command'."
 (ivy-set-occur 'counsel-pt-migemo 'counsel-pt-migemo-occur)
 (ivy-set-display-transformer 'counsel-pt-migemo 'counsel-git-grep-transformer)
 
-(defun counsel-pt-function-migemo (string)
-  "pt in the current directory for STRING."
+(defun counsel-pt-function-migemo (string extra-pt-args)
+  "The same as `counsel-ag-function' except for using migemo."
+  (when (null extra-pt-args)
+    (setq extra-pt-args ""))
   (if (< (length string) 3)
       (counsel-more-chars 3)
     (let ((default-directory counsel--git-grep-dir)
           (regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
                   (setq ivy--old-re
-                        (ivy--regex-migemo string)))))
-      (counsel--async-command
-       (format counsel-pt-migemo-base-command (shell-quote-argument regex)))
-      nil)))
+                        (ivy--regex string)))))
+      (let ((pt-cmd (format counsel-pt-migemo-base-command
+                            (concat extra-pt-args
+                                    " -- "
+                                    (shell-quote-argument regex)))))
+        (if (file-remote-p default-directory)
+            (split-string (shell-command-to-string pt-cmd) "\n" t)
+          (counsel--async-command pt-cmd)
+          nil)))))
 (byte-compile 'counsel-pt-function-migemo)
 
-(defun counsel-pt-migemo (&optional initial-input initial-directory)
-  "The same as `counsel-ag' except for using pt and migemo."
+(defun counsel-pt-migemo (&optional initial-input initial-directory extra-pt-args pt-prompt)
+  "The same as `counsel-ag' except for using migemo."
   (interactive
    (list nil
          (when current-prefix-arg
-           (read-directory-name "pt in directory: "))))
+           (read-directory-name (concat
+                                 (car (split-string counsel-pt-migemo-base-command))
+                                 " in directory: ")))))
+  (ivy-set-prompt 'counsel-pt-migemo counsel-prompt-function)
   (setq counsel--git-grep-dir (or initial-directory default-directory))
-  (ivy-read "pt: " 'counsel-pt-function-migemo
+  (ivy-read (or pt-prompt (car (split-string counsel-pt-migemo-base-command)))
+            (lambda (string)
+              (counsel-pt-function-migemo string extra-pt-args))
             :initial-input initial-input
             :dynamic-collection t
             :keymap counsel-ag-map
@@ -85,7 +97,7 @@ the command. The default is `counsel-grep-base-command'."
                       (counsel-delete-process)
                       (swiper--cleanup))
             :caller 'counsel-pt-migemo))
-(byte-compile 'counsel-pt-migemo)
+;; (byte-compile 'counsel-pt-migemo) ;Suppress a warning message for `counsel-prompt-function'
 
 (defun counsel-pt-migemo-occur ()
   "The same as `counsel-ag-occur' except for using pt and migemo."
