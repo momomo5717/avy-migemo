@@ -127,13 +127,14 @@ the command. The default is `counsel-grep-base-command'."
 ;; counsel-grep
 (defun counsel-grep-function-migemo (string)
   "The same as `counsel-grep-function' except for using migemo."
-  (if (< (length string) 3)
-      (counsel-more-chars 3)
+  (if (< (length string) 2)
+      (counsel-more-chars 2)
     (let ((regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
                   (setq ivy--old-re
                         (ivy--regex-migemo string)))))
       (counsel--async-command
-       (format counsel-grep-base-command-migemo regex counsel--git-grep-dir))
+       (format counsel-grep-base-command-migemo regex
+               (shell-quote-argument counsel--git-grep-dir)))
       nil)))
 (byte-compile 'counsel-grep-function-migemo)
 
