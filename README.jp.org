@@ -207,6 +207,7 @@
       + =counsel-grep-function-migemo=
       + =counsel-grep-base-command-migemo= (Default value: =counsel-grep-base-command= )
 
+
         #+BEGIN_SRC elisp
           ;; e.g. ripgrep
           (custom-set-variables
@@ -217,8 +218,9 @@
       + =counsel-pt-migemo= ( This function is not added to =avy-migemo-function-names= in the config file. )
       + =counsel-pt-migemo-base-command= (Default value: =counsel-pt-base-command= )
 
+
         #+BEGIN_SRC elisp
-          ;; e.g ripgrep
+          ;; e.g. ripgrep
           (custom-set-variables
           '(counsel-pt-migemo-base-command "rg --color never --no-heading -nS %s"))
         #+END_SRC
