@@ -180,6 +180,8 @@
       + =ivy--regex-plus-migemo=
       + =ivy--regex-plus-migemo-around=
       + =ivy--format-minibuffer-line-migemo=
+      + =ivy-occur-revert-buffer-migemo=
+      + =ivy-occur-press-migemo=
       + =ivy-migemo-ignore-functions=
       + =ivy-migemo-ignore-prompts=
 
@@ -204,7 +206,6 @@
       + =counsel-grep-function-migemo=
       + =counsel-grep-base-command-migemo= (Default value: =counsel-grep-base-command= )
 
-
         #+BEGIN_SRC elisp
           ;; e.g. ripgrep
           (custom-set-variables
@@ -212,15 +213,10 @@
         #+END_SRC
 
       + =counsel-grep-occur-migemo=
-      + =counsel-pt-migemo= ( This function is not added to =avy-migemo-function-names= in the config file. )
+      + =counsel-pt-migemo= ( This config file does not add this function to =avy-migemo-function-names=. )
       + =counsel-pt-migemo-base-command= (Default value: =counsel-pt-base-command= )
-
-
-        #+BEGIN_SRC elisp
-          ;; e.g. ripgrep
-          (custom-set-variables
-           '(counsel-pt-migemo-base-command "rg --color never --no-heading -nS %s"))
-        #+END_SRC
-
       + =counsel-pt-migemo-occur=
+      + =counsel-rg-migemo= ( This config file does not add this function to =avy-migemo-function-names=. )
+      + =counsel-rg-migemo-base-command= (Default value: =counsel-rg-base-command= )
+      + =counsel-rg-migemo-occur=
       + Disabling migemo when =counsel-ag=, =counsel-locate=, etc.
