@@ -157,7 +157,8 @@ The case of the text is ignored."
   "The same as `ivy--format-minibuffer-line' except adapting it for migemo's regexp."
   (let ((start
          (if (and (memq (ivy-state-caller ivy-last)
-                        '(counsel-git-grep counsel-ag counsel-pt counsel-pt-migemo))
+                        '(counsel-git-grep counsel-ag counsel-pt counsel-rg
+                          counsel-pt-migemo counsel-rg-migemo))
                   (string-match "^[^:]+:[^:]+:" str))
              (match-end 0)
            0))
@@ -227,6 +228,74 @@ The case of the text is ignored."
     str))
 (byte-compile 'ivy--format-minibuffer-line-migemo)
 
+(defun ivy-occur-revert-buffer-migemo ()
+  "The same as `ivy-occur-revert-buffer-migemo'.
+except for adding counsel-pt-migemo, counsel-rg-migemo."
+  (interactive)
+  (let ((caller (ivy-state-caller ivy-occur-last))
+        (ivy-last ivy-occur-last))
+    (cond ((eq caller 'swiper)
+           (let ((buffer (ivy-state-buffer ivy-occur-last)))
+             (unless (buffer-live-p buffer)
+               (error "buffer was killed"))
+             (let ((inhibit-read-only t))
+               (erase-buffer)
+               (funcall (plist-get ivy--occurs-list caller) t))))
+          ((memq caller '(counsel-git-grep counsel-grep counsel-ag counsel-rg
+                          ;; Add migemo version
+                          counsel-pt-migemo counsel-rg-migemo))
+           (let ((inhibit-read-only t))
+             (erase-buffer)
+             (funcall (plist-get ivy--occurs-list caller)))))))
+(byte-compile 'ivy-occur-revert-buffer-migemo)
+
+(defun ivy-occur-press-migemo ()
+  "The same as `ivy-occur-press' except for adding counsel-pt-migemo, counsel-rg-migemo."
+  (interactive)
+  (when (save-excursion
+          (beginning-of-line)
+          (looking-at "\\(?:./\\|    \\)\\(.*\\)$"))
+    (when (memq (ivy-state-caller ivy-occur-last)
+                '(swiper counsel-git-grep counsel-grep counsel-ag counsel-rg
+                  counsel-describe-function counsel-describe-variable
+                  ;; Add migemo version
+                  counsel-pt-migemo counsel-rg-migemo))
+      (let ((window (ivy-state-window ivy-occur-last)))
+        (when (or (null (window-live-p window))
+                  (equal window (selected-window)))
+          (save-selected-window
+            (setf (ivy-state-window ivy-occur-last)
+                  (display-buffer (ivy-state-buffer ivy-occur-last)
+                                  'display-buffer-pop-up-window))))))
+    (let* ((ivy-last ivy-occur-last)
+           (ivy-text (ivy-state-text ivy-last))
+           (str (buffer-substring
+                 (match-beginning 1)
+                 (match-end 1)))
+           (coll (ivy-state-collection ivy-last))
+           (action (ivy--get-action ivy-last))
+           (ivy-exit 'done))
+      (with-ivy-window
+        (setq counsel-grep-last-line nil)
+        (funcall action
+                 (if (and (consp coll)
+                          (consp (car coll)))
+                     (assoc str coll)
+                   str))
+        (if (memq (ivy-state-caller ivy-last)
+                  '(swiper counsel-git-grep counsel-grep))
+            (with-current-buffer (window-buffer (selected-window))
+              (swiper--cleanup)
+              (swiper--add-overlays
+               (ivy--regex ivy-text)
+               (line-beginning-position)
+               (line-end-position)
+               (selected-window))
+              (when (timerp ivy-occur-timer)
+                (cancel-timer ivy-occur-timer))
+              (setq ivy-occur-timer (run-at-time 1.0 nil 'swiper--cleanup))))))))
+(byte-compile 'ivy-occur-press-migemo)
+
 ;; For using with avy-migemo-mode
 (avy-migemo-remove-names 'ivy--regex-migemo)
 (avy-migemo-add-names '(ivy--regex :around ivy--regex-migemo-around)
@@ -234,7 +303,9 @@ The case of the text is ignored."
                         :around
                         ivy--regex-ignore-order--part-migemo-around)
                       '(ivy--regex-plus :around ivy--regex-plus-migemo-around)
-                      'ivy--format-minibuffer-line-migemo)
+                      'ivy--format-minibuffer-line-migemo
+                      'ivy-occur-revert-buffer-migemo
+                      'ivy-occur-press-migemo)
 (add-hook 'avy-migemo-regex-cache-clear-hook
           'avy-migemo--ivy--regex-hash-clear)
 
