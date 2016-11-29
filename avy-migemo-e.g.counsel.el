@@ -192,7 +192,7 @@ If BASE-CMD is nil, `counsel-pt-migemo-base-command' will be used."
                           (ivy--regex-migemo
                            (progn (string-match "\"\\(.*\\)\"" (buffer-name))
                                   (match-string 1 (buffer-name))))))
-                   counsel--git-grep-dir))
+                   (shell-quote-argument counsel--git-grep-dir)))
           "\n" t))
         (file (file-name-nondirectory counsel--git-grep-dir)))
     ;; Need precise number of header lines for `wgrep' to work.
