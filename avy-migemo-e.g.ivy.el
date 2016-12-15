@@ -276,7 +276,8 @@ except for adding counsel-pt-migemo, counsel-rg-migemo."
            (action (ivy--get-action ivy-last))
            (ivy-exit 'done))
       (with-ivy-window
-        (setq counsel-grep-last-line nil)
+        (when (boundp 'counsel-grep-last-line)
+          (setq counsel-grep-last-line nil))
         (funcall action
                  (if (and (consp coll)
                           (consp (car coll)))
