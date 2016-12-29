@@ -31,6 +31,13 @@
 (require 'ivy)
 (require 'avy-migemo)
 
+(defcustom ivy-migemo-get-function 'avy-migemo-regex-concat-nnl
+  "Function which takes a string and returns a regular expression.
+This variable will be used for `ivy--regex-migemo', `ivy--regex-plus-migemo'
+and `ivy--regex-ignore-order--part-migemo'."
+  :group 'ivy
+  :type 'function)
+
 (defcustom ivy-migemo-ignore-functions nil
   "List of function names.
 If `this-command' or caller of `ivy-last' is included,
@@ -83,7 +90,7 @@ The case of the text is ignored."
       (cdr (puthash str
                     (let ((subs
                            ;; Adapt for migemo
-                           (mapcar #'avy-migemo-regex-concat-nnl
+                           (mapcar ivy-migemo-get-function
                                    (ivy--split str))))
                       (if (= (length subs) 1)
                           (cons
@@ -118,7 +125,7 @@ The case of the text is ignored."
       (0
        "")
       (t
-       (mapcar (lambda (x) (cons (avy-migemo-regex-concat-nnl x) (not discard)))
+       (mapcar (lambda (x) (cons (funcall ivy-migemo-get-function x) (not discard)))
                subs)))))
 (byte-compile 'ivy--regex-ignore-order--part-migemo)
 
@@ -143,7 +150,7 @@ The case of the text is ignored."
        (cons
         (cons (ivy--regex-migemo (car parts)) t)
         (cl-loop for str in (split-string (cadr parts) " " t)
-                 collect (list (avy-migemo-regex-concat-nnl str)))))
+                 collect (list (funcall ivy-migemo-get-function str)))))
       (t (error "Unexpected: use only one !")))))
 (byte-compile 'ivy--regex-plus-migemo)
 
