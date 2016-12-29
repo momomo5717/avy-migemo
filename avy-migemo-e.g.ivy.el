@@ -227,6 +227,56 @@ The case of the text is ignored."
                       (cl-incf i-face)))))))))
     str))
 (byte-compile 'ivy--format-minibuffer-line-migemo)
+(make-obsolete 'ivy--format-minibuffer-line-migemo
+               "This will be removed in the future."
+               "20161229")
+
+(defun ivy--highlight-default-migemo (str)
+  "The same as `ivy--highlight-default' except for using migemo."
+  (unless ivy--old-re
+    (setq ivy--old-re (funcall ivy--regex-function ivy-text)))
+  (let ((fuzzy-p (eq ivy--highlight-function 'ivy--highlight-fuzzy))
+        (start
+         (if (and (memq (ivy-state-caller ivy-last)
+                        '(counsel-git-grep counsel-ag counsel-rg counsel-pt
+                          ;; Add migemo version
+                          counsel-pt-migemo counsel-rg-migemo))
+                  (string-match "^[^:]+:[^:]+:" str))
+             (match-end 0)
+           0)))
+    (ignore-errors
+      (while (and (string-match ivy--old-re str start)
+                  (> (- (match-end 0) (match-beginning 0)) 0))
+        (setq start (match-end 0))
+        ;; Adapt for migemo's regexp
+        (cl-loop
+         with i-face = (if fuzzy-p 1 0)
+         with c-mbeg = nil
+         with l-mend = 0
+         for i from (if fuzzy-p 1 0) below (if (zerop ivy--subexps) 1
+                                             (/ (length (match-data)) 2))
+         when (>= l-mend start) return nil
+         for mbeg = (or c-mbeg (match-beginning i))
+         for mend = (match-end i)
+         when (and mbeg mend (<= l-mend mbeg)) do
+         (setq c-mbeg (or c-mbeg mbeg))
+         (unless (and (match-beginning (1+ i))
+                      (= mend (match-beginning (1+ i))))
+           (let ((face
+                  (cond ((zerop ivy--subexps)
+                         (cadr ivy-minibuffer-faces))
+                        ((zerop i)
+                         (car ivy-minibuffer-faces))
+                        (t
+                         (nth (1+ (mod (+ i-face 2)
+                                       (1- (length ivy-minibuffer-faces))))
+                              ivy-minibuffer-faces)))))
+             (ivy-add-face-text-property
+              mbeg (if (> i 0) (setq l-mend mend) mend) face str)
+             (setq c-mbeg nil)
+             (cl-incf i-face)))))))
+  str)
+(byte-compile 'ivy--highlight-default-migemo)
 
 (defun ivy-occur-revert-buffer-migemo ()
   "The same as `ivy-occur-revert-buffer-migemo'.
@@ -298,13 +348,14 @@ except for adding counsel-pt-migemo, counsel-rg-migemo."
 (byte-compile 'ivy-occur-press-migemo)
 
 ;; For using with avy-migemo-mode
-(avy-migemo-remove-names 'ivy--regex-migemo)
+(avy-migemo-remove-names 'ivy--regex-migemo ; Obsolete
+                         'ivy--format-minibuffer-line-migemo)
 (avy-migemo-add-names '(ivy--regex :around ivy--regex-migemo-around)
                       '(ivy--regex-ignore-order--part
                         :around
                         ivy--regex-ignore-order--part-migemo-around)
                       '(ivy--regex-plus :around ivy--regex-plus-migemo-around)
-                      'ivy--format-minibuffer-line-migemo
+                      'ivy--highlight-default-migemo
                       'ivy-occur-revert-buffer-migemo
                       'ivy-occur-press-migemo)
 (add-hook 'avy-migemo-regex-cache-clear-hook
