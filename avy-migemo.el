@@ -30,8 +30,8 @@
 ;; It could be used as abbreviation matching for other languages
 ;; by preparing user's migemo dictionaries or customizing `avy-migemo-get-function'.
 ;;
-;; For example, if url is defined in a migemo dictionary as ftp, http, and so on,
-;; these words also can be added to avy's candidates.
+;; `avy-migemo-get-function' can also use `char-fold-to-regexp' as below.
+;; (setq avy-migemo-get-function 'char-fold-to-regexp)
 ;;
 ;;
 ;; The following functions are provided:
@@ -87,9 +87,16 @@
                  string))
 
 (defcustom avy-migemo-get-function 'migemo-get-pattern
-  "Getter function of migemo.
-It takes a string and returns a regular expression."
-  :type 'function)
+  "Function which takes a string and returns a regular expression."
+  :type '(choice (const :tag "Use `migemo-get-pattern'" migemo-get-pattern)
+                 (const :tag "Use `avy-migemo-get-pattern-non-capturing'"
+                        avy-migemo-get-pattern-non-capturing)
+                 (const :tag "Use `char-fold-to-regexp'" char-fold-to-regexp)
+                 function))
+
+(defcustom avy-migemo-regex-concat-use-non-capturing nil
+  "Use non-capturing group for `avy-migemo-regex-concat'/`avy-migemo-regex-quote-concat'."
+  :type 'boolean)
 
 (defcustom avy-migemo-function-names
   '(avy-migemo-goto-char
@@ -201,8 +208,17 @@ e.g. \(advice-add 'counsel-clj :around #'avy-migemo-disable-around\)"
     regex))
 
 (defun avy-migemo--rep-wspace-re (regexp)
-  "Replace \\s-* on REGEXP with empty string."
+  "Replace \\s-* with empty string in REGEXP."
   (replace-regexp-in-string "\\\\s-\\*" "" regexp))
+
+(defun avy-migemo--rep-group (regexp)
+  "Replace group with non-captureing group in REGEXP."
+  (replace-regexp-in-string "\\\\\\((\\)[^?]" "(?:" regexp nil nil 1))
+
+(defun avy-migemo-get-pattern-non-capturing (word)
+  "Retrun a regexp from WORD via `migemo-get-pattern'.
+The regxp's group will be repcaled with non-captureing group."
+  (avy-migemo--rep-group (migemo-get-pattern word)))
 
 ;;;###autoload
 (defun avy-migemo-regex-concat (pattern &optional nnl-p)
@@ -212,14 +228,15 @@ Return quoted PATTERN if PATTERN is invalid.
 If NNL-P is non-nil, replace \\s-* on migemo's regexp with empty string."
   (let ((cache (unless nnl-p (gethash pattern avy-migemo--regex-cache))))
     (if cache cache
-      (let ((re (let* ((mre (funcall avy-migemo-get-function pattern))
+      (let ((re (let* ((non-cap-p (and avy-migemo-regex-concat-use-non-capturing "?:"))
+                       (mre (funcall avy-migemo-get-function pattern))
                        (regex (if nnl-p (avy-migemo--rep-wspace-re mre) mre))
                        (regex-p (avy-migemo-regex-p regex))
                        (pattern-p (avy-migemo-regex-p pattern)))
                   (cond ((and regex-p pattern-p)
-                         (concat "\\(" regex "\\|" pattern "\\)"))
+                         (concat "\\(" non-cap-p regex "\\|" pattern "\\)"))
                         (regex-p
-                         (concat "\\(" (regexp-quote pattern) "\\|" regex "\\)"))
+                         (concat "\\(" non-cap-p (regexp-quote pattern) "\\|" regex "\\)"))
                         (pattern-p pattern)
                         (t (regexp-quote pattern))))))
         (if nnl-p re (puthash pattern re avy-migemo--regex-cache))))))
@@ -231,10 +248,11 @@ Return quoted PATTERN if migemo's regexp is invalid.
 If NNL-P is non-nil, replace \\s-* on migemo's regexp with empty string."
   (let ((cache (unless nnl-p (gethash pattern avy-migemo--regex-quote-cache))))
     (if cache cache
-      (let ((re (let* ((mre (funcall avy-migemo-get-function pattern))
+      (let ((re (let* ((non-cap-p (and avy-migemo-regex-concat-use-non-capturing "?:"))
+                       (mre (funcall avy-migemo-get-function pattern))
                        (regex (if nnl-p (avy-migemo--rep-wspace-re mre) mre)))
                   (if (avy-migemo-regex-p regex)
-                      (concat "\\(" regex "\\|" (regexp-quote pattern) "\\)")
+                      (concat "\\(" non-cap-p regex "\\|" (regexp-quote pattern) "\\)")
                     (regexp-quote pattern)))))
         (if nnl-p re (puthash pattern re avy-migemo--regex-quote-cache))))))
 
