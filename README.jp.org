@@ -30,23 +30,31 @@
 
     [[file:image/image.gif]]
 
-** Table of contents
-
-  + [[#requirements][Requirements]]
-  + [[#setup][Setup]]
-  + [[#customization][Customization]]
-    + [[#user-option-avy-migemo-lighter][User Option: =avy-migemo-lighter= ]]
-    + [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
-    + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
-    + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
-    + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
-    + [[#user-option-avy-migemo-use-isearch-search-fun][User Option: =avy-migemo-use-isearch-search-fun= ]]
-    + [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-at-full-max= ]]
-    + [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
-    + [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= )]]
-    + [[#an-example-config-for-ivy][An example config for ivy]]
-    + [[#an-example-config-for-swiper][An example config for swiper]]
-    + [[#an-example-config-for-counsel][An example config for counsel]]
+** Table of contents                                                  :toc_4:
+ - [[#avy-migemo][avy-migemo]]
+   - [[#requirements][Requirements]]
+   - [[#setup][Setup]]
+   - [[#customization][Customization]]
+     - [[#user-option-avy-migemo-lighter][User Option: =avy-migemo-lighter= ]]
+     - [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
+     - [[#user-option-avy-migemo-regex-concat-use-non-capturing][User Option: =avy-migemo-regex-concat-use-non-capturing= ]]
+     - [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
+     - [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
+     - [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
+     - [[#user-option-avy-migemo-use-isearch-search-fun][User Option: =avy-migemo-use-isearch-search-fun= ]]
+     - [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-at-full-max= ]]
+     - [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
+     - [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= ) ]]
+     - [[#an-example-config-for-ivy][An example config for ivy]]
+       - [[#user-option-ivy-migemo-get-function][User Option: =ivy-migemo-get-function= ]]
+       - [[#user-option-ivy-migemo-ignore-functions][User Option: =ivy-migemo-ignore-functions= ]]
+       - [[#user-option-ivy-migemo-ignore-prompts][User Option: =ivy-migemo-ignore-prompts= ]]
+     - [[#an-example-config-for-swiper][An example config for swiper]]
+     - [[#an-example-config-for-counsel][An example config for counsel]]
+       - [[#user-option-counsel-grep-base-command-migemo][User Option: =counsel-grep-base-command-migemo= ]]
+       - [[#user-option-counsel-pt-migemo-base-command][User Option: =counsel-pt-migemo-base-command= ]]
+       - [[#user-option-counsel-rg-migemo-base-command][User Option: =counsel-rg-migemo-base-command= ]]
+       - [[#user-option-counsel-unquote-regex-parens-migemo-function][User Option: =counsel-unquote-regex-parens-migemo-function= ]]
 
 ** Requirements
 
@@ -66,160 +74,240 @@
 
 ** Customization
 
-***** User Option: =avy-migemo-lighter=
+*** User Option: =avy-migemo-lighter=
 
       =avy-migemo-mode= の lighter です．初期値は =nil= に設定されています．
 
-***** User Option: =avy-migemo-get-function=
+*** User Option: =avy-migemo-get-function=
 
-      この変数の型は関数です．初期値は =migemo-get-pattern= に設定されています．
+    引数として文字列を取り，正規表現を返す関数を設定することができます．
 
-      引数として文字列を取り，正規表現を返す関数を設定することができます．
+    初期値は =migemo-get-pattern= に設定されています．
 
-***** User Option: =avy-migemo-function-names=
+    #+BEGIN_SRC elisp
+      ;; e.g. Using non-capturing group
+      (custom-set-variables
+       '(avy-migemo-get-function 'avy-migemo-get-pattern-non-capturing)
+       '(avy-migemo-regex-concat-use-non-capturing t))
+    #+END_SRC
 
-      avy-migemo の関数名のリストです．
-      また =advice-add= の引数のように， =(orig-fn where advice-fn)= と指定することができます．
+*** User Option: =avy-migemo-regex-concat-use-non-capturing=
 
-      初期値では全ての関数名が含まれています．
+    non-nil の場合, =avy-migemo-regex-concat= / =avy-migemo-regex-quote-concat= 時に non-capturing group を使用します．
 
-      この変数を変更する場合は， =setq= ではなく =custom-set-variables= を使用してください．
-      =setq= を使用すると，オーバーライドする関数との整合性が取れなくなります．
+    初期値は =nil= に設定されています．
 
-      =avy-goto-char-timer= のみをオーバーライドして使用する場合は，以下のようになります．
+    non-nilの場合，grep の -E オプションと使用することができません．
+    そのため =counsel-grep-function-migemo= を使用する場合は，
+    [[#user-option-counsel-grep-base-command-migemo][ =counsel-grep-base-command-migemo= ]]で -P オプションまたは他のコマンドを使用する必要があります．
 
-      #+BEGIN_SRC emacs-lisp
-        ;; Override only `avy-goto-char-timer' when `avy-migemo-mode' is enabled.
-        (custom-set-variables
-         '(avy-migemo-function-names
-           '(avy-migemo-goto-char-timer)))
+*** User Option: =avy-migemo-function-names=
 
-      #+END_SRC
+    avy-migemo の関数名のリストです．
+    また =advice-add= の引数のように， =(orig-fn where advice-fn)= と指定することができます．
 
-***** Function: =avy-migemo-remove-names= /&rest/ /names/
+    初期値にはアドバイス関数として使用できる全ての関数名が含まれています．
 
-      =avy-migemo-function-names= から /names/ を取り除くための関数です．
+    この変数を変更する場合は， =setq= ではなく =custom-set-variables= を使用してください．
+    =setq= を使用すると，オーバーライドする関数との整合性が取れなくなります．
 
-      #+BEGIN_SRC emacs-lisp
-        ;; Remove only `avy-migemo-goto-char' from `avy-migemo-function-names'.
-        (avy-migemo-remove-names 'avy-migemo-goto-char)
-      #+END_SRC
+    =avy-goto-char-timer= のみをオーバーライドして使用する場合は，以下のようになります．
 
-***** Function: =avy-migemo-add-names= /&rest/ /names/
+    #+BEGIN_SRC emacs-lisp
+      ;; Override only `avy-goto-char-timer' when `avy-migemo-mode' is enabled.
+      (custom-set-variables
+       '(avy-migemo-function-names
+         '(avy-migemo-goto-char-timer)))
 
-      =avy-migemo-function-names= に /names/ を追加するための関数です．
+    #+END_SRC
 
-***** User Option: =avy-migemo-use-isearch-search-fun=
+*** Function: =avy-migemo-remove-names= /&rest/ /names/
 
-      =non-nil= の場合， =avy-migemo-isearch= 時に =isearch-search-fun= を使用して候補を集めます．
-      初期値は =nil= に設定されています．
+    =avy-migemo-function-names= から /names/ を取り除くための関数です．
 
-***** User Option: =avy-migemo-at-full-max=
+    #+BEGIN_SRC emacs-lisp
+      ;; Remove only `avy-migemo-goto-char' from `avy-migemo-function-names'.
+      (avy-migemo-remove-names 'avy-migemo-goto-char)
+    #+END_SRC
 
-      この変数に整数を指定すると，候補上に表示されるキーの長さを制限することができます．
-      初期値は =nil= に設定されています．
+*** Function: =avy-migemo-add-names= /&rest/ /names/
 
-      この機能は =avy-migemo--overlay-at-full= に依存しています．
+    =avy-migemo-function-names= に /names/ を追加するための関数です．
 
-      #+BEGIN_SRC emacs-lisp
-        (custom-set-variables '(avy-migemo-at-full-max 2))
-      #+END_SRC
+*** User Option: =avy-migemo-use-isearch-search-fun=
 
-***** User Option: =avy-migemo-regex-cache-clear-hook=
+    non-nil の場合， =avy-migemo-isearch= 時に =isearch-search-fun= を使用して候補を集めます．
+    初期値は =nil= に設定されています．
 
-      =avy-migemo-regex-cache-clear= の呼び出し時に実行されるノーマルフックです．
+    =migemo-isearch-toggle-migemo= ，isearch symbol/word などの切り替えに対応しています．
 
-***** An example config for zzz-to-char ( =zzz-to-char--base= )
+*** User Option: =avy-migemo-at-full-max=
 
-      以下のように，avy を使用している関数の migemo版を新たに追加することができます．
-      既存の関数名に =-migemo= を加えた関数を新たに定義し，追加します．
+    この変数に整数を指定すると，候補上に表示されるキーの長さを制限することができます．
+    初期値は =nil= に設定されています．
 
-      以下の設定例は avy-migemo-e.g.zzz-to-char.el をロードすることで使用することができます．
+    この機能は =avy-migemo--overlay-at-full= に依存しています．
 
-      #+BEGIN_SRC emacs-lisp
-        ;; If you use zzz-to-char (which can be installed from MELPA or El-Get),
-        ;; you can adapt it for migemo.
-        (require 'zzz-to-char)
+    #+BEGIN_SRC emacs-lisp
+      (custom-set-variables '(avy-migemo-at-full-max 2))
+    #+END_SRC
 
-        ;; You need to add "-migemo" to the original name.
-        (defun zzz-to-char--base-migemo (char n-shift)
-          "The same as `zzz-to-char--base' except for using migemo."
-          (let ((p (point))
-                (avy-all-windows nil))
-            (avy-with zzz-to-char
-              (avy--generic-jump
-               (if (= 13 char)
-                   "\n"
-                 ;; Adapt for migemo
-                 (avy-migemo-regex-quote-concat (string char)))
-               nil
-               avy-style
-               (- p zzz-to-char-reach)
-               (+ p zzz-to-char-reach)))
-            (let ((n (point)))
-              (when (/= n p)
-                (cl-destructuring-bind (beg . end)
-                    (if (> n p)
-                        (cons p (- (1+ n) n-shift))
-                      (cons (+ n n-shift) p))
-                  (goto-char end)
-                  (kill-region beg end))))))
+*** User Option: =avy-migemo-regex-cache-clear-hook=
 
-        (avy-migemo-add-names 'zzz-to-char--base-migemo)
-      #+END_SRC
+    =avy-migemo-regex-cache-clear= の呼び出し時に実行されるノーマルフックです．
 
-***** An example config for ivy
+*** An example config for zzz-to-char ( =zzz-to-char--base= )
 
-      avy-migemo-e.g.ivy.el は ivy.el のための設定ファイルです．
+    以下のように，avy を使用している関数の migemo版を新たに追加することができます．
+    既存の関数名に =-migemo= を加えた関数を新たに定義し，追加します．
 
-      #+BEGIN_SRC elisp
-        (require 'avy-migemo-e.g.ivy)
-      #+END_SRC
+    以下の設定例は avy-migemo-e.g.zzz-to-char.el をロードすることで使用することができます．
 
-      + =ivy--regex-migemo=
-      + =ivy--regex-migemo-around=
-      + =ivy--regex-ignore-order--part-migemo=
-      + =ivy--regex-ignore-order--part-migemo-around=
-      + =ivy--regex-plus-migemo=
-      + =ivy--regex-plus-migemo-around=
-      + =ivy--format-minibuffer-line-migemo=
-      + =ivy-occur-revert-buffer-migemo=
-      + =ivy-occur-press-migemo=
-      + =ivy-migemo-ignore-functions=
-      + =ivy-migemo-ignore-prompts=
+    #+BEGIN_SRC emacs-lisp
+      ;; If you use zzz-to-char (which can be installed from MELPA or El-Get),
+      ;; you can adapt it for migemo.
+      (require 'zzz-to-char)
 
-***** An example config for swiper
+      ;; Adding "-migemo" to the original name is needed.
+      (defun zzz-to-char--base-migemo (char n-shift)
+        "The same as `zzz-to-char--base' except for using migemo."
+        (let ((p (point))
+              (avy-all-windows nil))
+          (avy-with zzz-to-char
+            (avy--generic-jump
+             (if (= 13 char)
+                 "\n"
+               ;; Adapt for migemo
+               (avy-migemo-regex-quote-concat (string char)))
+             nil
+             avy-style
+             (- p zzz-to-char-reach)
+             (+ p zzz-to-char-reach)))
+          (let ((n (point)))
+            (when (/= n p)
+              (cl-destructuring-bind (beg . end)
+                  (if (> n p)
+                      (cons p (- (1+ n) n-shift))
+                    (cons (+ n n-shift) p))
+                (goto-char end)
+                (kill-region beg end))))))
 
-      avy-migemo-e.g.swiper.el は swiper.el のための設定ファイルです．
+      (avy-migemo-add-names 'zzz-to-char--base-migemo)
+    #+END_SRC
 
-      #+BEGIN_SRC elisp
-        (require 'avy-migemo-e.g.swiper)
-      #+END_SRC
+*** An example config for ivy
 
-      + =swiper--add-overlays-migemo=
+    avy-migemo-e.g.ivy.el は [[https://github.com/abo-abo/swiper/blob/master/ivy.el][ivy.el]] のための設定ファイルです．
 
-***** An example config for counsel
+    #+BEGIN_SRC elisp
+      (require 'avy-migemo-e.g.ivy)
+    #+END_SRC
 
-      avy-migemo-e.g.counsel.el は counsel.el のための設定ファイルです．
+    以下の関数はアドバイス関数として使用されます．
 
-      #+BEGIN_SRC elisp
-        (require 'avy-migemo-e.g.counsel)
-      #+END_SRC
+    + =ivy--regex-migemo-around=
+    + =ivy--regex-ignore-order--part-migemo-around=
+    + =ivy--regex-plus-migemo-around=
+    + =ivy--highlight-default-migemo=
+    + =ivy-occur-revert-buffer-migemo=
+    + =ivy-occur-press-migemo=
 
-      + =counsel-grep-function-migemo=
-      + =counsel-grep-base-command-migemo= (Default value: =counsel-grep-base-command= )
+**** User Option: =ivy-migemo-get-function=
 
-        #+BEGIN_SRC elisp
-          ;; e.g. ripgrep
-          (custom-set-variables
-           '(counsel-grep-base-command-migemo "rg --color never -nS \"%s\" %s"))
-        #+END_SRC
+     引数として文字列を取り，正規表現を返す関数を設定することができます．
 
-      + =counsel-grep-occur-migemo=
-      + =counsel-pt-migemo= ( This config file does not add this function to =avy-migemo-function-names=. )
-      + =counsel-pt-migemo-base-command= (Default value: =counsel-pt-base-command= )
-      + =counsel-pt-migemo-occur=
-      + =counsel-rg-migemo= ( This config file does not add this function to =avy-migemo-function-names=. )
-      + =counsel-rg-migemo-base-command= (Default value: =counsel-rg-base-command= )
-      + =counsel-rg-migemo-occur=
-      + =counsel-ag=, =counsel-locate= などの動作時における migemo の無効化
+     初期値は =avy-migemo-regex-concat-nnl= に設定されています．
+
+**** User Option: =ivy-migemo-ignore-functions=
+
+     =ivy-state-caller= または =ivy-state-collection= に使用される関数名のリストです．
+     =ivy--regex-*-migemo-around= 実行時に migemo を使用しないようにすることができます．
+
+     初期値は =nil= に設定されています．( avy-migemo-e.g.counsel.el ロード時にいくつかの counsel コマンドが追加されます． )
+
+**** User Option: =ivy-migemo-ignore-prompts=
+
+     正規表現のリストです．
+     =ivy-state-prompt= にマッチする場合， =ivy--regex-*-migemo-around= で migemo を使用しないようにすることができます．
+
+     初期値は  =(list (regexp-opt '("symbol" "function" "variable" "binding" "face")))= に設定されています．
+
+     =ivy-state-caller= が設定されていないコマンドに使用することができます．
+
+*** An example config for swiper
+
+    avy-migemo-e.g.swiper.el は [[https://github.com/abo-abo/swiper/blob/master/swiper.el][swiper.el]] のための設定ファイルです．
+
+    #+BEGIN_SRC elisp
+      (require 'avy-migemo-e.g.swiper)
+    #+END_SRC
+
+    以下の関数はアドバイス関数として使用されます．
+
+    + =swiper--add-overlays-migemo=
+    + =swiper--re-builder-migemo-around=
+
+*** An example config for counsel
+
+    avy-migemo-e.g.counsel.el は [[https://github.com/abo-abo/swiper/blob/master/counsel.el][counsel.el]] のための設定ファイルです．
+
+    #+BEGIN_SRC elisp
+      (require 'avy-migemo-e.g.counsel)
+    #+END_SRC
+
+    以下の関数はアドバイス関数として使用されます．
+
+    + =counsel-grep-function-migemo=
+    + =counsel-grep-occur-migemo=
+    + =avy-migemo-disable-around= for =counsel-clj=
+
+    以下の関数は =ivy-migemo-ignore-functions= に追加されます．
+
+    counsel-ag, counsel-rg, counsel-locate counsel-describe-variable,
+    counsel-describe-function, counsel-descbinds, counsel-M-x ,counsel-dpkg, counsel-rpm
+
+    以下のコマンドが定義されています．
+
+    + =counsel-pt-migemo=
+    + =counsel-rg-migemo=
+
+**** User Option: =counsel-grep-base-command-migemo=
+
+     =counsel-grep-function-migemo= で使用されるフォーマットです．
+     初期値は =counsel-grep-base-command= に設定されています．
+
+      =avy-migemo-regex-concat-use-non-capturing= が non-nilの場合，grep の -E オプションと使用することができません．
+      以下のように -P オプションと使用することができます．
+
+     #+BEGIN_SRC elisp
+       ;; e.g. grep with -P option
+       (custom-set-variables
+        '(counsel-grep-base-command-migemo "grep -nP \"%s\" %s"))
+     #+END_SRC
+
+     #+BEGIN_SRC elisp
+       ;; e.g. ripgrep
+       (custom-set-variables
+        '(counsel-grep-base-command-migemo "rg --color never -ni \"%s\" %s"))
+     #+END_SRC
+
+**** User Option: =counsel-pt-migemo-base-command=
+
+     =counsel-pt-migemo= で使用されるフォーマットです．
+     初期値は =counsel-pt-base-command= に設定されています．
+
+**** User Option: =counsel-rg-migemo-base-command=
+
+     =counsel-rg-migemo= で使用されるフォーマットです．
+     初期値は =counsel-rg-base-command= に設定されています．
+
+**** User Option: =counsel-unquote-regex-parens-migemo-function=
+
+     =counsel-unquote-regex-parens-migemo= で内部的に使用されます．
+
+     引数として文字列を取り，正規表現を返す関数を設定することができます．
+     =ivy--regex= の返り値が引数として使用されます．
+
+     初期値は =counsel-unquote-regex-parens-migemo-default= に設定されています．
+     =counsel-unquote-regex-parens-migemo-default= は 引数に対して =counsel-unquote-regex-parens= を実行し，
+     その返り値に含まれている "\\\\|" を "|" に変換します．
