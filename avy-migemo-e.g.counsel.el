@@ -50,10 +50,25 @@ the command. The default is `counsel-grep-base-command'."
   :type 'string
   :group 'ivy)
 
+(defcustom counsel-unquote-regex-parens-migemo-function
+  'counsel-unquote-regex-parens-migemo-default
+  "Funciton for migemo instead of `counsel-unquote-regex-parens'.
+This function will be used for `counsel-unquote-regex-parens-migemo'."
+  :type 'function
+  :group 'ivy)
+
 ;; Helper function
+(defun counsel-unquote-regex-parens-migemo-default (str)
+  "Replace the backslash of \\\\|  with empty string in STR.
+after `counsel-unquote-regex-parens'."
+  (replace-regexp-in-string "\\(\\\\\\)|" ""
+                            (counsel-unquote-regex-parens str) nil nil 1))
+(byte-compile 'counsel-unquote-regex-parens-migemo-default)
+
 (defun counsel-unquote-regex-parens-migemo (str)
-  "`counsel-unquote-regex-parens' for migemo."
-  (replace-regexp-in-string "\\\\|" "|" (counsel-unquote-regex-parens str)))
+  "`counsel-unquote-regex-parens' for migemo.
+`counsel-unquote-regex-parens-migemo-function' will be used."
+  (funcall counsel-unquote-regex-parens-migemo-function str))
 (byte-compile 'counsel-unquote-regex-parens-migemo)
 
 ;; counsel-pt-migemo
