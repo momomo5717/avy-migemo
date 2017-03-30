@@ -232,7 +232,9 @@ If BASE-CMD is nil, `counsel-pt-migemo-base-command' will be used."
               counsel-descbinds
               counsel-M-x
               counsel-dpkg
-              counsel-rpm))
+              counsel-rpm
+              counsel-irony
+              counsel-git-grep))
   (add-to-list 'ivy-migemo-ignore-functions fn))
 
 (add-to-list 'ivy-migemo-ignore-prompts
