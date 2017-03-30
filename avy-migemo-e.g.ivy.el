@@ -297,13 +297,15 @@ except for adding counsel-pt-migemo, counsel-rg-migemo."
                (error "buffer was killed"))
              (let ((inhibit-read-only t))
                (erase-buffer)
-               (funcall (plist-get ivy--occurs-list caller) t))))
+               (funcall (plist-get ivy--occurs-list caller) t)
+               (ivy-occur-grep-mode))))
           ((memq caller '(counsel-git-grep counsel-grep counsel-ag counsel-rg
-                          ;; Add migemo version
-                          counsel-pt-migemo counsel-rg-migemo))
+                                           ;; Add migemo version
+                                           counsel-pt-migemo counsel-rg-migemo))
            (let ((inhibit-read-only t))
              (erase-buffer)
-             (funcall (plist-get ivy--occurs-list caller)))))))
+             (funcall (plist-get ivy--occurs-list caller)))))
+    (setq ivy-occur-last ivy-last)))
 (byte-compile 'ivy-occur-revert-buffer-migemo)
 
 (defun ivy-occur-press-migemo ()
