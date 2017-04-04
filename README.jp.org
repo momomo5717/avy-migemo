@@ -50,6 +50,7 @@
        - [[#user-option-ivy-migemo-ignore-functions][User Option: =ivy-migemo-ignore-functions= ]]
        - [[#user-option-ivy-migemo-ignore-prompts][User Option: =ivy-migemo-ignore-prompts= ]]
      - [[#an-example-config-for-swiper][An example config for swiper]]
+       - [[#user-option-swiper-migemo-min-highlight][User Option: =swiper-migemo-min-highlight= ]]
      - [[#an-example-config-for-counsel][An example config for counsel]]
        - [[#user-option-counsel-grep-base-command-migemo][User Option: =counsel-grep-base-command-migemo= ]]
        - [[#user-option-counsel-pt-migemo-base-command][User Option: =counsel-pt-migemo-base-command= ]]
@@ -247,6 +248,14 @@
     + =swiper--add-overlays-migemo=
     + =swiper--re-builder-migemo-around=
 
+**** User Option: =swiper-migemo-min-highlight=
+
+     初期値は =2= に設定されています．
+
+     入力文字列の長さがこの値以上になった場合のみハイライトします．
+
+     =nil= の場合は， =swiper-min-highlight= が使用されます．
+
 *** An example config for counsel
 
     avy-migemo-e.g.counsel.el は [[https://github.com/abo-abo/swiper/blob/master/counsel.el][counsel.el]] のための設定ファイルです．
@@ -263,8 +272,8 @@
 
     以下の関数は =ivy-migemo-ignore-functions= に追加されます．
 
-    counsel-ag, counsel-rg, counsel-locate counsel-describe-variable,
-    counsel-describe-function, counsel-descbinds, counsel-M-x ,counsel-dpkg, counsel-rpm
+    counsel-ag, counsel-rg, counsel-git-grep, counsel-locate counsel-describe-variable,
+    counsel-describe-function, counsel-descbinds, counsel-M-x ,counsel-dpkg, counsel-rpm, counsel-irony
 
     以下のコマンドが定義されています．
 

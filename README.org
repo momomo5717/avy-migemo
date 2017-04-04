@@ -50,6 +50,7 @@
        - [[#user-option-ivy-migemo-ignore-functions][User Option: =ivy-migemo-ignore-functions= ]]
        - [[#user-option-ivy-migemo-ignore-prompts][User Option: =ivy-migemo-ignore-prompts= ]]
      - [[#an-example-config-for-swiper][An example config for swiper]]
+       - [[#user-option-swiper-migemo-min-highlight][User Option: =swiper-migemo-min-highlight= ]]
      - [[#an-example-config-for-counsel][An example config for counsel]]
        - [[#user-option-counsel-grep-base-command-migemo][User Option: =counsel-grep-base-command-migemo= ]]
        - [[#user-option-counsel-pt-migemo-base-command][User Option: =counsel-pt-migemo-base-command= ]]
@@ -247,6 +248,14 @@
     + =swiper--add-overlays-migemo=
     + =swiper--re-builder-migemo-around=
 
+**** User Option: =swiper-migemo-min-highlight=
+
+     Default value is =2=.
+
+     =swiper--add-overlays-migemo= will highlight matches if an input string is at least this long.
+
+     If =nil=, =swiper-min-highlight= will be used.
+
 *** An example config for counsel
 
     avy-migemo-e.g.counsel.el is a config file for [[https://github.com/abo-abo/swiper/blob/master/counsel.el][counsel.el]].
@@ -263,8 +272,8 @@
 
     The following functions will be added to =ivy-migemo-ignore-functions=.
 
-    counsel-ag, counsel-rg, counsel-locate counsel-describe-variable,
-    counsel-describe-function, counsel-descbinds, counsel-M-x ,counsel-dpkg, counsel-rpm
+    counsel-ag, counsel-rg, counsel-git-grep, counsel-locate counsel-describe-variable,
+    counsel-describe-function, counsel-descbinds, counsel-M-x ,counsel-dpkg, counsel-rpm, counsel-irony
 
     The following commands are provided.
 
