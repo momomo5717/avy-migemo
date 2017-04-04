@@ -1,6 +1,6 @@
 ;;; avy-migemo.el --- avy with migemo -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015-2016 momomo5717
+;; Copyright (C) 2015-2017 momomo5717
 
 ;; Keywords: avy, migemo
 ;; Version: 0.3.2
