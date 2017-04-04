@@ -31,6 +31,13 @@
 (require 'swiper)
 (require 'avy-migemo-e.g.ivy)
 
+(defcustom swiper-migemo-min-highlight 2
+  "Highlight matches if `ivy-text' is at least this long.
+If nil, `swiper-min-highlight' will be used."
+  :group 'swiper
+  :type '(choice integer
+                 (const :tag "Use `swiper-min-highlight'." nil)))
+
 (defun swiper--add-overlays-migemo-visible-regions (beg end)
   "Return visible regions between BEG and END."
   (let ((pt beg)
@@ -119,7 +126,9 @@ RE-SEQ is a list of \(regex . boolean)."
            (end (or end (save-excursion
                           (forward-line wh)
                           (point)))))
-      (when (>= (length re) swiper-min-highlight)
+      (when (if swiper-migemo-min-highlight
+                (>= (length ivy-text) swiper-migemo-min-highlight)
+              (>= (length re) swiper-min-highlight))
         (if (eq ivy--regex-function 'ivy--regex-ignore-order)
             (swiper--add-overlays-migemo-ignore-order
              (ivy--regex-ignore-order ivy-text) beg end wnd)
