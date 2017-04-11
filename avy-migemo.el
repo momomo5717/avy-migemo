@@ -600,8 +600,8 @@ BEG / LEN is an integer."
              ;; Handle RET
              ((= char 13)
               (setq break t))
-             ;; Handle DEL
-             ((= char 127)
+             ;; Handle C-h, DEL
+             ((memq char '(8 127))
               (let ((l (length str)))
                 (when (>= l 1)
                   (setq str (substring str 0 (1- l))))))
