@@ -82,7 +82,7 @@ after `counsel-unquote-regex-parens'."
     (setq extra-pt-args ""))
   (if (< (length string) 3)
       (counsel-more-chars 3)
-    (let ((default-directory counsel--git-grep-dir)
+    (let ((default-directory counsel--git-dir)
           (regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
                   (setq ivy--old-re
                         (ivy--regex string)))))
@@ -109,7 +109,7 @@ after `counsel-unquote-regex-parens'."
   "The same as `counsel-ag' except for using migemo and pt."
   (interactive (counsel-pt-migemo-arg-descriptor counsel-pt-migemo-base-command))
   (ivy-set-prompt 'counsel-pt-migemo counsel-prompt-function)
-  (setq counsel--git-grep-dir (or initial-directory default-directory))
+  (setq counsel--git-dir (or initial-directory default-directory))
   (ivy-read (or pt-prompt (car (split-string counsel-pt-migemo-base-command)))
             (lambda (string)
               (counsel-pt-function-migemo string counsel-pt-migemo-base-command extra-pt-args))
@@ -130,7 +130,7 @@ If BASE-CMD is nil, `counsel-pt-migemo-base-command' will be used."
   (setq base-cmd (or base-cmd counsel-pt-migemo-base-command))
   (unless (eq major-mode 'ivy-occur-grep-mode)
     (ivy-occur-grep-mode))
-  (setq default-directory counsel--git-grep-dir)
+  (setq default-directory counsel--git-dir)
   (let* ((regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
                  (setq ivy--old-re
                        (ivy--regex-migemo
@@ -160,7 +160,7 @@ If BASE-CMD is nil, `counsel-pt-migemo-base-command' will be used."
   "The same as `counsel-rg' except for using migemo"
   (interactive (counsel-pt-migemo-arg-descriptor counsel-rg-migemo-base-command))
   (ivy-set-prompt 'counsel-rg-migemo counsel-prompt-function)
-  (setq counsel--git-grep-dir (or initial-directory default-directory))
+  (setq counsel--git-dir (or initial-directory default-directory))
   (ivy-read (or rg-prompt (car (split-string counsel-rg-migemo-base-command)))
             (lambda (string)
               (counsel-pt-function-migemo string counsel-rg-migemo-base-command extra-rg-args))
@@ -190,7 +190,7 @@ If BASE-CMD is nil, `counsel-pt-migemo-base-command' will be used."
                         (ivy--regex-migemo string)))))
       (counsel--async-command
        (format counsel-grep-base-command-migemo regex
-               (shell-quote-argument counsel--git-grep-dir)))
+               (shell-quote-argument counsel--git-dir)))
       nil)))
 (byte-compile 'counsel-grep-function-migemo)
 
@@ -207,9 +207,9 @@ If BASE-CMD is nil, `counsel-pt-migemo-base-command' will be used."
                           (ivy--regex-migemo
                            (progn (string-match "\"\\(.*\\)\"" (buffer-name))
                                   (match-string 1 (buffer-name))))))
-                   (shell-quote-argument counsel--git-grep-dir)))
+                   (shell-quote-argument counsel--git-dir)))
           "\n" t))
-        (file (file-name-nondirectory counsel--git-grep-dir)))
+        (file (file-name-nondirectory counsel--git-dir)))
     ;; Need precise number of header lines for `wgrep' to work.
     (insert (format "-*- mode:grep; default-directory: %S -*-\n\n\n"
                     default-directory))
