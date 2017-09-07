@@ -204,7 +204,7 @@
     The following functions will be used as advice.
 
     + =ivy--regex-migemo-around=
-    + =ivy--regex-ignore-order--part-migemo-around=
+    + =ivy--regex-or-literal-migemo-around=
     + =ivy--regex-plus-migemo-around=
     + =ivy--highlight-default-migemo=
     + =ivy-occur-revert-buffer-migemo=
