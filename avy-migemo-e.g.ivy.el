@@ -135,6 +135,16 @@ The case of the text is ignored."
     (apply #'ivy--regex-ignore-order--part-migemo args)))
 (byte-compile 'ivy--regex-ignore-order--part-migemo-around)
 
+(make-obsolete 'ivy--regex-ignore-order--part-migemo-around
+               "This will be removed in the future."
+               "20170908")
+
+(defun ivy--regex-or-literal-migemo-around (fn &rest args)
+  "Around advice function for `ivy--regex-or-literal'."
+  (if (ivy--migemo-ignore-p) (apply fn args)
+    (apply ivy-migemo-get-function args)))
+(byte-compile 'ivy--regex-or-literal-migemo-around)
+
 (defun ivy--regex-plus-migemo (str)
   "The same as `ivy--regex-plus' except for using migemo."
   (let ((parts (split-string str "!" t)))
@@ -358,11 +368,14 @@ except for adding counsel-pt-migemo, counsel-rg-migemo."
 
 ;; For using with avy-migemo-mode
 (avy-migemo-remove-names 'ivy--regex-migemo ; Obsolete
-                         'ivy--format-minibuffer-line-migemo)
+                         'ivy--format-minibuffer-line-migemo
+                         '(ivy--regex-ignore-order--part
+                           :around
+                           ivy--regex-ignore-order--part-migemo-around))
 (avy-migemo-add-names '(ivy--regex :around ivy--regex-migemo-around)
-                      '(ivy--regex-ignore-order--part
+                      '(ivy--regex-or-literal
                         :around
-                        ivy--regex-ignore-order--part-migemo-around)
+                        ivy--regex-or-literal-migemo-around)
                       '(ivy--regex-plus :around ivy--regex-plus-migemo-around)
                       'ivy--highlight-default-migemo
                       'ivy-occur-revert-buffer-migemo
