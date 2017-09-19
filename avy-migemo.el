@@ -304,6 +304,17 @@ Replace \\s-* on migemo's regexp with empty string."
         (propertize pad-str 'face 'avy-background-face)
       pad-str)))
 
+(defun avy-mgiemo--truncate-str-width (str width)
+  "Truncate STR to WIDTH."
+  (substring str 0
+             (cl-loop with s-to = 0
+                      for c across str
+                      if (> width 0) do
+                      (cl-decf width (char-width c))
+                      (cl-incf s-to)
+                      else return s-to
+                      finally return s-to)))
+
 (defun avy-migemo--rest-old-str (old-str+ len)
   "Return the padded string of a part of OLD-STR+.
 LEN is compared with string width of OLD-STR+."
@@ -389,7 +400,14 @@ Set variables for distinguish the beginning position of the visual line."
       (unless (eq beg (point)) (goto-char beg))
       (prog2
           (end-of-visual-line)
-          (setq avy-migemo--vend (point))
+          (setq avy-migemo--vend
+                (cond
+                 ((<= beg (point)) (point))
+                 ((and vbeg vend
+                       (eq vwnd (selected-window))
+                       (<= vbeg (point) vend))
+                  vend)
+                 (t (line-end-position))))
         (if (and (eq (selected-window) vwnd)
                  (eq avy-migemo--vend vend))
             (setq avy-migemo--vbeg vbeg
@@ -435,10 +453,11 @@ Also restrict LEN if `avy-migemo-at-full-max' is an integer,"
 STR / OLD-STR+ is a string.
 BEG / LEN is an integer."
   (let* ((other-char-p
-          (cl-loop for c across str
-                   for i from 0
-                   unless (or (memq c avy-keys) (eq c ? ))
-                   return i))
+          (unless (eq avy-style 'words)
+            (cl-loop for c across str
+                     for i from 0
+                     unless (or (memq c avy-keys) (eq c ? ))
+                     return i)))
          (str (if other-char-p
                   (substring str 0 other-char-p) str))
          (len (if other-char-p (length str) len))
@@ -503,7 +522,10 @@ BEG / LEN is an integer."
                                   1
                                 len))
                            lep)))
-          (setq avy-migemo--old-str+ (buffer-substring beg (min end (point-max))))
+          (setq avy-migemo--old-str+
+                (avy-mgiemo--truncate-str-width
+                 (buffer-substring beg (min end (point-max)))
+                 (length str)))
           (when (and (bound-and-true-p visual-line-mode)
                      (> len (- end beg))
                      (not (eq lep beg)))
@@ -518,6 +540,7 @@ BEG / LEN is an integer."
                           'avy-lead-face
                         'avy-lead-face-0))
                      0 len)))))))
+    (setq end (min (+ beg (length avy-migemo--old-str+)) end))
     (avy-migemo--overlay-at-full-add-vpoint
      (avy--overlay
       str beg end wnd
