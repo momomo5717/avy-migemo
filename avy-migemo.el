@@ -43,6 +43,7 @@
 ;;   + avy-migemo-goto-subword-1
 ;;   + avy-migemo-goto-word-1
 ;;   + avy-migemo-isearch
+;;   + avy-migemo-org-goto-heading-timer
 ;;   + avy-migemo--overlay-at
 ;;   + avy-migemo--overlay-at-full
 ;;   + avy-migemo--read-candidates
@@ -106,6 +107,7 @@
     avy-migemo-goto-subword-1
     avy-migemo-goto-word-1
     avy-migemo-isearch
+    avy-migemo-org-goto-heading-timer
     avy-migemo--overlay-at
     avy-migemo--overlay-at-full)
   "Function names for overriding avy's functions.
@@ -601,9 +603,14 @@ BEG / LEN is an integer."
      (line-beginning-position)
      (line-end-position))))
 
-(defun avy-migemo--read-candidates ()
-  "The same as `avy--read-candidates' except for the candidates via migemo."
-  (let ((str "") char break overlays regex)
+(defun avy-migemo--read-candidates (&optional re-builder group)
+  "The same as `avy--read-candidates' except for the candidates via migemo.
+Default RE-BUILDER is `avy-migemo-regex-quote-concat'.
+If GROUP is no-nil, the group will be highlighted. Default value is 0."
+  (let ((str "")
+        (re-builder (or re-builder #'avy-migemo-regex-quote-concat))
+        (group (or group 0))
+        char break overlays regex)
     (unwind-protect
         (progn
           (while (and (not break)
@@ -633,7 +640,7 @@ BEG / LEN is an integer."
             ;; Highlight
             (when (>= (length str) 1)
               ;; Adapt for migemo
-              (setq regex (avy-migemo-regex-quote-concat str))
+              (setq regex (funcall re-builder str))
               (let ((case-fold-search
                      (or avy-case-fold-search (string= str (downcase str))))
                     found)
@@ -646,8 +653,8 @@ BEG / LEN is an integer."
                       (while (re-search-forward regex (cdr pair) t)
                         (unless (get-char-property (1- (point)) 'invisible)
                           (let ((ov (make-overlay
-                                     (match-beginning 0)
-                                     (match-end 0))))
+                                     (match-beginning group)
+                                     (match-end group))))
                             (setq found t)
                             (push ov overlays)
                             (overlay-put ov 'window (selected-window))
@@ -768,6 +775,26 @@ BEG / LEN is an integer."
                        (avy-migemo-regex-concat isearch-string)))
                     (avy--style-fn avy-style))
       (isearch-done))))
+
+
+(declare-function org-back-to-heading "org")
+
+;;;###autoload
+(defun avy-migemo-org-goto-heading-timer (&optional arg)
+  "The same as `avy-org-goto-heading-timer' except for the candidates via migemo."
+  (interactive "P")
+  (let ((avy-all-windows (if arg
+                             (not avy-all-windows)
+                           avy-all-windows)))
+    (avy-with avy-goto-char-timer
+      (avy--process
+       ;; Addapt for migemo
+       (avy-migemo--read-candidates
+        (lambda (input)
+          (format "^\\*+ .*\\(%s\\)" (avy-migemo-regex-concat input)))
+        1)
+       (avy--style-fn avy-style))
+      (org-back-to-heading))))
 
 (provide 'avy-migemo)
 ;;; avy-migemo.el ends here
