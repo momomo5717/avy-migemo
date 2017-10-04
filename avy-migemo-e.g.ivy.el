@@ -296,7 +296,7 @@ The case of the text is ignored."
 (byte-compile 'ivy--highlight-default-migemo)
 
 (defun ivy-occur-revert-buffer-migemo ()
-  "The same as `ivy-occur-revert-buffer-migemo'.
+  "The same as `ivy-occur-revert-buffer'.
 except for adding counsel-pt-migemo, counsel-rg-migemo."
   (interactive)
   (let ((caller (ivy-state-caller ivy-occur-last))
@@ -304,7 +304,7 @@ except for adding counsel-pt-migemo, counsel-rg-migemo."
     (cond ((eq caller 'swiper)
            (let ((buffer (ivy-state-buffer ivy-occur-last)))
              (unless (buffer-live-p buffer)
-               (error "buffer was killed"))
+               (error "Buffer was killed"))
              (let ((inhibit-read-only t))
                (erase-buffer)
                (funcall (plist-get ivy--occurs-list caller) t)
@@ -347,11 +347,12 @@ except for adding counsel-pt-migemo, counsel-rg-migemo."
       (with-ivy-window
         (when (boundp 'counsel-grep-last-line)
           (setq counsel-grep-last-line nil))
-        (funcall action
-                 (if (and (consp coll)
-                          (consp (car coll)))
-                     (assoc str coll)
-                   str))
+        (with-current-buffer (ivy-state-buffer ivy-last)
+          (funcall action
+                   (if (and (consp coll)
+                            (consp (car coll)))
+                       (assoc str coll)
+                     str)))
         (if (memq (ivy-state-caller ivy-last)
                   '(swiper counsel-git-grep counsel-grep))
             (with-current-buffer (window-buffer (selected-window))
