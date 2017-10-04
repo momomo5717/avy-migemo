@@ -267,6 +267,7 @@
 
     以下の関数はアドバイス関数として使用されます．
 
+    + =counsel-grep-migemo-around=
     + =counsel-grep-function-migemo=
     + =counsel-grep-occur-migemo=
     + =avy-migemo-disable-around= for =counsel-clj=
@@ -292,13 +293,13 @@
      #+BEGIN_SRC elisp
        ;; e.g. grep with -P option
        (custom-set-variables
-        '(counsel-grep-base-command-migemo "grep -nP \"%s\" %s"))
+        '(counsel-grep-base-command-migemo "grep -nP '%s' %s"))
      #+END_SRC
 
      #+BEGIN_SRC elisp
        ;; e.g. ripgrep
        (custom-set-variables
-        '(counsel-grep-base-command-migemo "rg --color never -ni \"%s\" %s"))
+        '(counsel-grep-base-command-migemo "rg --color never --no-heading -ni '%s' %s"))
      #+END_SRC
 
 **** User Option: =counsel-pt-migemo-base-command=
