@@ -202,9 +202,13 @@ after `counsel-unquote-regex-parens'."
       (counsel-more-chars 2)
     (let ((regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
                   (setq ivy--old-re
-                        (ivy--regex-migemo string)))))
+                        (ivy--regex-migemo string))))
+          (maybe-shell-quote-arg
+           (if (string-match-p "\\(\"%s\"\\|'%s'\\)" counsel-grep-command)
+               #'identity
+             #'shell-quote-argument)))
       (counsel--async-command
-       (format counsel-grep-command regex))
+       (format counsel-grep-command (funcall maybe-shell-quote-arg regex)))
       nil)))
 (byte-compile 'counsel-grep-function-migemo)
 
