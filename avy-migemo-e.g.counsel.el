@@ -241,7 +241,8 @@ after `counsel-unquote-regex-parens'."
               counsel-dpkg
               counsel-rpm
               counsel-irony
-              counsel-git-grep))
+              counsel-git-grep
+              counsel-fzf))
   (add-to-list 'ivy-migemo-ignore-functions fn))
 
 (add-to-list 'ivy-migemo-ignore-prompts
