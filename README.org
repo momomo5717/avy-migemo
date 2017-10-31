@@ -274,7 +274,7 @@
 
     The following functions will be added to =ivy-migemo-ignore-functions=.
 
-    counsel-ag, counsel-rg, counsel-git-grep, counsel-locate counsel-describe-variable,
+    counsel-ag, counsel-rg, counsel-git-grep, counsel-locate counsel-describe-variable, counsel-fzf,
     counsel-describe-function, counsel-descbinds, counsel-M-x ,counsel-dpkg, counsel-rpm, counsel-irony
 
     The following commands are provided.
