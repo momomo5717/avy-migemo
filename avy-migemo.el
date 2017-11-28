@@ -629,7 +629,9 @@ If GROUP is no-nil, the group will be highlighted. Default value is 0."
             (cond
              ;; Handle RET
              ((= char 13)
-              (setq break t))
+              (if avy-enter-times-out
+                  (setq break t)
+                (setq str (concat str (list ?\n)))))
              ;; Handle C-h, DEL
              ((memq char '(8 127))
               (let ((l (length str)))
