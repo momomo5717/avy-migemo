@@ -50,6 +50,22 @@ the command. The default is `counsel-grep-base-command'."
   :type 'string
   :group 'ivy)
 
+(defcustom counsel-cmd-to-dired-migemo-grep-command "grep %s -i -P %s"
+  "Format string ot use in `counsel-find-file-occur-migemo-around'.
+The first fomat specification will be used for the --invert-matching option."
+  :type 'string
+  :group 'ivy)
+
+(defcustom counsel-cmd-to-dired-migemo-grep-invert-matching "-v"
+  "This option will be used for the first fomat specification of `counsel-cmd-to-dired-migemo-grep-command'."
+  :type 'string
+  :group 'ivy)
+
+(defcustom counsel-find-file-occur-migemo-xargs-cmd "xargs -d '\n' ls"
+  "This command will be used for `counsel-find-file-occur-migemo-around'."
+  :type 'string
+  :group 'ivy)
+
 (defcustom counsel-unquote-regex-parens-migemo-function
   'counsel-unquote-regex-parens-migemo-default
   "Funciton for migemo instead of `counsel-unquote-regex-parens'.
@@ -226,10 +242,51 @@ after `counsel-unquote-regex-parens'."
               " ")))
 (byte-compile 'counsel-grep-occur-migemo)
 
+;; counsel-cmd-to-dired
+(defun counsel-migemo--compose-grep-cmd-to-dired (re)
+  "Compose grep command from RE for using `counsel-cmd-to-dired'."
+  (cl-labels ((quote-re (re) (shell-quote-argument (counsel-unquote-regex-parens-migemo re))))
+    (let ((grep-format counsel-cmd-to-dired-migemo-grep-command)
+          (invert-opt counsel-cmd-to-dired-migemo-grep-invert-matching))
+      (mapconcat (lambda (pair)
+                   (format grep-format
+                           (if (cdr pair) "" invert-opt) (quote-re (car pair))))
+                 (if (listp re) re `((,re . t)))
+                 " | "))))
+(byte-compile 'counsel-migemo--compose-grep-cmd-to-dired)
+
+(defun counsel-git-occur-migemo-around (fn &rest args)
+  "Around advice for `counsel-git-occur'."
+  (if (ivy--migemo-ignore-p)
+      (apply fn args)
+    (cd counsel--git-dir)
+    (counsel-cmd-to-dired
+     (concat counsel-git-cmd " | "
+             (counsel-migemo--compose-grep-cmd-to-dired ivy--old-re)
+             " | xargs ls"))))
+(byte-compile 'counsel-git-occur-migemo-around)
+
+(defun counsel-find-file-occur-migemo-around (fn &rest args)
+  "Around advice for `counsel-find-file-occur'."
+  (if (ivy--migemo-ignore-p)
+      (apply fn args)
+    (cd ivy--directory)
+    (counsel-cmd-to-dired
+     (concat
+      "ls | " (counsel-migemo--compose-grep-cmd-to-dired ivy--old-re)
+      " | " counsel-find-file-occur-migemo-xargs-cmd))))
+(byte-compile 'counsel-find-file-occur-migemo-around)
+
 ;; For using with `avy-migemo-mode'
 (avy-migemo-add-names '(counsel-grep :around counsel-grep-migemo-around)
                       'counsel-grep-function-migemo
-                      'counsel-grep-occur-migemo)
+                      'counsel-grep-occur-migemo
+                      '(counsel-git-occur
+                        :around
+                        counsel-git-occur-migemo-around)
+                      '(counsel-find-file-occur
+                        :around
+                        counsel-find-file-occur-migemo-around))
 
 (dolist (fn '(counsel-ag
               counsel-rg
