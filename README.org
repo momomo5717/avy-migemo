@@ -32,31 +32,34 @@
     [[file:image/image.gif]]
 
 ** Table of contents                                                  :toc_4:
- - [[#avy-migemo][avy-migemo]]
-   - [[#requirements][Requirements]]
-   - [[#setup][Setup]]
-   - [[#customization][Customization]]
-     - [[#user-option-avy-migemo-lighter][User Option: =avy-migemo-lighter= ]]
-     - [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
-     - [[#user-option-avy-migemo-regex-concat-use-non-capturing][User Option: =avy-migemo-regex-concat-use-non-capturing= ]]
-     - [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
-     - [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
-     - [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
-     - [[#user-option-avy-migemo-use-isearch-search-fun][User Option: =avy-migemo-use-isearch-search-fun= ]]
-     - [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-at-full-max= ]]
-     - [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
-     - [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= ) ]]
-     - [[#an-example-config-for-ivy][An example config for ivy]]
-       - [[#user-option-ivy-migemo-get-function][User Option: =ivy-migemo-get-function= ]]
-       - [[#user-option-ivy-migemo-ignore-functions][User Option: =ivy-migemo-ignore-functions= ]]
-       - [[#user-option-ivy-migemo-ignore-prompts][User Option: =ivy-migemo-ignore-prompts= ]]
-     - [[#an-example-config-for-swiper][An example config for swiper]]
-       - [[#user-option-swiper-migemo-min-highlight][User Option: =swiper-migemo-min-highlight= ]]
-     - [[#an-example-config-for-counsel][An example config for counsel]]
-       - [[#user-option-counsel-grep-base-command-migemo][User Option: =counsel-grep-base-command-migemo= ]]
-       - [[#user-option-counsel-pt-migemo-base-command][User Option: =counsel-pt-migemo-base-command= ]]
-       - [[#user-option-counsel-rg-migemo-base-command][User Option: =counsel-rg-migemo-base-command= ]]
-       - [[#user-option-counsel-unquote-regex-parens-migemo-function][User Option: =counsel-unquote-regex-parens-migemo-function= ]]
+- [[#avy-migemo][avy-migemo]]
+  - [[#requirements][Requirements]]
+  - [[#setup][Setup]]
+  - [[#customization][Customization]]
+    - [[#user-option-avy-migemo-lighter][User Option: =avy-migemo-lighter= ]]
+    - [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
+    - [[#user-option-avy-migemo-regex-concat-use-non-capturing][User Option: =avy-migemo-regex-concat-use-non-capturing= ]]
+    - [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
+    - [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
+    - [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
+    - [[#user-option-avy-migemo-use-isearch-search-fun][User Option: =avy-migemo-use-isearch-search-fun= ]]
+    - [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-at-full-max= ]]
+    - [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
+    - [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= ) ]]
+    - [[#an-example-config-for-ivy][An example config for ivy]]
+      - [[#user-option-ivy-migemo-get-function][User Option: =ivy-migemo-get-function= ]]
+      - [[#user-option-ivy-migemo-ignore-functions][User Option: =ivy-migemo-ignore-functions= ]]
+      - [[#user-option-ivy-migemo-ignore-prompts][User Option: =ivy-migemo-ignore-prompts= ]]
+    - [[#an-example-config-for-swiper][An example config for swiper]]
+      - [[#user-option-swiper-migemo-min-highlight][User Option: =swiper-migemo-min-highlight= ]]
+    - [[#an-example-config-for-counsel][An example config for counsel]]
+      - [[#user-option-counsel-grep-base-command-migemo][User Option: =counsel-grep-base-command-migemo= ]]
+      - [[#user-option-counsel-pt-migemo-base-command][User Option: =counsel-pt-migemo-base-command= ]]
+      - [[#user-option-counsel-rg-migemo-base-command][User Option: =counsel-rg-migemo-base-command= ]]
+      - [[#user-option-counsel-cmd-to-dired-migemo-grep-command][User Option: =counsel-cmd-to-dired-migemo-grep-command= ]]
+      - [[#user-option-counsel-cmd-to-dired-migemo-grep-invert-matching][User Option: =counsel-cmd-to-dired-migemo-grep-invert-matching= ]]
+      - [[#user-option-counsel-find-file-occur-migemo-xargs-cmd][User Option: =counsel-find-file-occur-migemo-xargs-cmd= ]]
+      - [[#user-option-counsel-unquote-regex-parens-migemo-function][User Option: =counsel-unquote-regex-parens-migemo-function= ]]
 
 ** Requirements
 
@@ -270,6 +273,8 @@
     + =counsel-grep-migemo-around=
     + =counsel-grep-function-migemo=
     + =counsel-grep-occur-migemo=
+    + =counsel-git-occur-migemo-around=
+    + =counsel-find-file-occur-migemo-around=
     + =avy-migemo-disable-around= for =counsel-clj=
 
     The following functions will be added to =ivy-migemo-ignore-functions=.
@@ -311,6 +316,22 @@
 
      Format string for =counsel-rg-migemo=.
      Default value is =counsel-rg-base-command=.
+
+**** User Option: =counsel-cmd-to-dired-migemo-grep-command=
+
+     Format string of grep part for an arg of =counsel-cmd-to-dired=.
+     Default value is "grep %s -i -P %s".
+
+**** User Option: =counsel-cmd-to-dired-migemo-grep-invert-matching=
+
+     The =--invert-matching= option of grep.
+     This will be inserted into the first format specification of =counsel-cmd-to-dired-migemo-grep-command=.
+     Default value is "-v"
+
+**** User Option: =counsel-find-file-occur-migemo-xargs-cmd=
+
+     Command string as part of =counsel-find-file-occur-cmd=.
+     Default value is "xargs -d '\n' ls"
 
 **** User Option: =counsel-unquote-regex-parens-migemo-function=
 
