@@ -331,7 +331,7 @@
 **** User Option: =counsel-find-file-occur-migemo-xargs-cmd=
 
      Command string as part of =counsel-find-file-occur-cmd=.
-     Default value is "xargs -d '\n' ls"
+     Default value is "tr '\\n' '\\0' | xargs -0 ls"
 
 **** User Option: =counsel-unquote-regex-parens-migemo-function=
 

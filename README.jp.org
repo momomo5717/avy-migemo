@@ -331,7 +331,7 @@
 **** User Option: =counsel-find-file-occur-migemo-xargs-cmd=
 
      =counsel-find-file-occur-cmd= の xargs コマンド部分です．
-     初期値は "xargs -d '\n' ls" に設定されています．
+     初期値は "tr '\\n' '\\0' | xargs -0 ls" に設定されています．
 
 **** User Option: =counsel-unquote-regex-parens-migemo-function=
 
