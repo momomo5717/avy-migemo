@@ -61,7 +61,7 @@ The first fomat specification will be used for the --invert-matching option."
   :type 'string
   :group 'ivy)
 
-(defcustom counsel-find-file-occur-migemo-xargs-cmd "xargs -d '\n' ls"
+(defcustom counsel-find-file-occur-migemo-xargs-cmd "tr '\\n' '\\0' | xargs -0 ls"
   "This command will be used for `counsel-find-file-occur-migemo-around'."
   :type 'string
   :group 'ivy)
