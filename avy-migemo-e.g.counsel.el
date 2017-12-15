@@ -61,8 +61,15 @@ The first fomat specification will be used for the --invert-matching option."
   :type 'string
   :group 'ivy)
 
-(defcustom counsel-find-file-occur-migemo-xargs-cmd "tr '\\n' '\\0' | xargs -0 ls"
-  "This command will be used for `counsel-find-file-occur-migemo-around'."
+(defcustom counsel-find-file-occur-migemo-find-cmd "find . -maxdepth 1"
+  "This command will be used for `counsel-find-file-occur-migemo-around'.
+This is find command part of `counsel-find-file-occur-cmd'."
+  :type 'string
+  :group 'ivy)
+
+(defcustom counsel-find-file-occur-migemo-xargs-cmd "xargs -I {} find {} -maxdepth 0 -ls"
+  "This command will be used for `counsel-find-file-occur-migemo-around'.
+This is xargs command part of `counsel-find-file-occur-cmd'."
   :type 'string
   :group 'ivy)
 
@@ -261,9 +268,10 @@ after `counsel-unquote-regex-parens'."
       (apply fn args)
     (cd counsel--git-dir)
     (counsel-cmd-to-dired
-     (concat counsel-git-cmd " | "
-             (counsel-migemo--compose-grep-cmd-to-dired ivy--old-re)
-             " | xargs ls"))))
+     (counsel--expand-ls
+      (concat counsel-git-cmd " | "
+              (counsel-migemo--compose-grep-cmd-to-dired ivy--old-re)
+              " | xargs ls")))))
 (byte-compile 'counsel-git-occur-migemo-around)
 
 (defun counsel-find-file-occur-migemo-around (fn &rest args)
@@ -271,10 +279,14 @@ after `counsel-unquote-regex-parens'."
   (if (ivy--migemo-ignore-p)
       (apply fn args)
     (cd ivy--directory)
-    (counsel-cmd-to-dired
-     (concat
-      "ls | " (counsel-migemo--compose-grep-cmd-to-dired ivy--old-re)
-      " | " counsel-find-file-occur-migemo-xargs-cmd))))
+    (let* ((find counsel-find-file-occur-migemo-find-cmd)
+           (grep-v-dot (if (string-match-p "^\\." ivy-text) "" "grep -v '/\\.' | "))
+           (grep (counsel-migemo--compose-grep-cmd-to-dired ivy--old-re))
+           (xargs counsel-find-file-occur-migemo-xargs-cmd)
+           (grep-xargs (concat " | " grep-v-dot grep  " | " xargs)))
+      (counsel-cmd-to-dired
+       (concat find " -type d " grep-xargs " && " find " -type f " grep-xargs)
+       'find-dired-filter))))
 (byte-compile 'counsel-find-file-occur-migemo-around)
 
 ;; For using with `avy-migemo-mode'
