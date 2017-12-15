@@ -58,6 +58,7 @@
       - [[#user-option-counsel-rg-migemo-base-command][User Option: =counsel-rg-migemo-base-command= ]]
       - [[#user-option-counsel-cmd-to-dired-migemo-grep-command][User Option: =counsel-cmd-to-dired-migemo-grep-command= ]]
       - [[#user-option-counsel-cmd-to-dired-migemo-grep-invert-matching][User Option: =counsel-cmd-to-dired-migemo-grep-invert-matching= ]]
+      - [[#user-option-counsel-find-file-occur-migemo-find-cmd][User Option: =counsel-find-file-occur-migemo-find-cmd= ]]
       - [[#user-option-counsel-find-file-occur-migemo-xargs-cmd][User Option: =counsel-find-file-occur-migemo-xargs-cmd= ]]
       - [[#user-option-counsel-unquote-regex-parens-migemo-function][User Option: =counsel-unquote-regex-parens-migemo-function= ]]
 
@@ -328,10 +329,15 @@
      This will be inserted into the first format specification of =counsel-cmd-to-dired-migemo-grep-command=.
      Default value is "-v"
 
+**** User Option: =counsel-find-file-occur-migemo-find-cmd=
+
+     Command string as find command part of =counsel-find-file-occur-cmd=.
+     Default value is "find . -maxdepth 1".
+
 **** User Option: =counsel-find-file-occur-migemo-xargs-cmd=
 
-     Command string as part of =counsel-find-file-occur-cmd=.
-     Default value is "tr '\\n' '\\0' | xargs -0 ls"
+     Command string as xargs command part of =counsel-find-file-occur-cmd=.
+     Default value is "xargs -I {} find {} -maxdepth 0 -ls".
 
 **** User Option: =counsel-unquote-regex-parens-migemo-function=
 
