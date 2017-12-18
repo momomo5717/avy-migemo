@@ -264,7 +264,7 @@ after `counsel-unquote-regex-parens'."
 
 (defun counsel-git-occur-migemo-around (fn &rest args)
   "Around advice for `counsel-git-occur'."
-  (if (ivy--migemo-ignore-p)
+  (if (ivy-migemo-ignore-p)
       (apply fn args)
     (cd counsel--git-dir)
     (counsel-cmd-to-dired
@@ -276,7 +276,7 @@ after `counsel-unquote-regex-parens'."
 
 (defun counsel-find-file-occur-migemo-around (fn &rest args)
   "Around advice for `counsel-find-file-occur'."
-  (if (ivy--migemo-ignore-p)
+  (if (ivy-migemo-ignore-p)
       (apply fn args)
     (cd ivy--directory)
     (let* ((find counsel-find-file-occur-migemo-find-cmd)

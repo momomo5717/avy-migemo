@@ -54,20 +54,42 @@ The case of the text is ignored."
   :group 'ivy
   :type '(repeat regexp))
 
-(defun ivy--migemo-ignore-p ()
-  "Retrun t, if `ivy-last' state is included in `ivy-migemo-ignore-functions' or `ivy-migemo-ignore-prompts'."
-  (let ((collection (ivy-state-collection ivy-last))
-        (caller (ivy-state-caller ivy-last))
-        (prompt (ivy-state-prompt ivy-last))
+(defcustom ivy-migemo-preferred-functions nil
+  "List of function names.
+If `this-command' or caller of `ivy-last' is included,
+`ivy--regex-migemo-around' will use migemo.
+If non-nil, `ivy-migemo-ignore-functions' will be ignored."
+  :group 'ivy
+  :type '(repeat symbol))
+
+(defun ivy-migemo--include-caller-p (names)
+  "Return t, if NAMES include `this-command' or caller/collection of `ivy-last'."
+  (let ((caller (ivy-state-caller ivy-last))
+        (collection (ivy-state-collection ivy-last)))
+    (or (and caller
+             (memq caller names))
+        (and (functionp collection)
+             (member collection names))
+        (memq this-command names))))
+(byte-compile 'ivy-migemo--include-caller-p)
+
+(defun ivy-migemo-ignore-p ()
+  "Retrun t, if `ivy-migemo-ignore-functions'/`ivy-migemo-ignore-prompts' has caller/collection/prompt of `ivy-last.
+Return nil if `ivy-migemo-preferred-functions' has caller/collection/prompt of `ivy-last.
+If `ivy-migemo-preferred-functions' is non-nil,
+`ivy-migemo-ignore-functions'/`ivy-migemo-ignore-prompts' will be ignored."
+  (let ((prompt (ivy-state-prompt ivy-last))
         (case-fold-search t))
-    (or (and (functionp collection)
-             (member collection ivy-migemo-ignore-functions))
-        (and caller
-             (member caller ivy-migemo-ignore-functions))
-        (member this-command ivy-migemo-ignore-functions)
-        (cl-loop for re in ivy-migemo-ignore-prompts
-                 thereis (string-match-p re prompt)))))
-(byte-compile 'ivy--migemo-ignore-p)
+    (if ivy-migemo-preferred-functions
+        (not (ivy-migemo--include-caller-p ivy-migemo-preferred-functions))
+      (or (ivy-migemo--include-caller-p ivy-migemo-ignore-functions)
+          (cl-loop for re in ivy-migemo-ignore-prompts
+                   thereis (string-match-p re prompt))))))
+(byte-compile 'ivy-migemo-ignore-p)
+
+(define-obsolete-function-alias 'ivy--migemo-ignoreq-p
+  'ivy-migemo-ignore-p
+  "20171218")
 
 (defvar avy-migemo--ivy--regex-hash
   (make-hash-table :test #'equal)
@@ -112,7 +134,7 @@ The case of the text is ignored."
 
 (defun ivy--regex-migemo-around (fn &rest args)
   "Around advice function for `ivy--regex'."
-  (if (ivy--migemo-ignore-p)
+  (if (ivy-migemo-ignore-p)
       (apply fn args)
     (apply #'ivy--regex-migemo args)))
 (byte-compile 'ivy--regex-migemo-around)
@@ -131,7 +153,7 @@ The case of the text is ignored."
 
 (defun ivy--regex-ignore-order--part-migemo-around (fn &rest args)
   "Around advice function for `ivy--regex-ignore-order--part'."
-  (if (ivy--migemo-ignore-p) (apply fn args)
+  (if (ivy-migemo-ignore-p) (apply fn args)
     (apply #'ivy--regex-ignore-order--part-migemo args)))
 (byte-compile 'ivy--regex-ignore-order--part-migemo-around)
 
@@ -141,7 +163,7 @@ The case of the text is ignored."
 
 (defun ivy--regex-or-literal-migemo-around (fn &rest args)
   "Around advice function for `ivy--regex-or-literal'."
-  (if (ivy--migemo-ignore-p) (apply fn args)
+  (if (ivy-migemo-ignore-p) (apply fn args)
     (apply ivy-migemo-get-function args)))
 (byte-compile 'ivy--regex-or-literal-migemo-around)
 
@@ -166,7 +188,7 @@ The case of the text is ignored."
 
 (defun ivy--regex-plus-migemo-around (fn &rest args)
   "Around advice function for `ivy--regex-plus'."
-  (if (ivy--migemo-ignore-p) (apply fn args)
+  (if (ivy-migemo-ignore-p) (apply fn args)
     (apply #'ivy--regex-plus-migemo args)))
 (byte-compile 'ivy--regex-plus-migemo-around)
 
