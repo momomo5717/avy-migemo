@@ -50,6 +50,7 @@
       - [[#user-option-ivy-migemo-get-function][User Option: =ivy-migemo-get-function= ]]
       - [[#user-option-ivy-migemo-ignore-functions][User Option: =ivy-migemo-ignore-functions= ]]
       - [[#user-option-ivy-migemo-ignore-prompts][User Option: =ivy-migemo-ignore-prompts= ]]
+      - [[#user-option-ivy-migemo-preferred-functions][User Option: =ivy-migemo-preferred-functions= ]]
     - [[#an-example-config-for-swiper][An example config for swiper]]
       - [[#user-option-swiper-migemo-min-highlight][User Option: =swiper-migemo-min-highlight= ]]
     - [[#an-example-config-for-counsel][An example config for counsel]]
@@ -239,6 +240,19 @@
      初期値は  =(list (regexp-opt '("symbol" "function" "variable" "binding" "face")))= に設定されています．
 
      =ivy-state-caller= が設定されていないコマンドに使用することができます．
+
+**** User Option: =ivy-migemo-preferred-functions=
+
+     =ivy-state-caller= または =ivy-state-collection= に使用される関数名のリストです．
+     =ivy--regex-*-migemo-around=  実行時に， 指定された関数のみ migemo を使用します．
+     non-nil の場合， [[#user-option-ivy-migemo-ignore-functions][ =ivy-migemo-ignore-functions= ]] / [[#user-option-ivy-migemo-ignore-prompts][ =ivy-migemo-ignore-prompts= ]] の設定は使用されません．
+
+     初期値は =nil= に設定されています．
+
+     #+begin_src elisp
+       ;; e.g. Using only swiper with migemo.
+       (add-to-list 'ivy-migemo-preferred-functions 'swiper)
+     #+end_src
 
 *** An example config for swiper
 

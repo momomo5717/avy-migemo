@@ -50,6 +50,7 @@
       - [[#user-option-ivy-migemo-get-function][User Option: =ivy-migemo-get-function= ]]
       - [[#user-option-ivy-migemo-ignore-functions][User Option: =ivy-migemo-ignore-functions= ]]
       - [[#user-option-ivy-migemo-ignore-prompts][User Option: =ivy-migemo-ignore-prompts= ]]
+      - [[#user-option-ivy-migemo-preferred-functions][User Option: =ivy-migemo-preferred-functions= ]]
     - [[#an-example-config-for-swiper][An example config for swiper]]
       - [[#user-option-swiper-migemo-min-highlight][User Option: =swiper-migemo-min-highlight= ]]
     - [[#an-example-config-for-counsel][An example config for counsel]]
@@ -223,7 +224,6 @@
 
      This function takes a string and returns a regular expression.
 
-
 **** User Option: =ivy-migemo-ignore-functions=
 
      List of function names.
@@ -239,6 +239,19 @@
      Default value is =(list (regexp-opt '("symbol" "function" "variable" "binding" "face")))=.
 
      This variable can be used for ivy/counsel commands which do not have =ivy-state-caller=.
+
+**** User Option: =ivy-migemo-preferred-functions=
+
+     List of function names.
+     If it has =ivy-state-caller= or =ivy-state-collection=, =ivy--regex-*-migemo-around= will use migemo.
+     If non-nil, [[#user-option-ivy-migemo-ignore-functions][ =ivy-migemo-ignore-functions= ]] / [[#user-option-ivy-migemo-ignore-prompts][ =ivy-migemo-ignore-prompts= ]] will be ignored.
+
+     Default value is =nil=.
+
+     #+begin_src elisp
+       ;; e.g. Using only swiper with migemo.
+       (add-to-list 'ivy-migemo-preferred-functions 'swiper)
+     #+end_src
 
 *** An example config for swiper
 
