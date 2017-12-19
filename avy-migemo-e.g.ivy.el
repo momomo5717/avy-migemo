@@ -87,7 +87,7 @@ If `ivy-migemo-preferred-functions' is non-nil,
                    thereis (string-match-p re prompt))))))
 (byte-compile 'ivy-migemo-ignore-p)
 
-(define-obsolete-function-alias 'ivy--migemo-ignoreq-p
+(define-obsolete-function-alias 'ivy--migemo-ignore-p
   'ivy-migemo-ignore-p
   "20171218")
 
