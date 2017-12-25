@@ -61,15 +61,29 @@ The first fomat specification will be used for the --invert-matching option."
   :type 'string
   :group 'ivy)
 
-(defcustom counsel-find-file-occur-migemo-find-cmd "find . -maxdepth 1"
+(defcustom counsel-find-file-occur-migemo-ls-cmd "ls -a"
   "This command will be used for `counsel-find-file-occur-migemo-around'.
-This is find command part of `counsel-find-file-occur-cmd'."
+This is \"ls\" command part of `counsel-find-file-occur-cmd'."
   :type 'string
   :group 'ivy)
 
-(defcustom counsel-find-file-occur-migemo-xargs-cmd "xargs -I {} find {} -maxdepth 0 -ls"
+(defcustom counsel-find-file-occur-migemo-ls-xargs-cmd
+  "tr '\\n' '\\0' | xargs -0 ls -d --group-directories-first"
   "This command will be used for `counsel-find-file-occur-migemo-around'.
-This is xargs command part of `counsel-find-file-occur-cmd'."
+This is \"xargs\" command part of `counsel-find-file-occur-cmd'."
+  :type 'string
+  :group 'ivy)
+
+(defcustom counsel-find-file-occur-migemo-find-cmd "find . -maxdepth 1"
+  "This command will be used for `counsel-find-file-occur-migemo-around'.
+This is \"find\" command part of `counsel--occur-cmd-find'."
+  :type 'string
+  :group 'ivy)
+
+(defcustom counsel-find-file-occur-migemo-find-xargs-cmd
+  "xargs -I {} find {} -maxdepth 0 -ls"
+  "This command will be used for `counsel-find-file-occur-migemo-around'.
+This is \"xargs\" command part of `counsel--occur-cmd-find'."
   :type 'string
   :group 'ivy)
 
@@ -274,19 +288,31 @@ after `counsel-unquote-regex-parens'."
               " | xargs ls")))))
 (byte-compile 'counsel-git-occur-migemo-around)
 
+(defun counsel--occur-cmd-find-migemo ()
+  "The same as `counsel--occur-cmd-find' except for using migemo."
+  (let* ((find counsel-find-file-occur-migemo-find-cmd)
+         (grep-v-dot (if (string-match-p "^\\." ivy-text) "" "grep -v '/\\.' | "))
+         (grep (counsel-migemo--compose-grep-cmd-to-dired ivy--old-re))
+         (xargs counsel-find-file-occur-migemo-find-xargs-cmd)
+         (grep-xargs (concat " | " grep-v-dot grep  " | " xargs)))
+    (concat find " -type d " grep-xargs " && " find " -type f " grep-xargs)))
+(byte-compile 'counsel--occur-cmd-find-migemo)
+
 (defun counsel-find-file-occur-migemo-around (fn &rest args)
   "Around advice for `counsel-find-file-occur'."
   (if (ivy-migemo-ignore-p)
       (apply fn args)
     (cd ivy--directory)
-    (let* ((find counsel-find-file-occur-migemo-find-cmd)
-           (grep-v-dot (if (string-match-p "^\\." ivy-text) "" "grep -v '/\\.' | "))
-           (grep (counsel-migemo--compose-grep-cmd-to-dired ivy--old-re))
-           (xargs counsel-find-file-occur-migemo-xargs-cmd)
-           (grep-xargs (concat " | " grep-v-dot grep  " | " xargs)))
-      (counsel-cmd-to-dired
-       (concat find " -type d " grep-xargs " && " find " -type f " grep-xargs)
-       'find-dired-filter))))
+    (if (and counsel-find-file-occur-use-find
+             (require 'find-dired))
+        (counsel-cmd-to-dired
+         (counsel--occur-cmd-find-migemo)
+         'find-dired-filter)
+      (let ((ls counsel-find-file-occur-migemo-ls-cmd)
+            (xargs counsel-find-file-occur-migemo-ls-xargs-cmd)
+            (grep (counsel-migemo--compose-grep-cmd-to-dired ivy--old-re)))
+        (counsel-cmd-to-dired
+         (counsel--expand-ls (concat ls " | " grep " | " xargs)))))))
 (byte-compile 'counsel-find-file-occur-migemo-around)
 
 ;; For using with `avy-migemo-mode'
