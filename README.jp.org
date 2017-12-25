@@ -59,8 +59,10 @@
       - [[#user-option-counsel-rg-migemo-base-command][User Option: =counsel-rg-migemo-base-command= ]]
       - [[#user-option-counsel-cmd-to-dired-migemo-grep-command][User Option: =counsel-cmd-to-dired-migemo-grep-command= ]]
       - [[#user-option-counsel-cmd-to-dired-migemo-grep-invert-matching][User Option: =counsel-cmd-to-dired-migemo-grep-invert-matching= ]]
+      - [[#user-option-counsel-find-file-occur-migemo-ls-cmd][User Option: =counsel-find-file-occur-migemo-ls-cmd= ]]
+      - [[#user-option-counsel-find-file-occur-migemo-ls-xargs-cmd][User Option: =counsel-find-file-occur-migemo-ls-xargs-cmd= ]]
       - [[#user-option-counsel-find-file-occur-migemo-find-cmd][User Option: =counsel-find-file-occur-migemo-find-cmd= ]]
-      - [[#user-option-counsel-find-file-occur-migemo-xargs-cmd][User Option: =counsel-find-file-occur-migemo-xargs-cmd= ]]
+      - [[#user-option-counsel-find-file-occur-migemo-find-xargs-cmd][User Option: =counsel-find-file-occur-migemo-find-xargs-cmd= ]]
       - [[#user-option-counsel-unquote-regex-parens-migemo-function][User Option: =counsel-unquote-regex-parens-migemo-function= ]]
 
 ** Requirements
@@ -343,14 +345,24 @@
      =counsel-cmd-to-dired-migemo-grep-command= の1つめの書式指定子に使用されます．
      初期値は "-v" に設定されています．
 
+**** User Option: =counsel-find-file-occur-migemo-ls-cmd=
+
+     =counsel-find-file-occur-cmd= の =ls= コマンド部分です．
+     初期値は "ls -a"．
+
+**** User Option: =counsel-find-file-occur-migemo-ls-xargs-cmd=
+
+     =counsel-find-file-occur-cmd= の =xargs= コマンド部分です．
+     初期値は "tr '\\n' '\\0' | xargs -0 ls -d --group-directories-first"．
+
 **** User Option: =counsel-find-file-occur-migemo-find-cmd=
 
-      =counsel-find-file-occur-cmd= の find コマンド部分です．
+      =counsel--occur-cmd-find= の =find= コマンド部分です．
      初期値は "find . -maxdepth 1" に設定されています．
 
-**** User Option: =counsel-find-file-occur-migemo-xargs-cmd=
+**** User Option: =counsel-find-file-occur-migemo-find-xargs-cmd=
 
-     =counsel-find-file-occur-cmd= の xargs コマンド部分です．
+     =counsel--occur-cmd-find= の =xargs= コマンド部分です．
      初期値は "xargs -I {} find {} -maxdepth 0 -ls" に設定されています．
 
 **** User Option: =counsel-unquote-regex-parens-migemo-function=
