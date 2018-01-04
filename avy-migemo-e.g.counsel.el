@@ -112,7 +112,7 @@ after `counsel-unquote-regex-parens'."
   "The same as `counsel-grep-like-occur' except for using migemo."
   (unless (eq major-mode 'ivy-occur-grep-mode)
     (ivy-occur-grep-mode)
-    (setq default-directory counsel--git-dir))
+    (setq default-directory (ivy-state-directory ivy-last)))
   (setq ivy-text
         (and (string-match "\"\\(.*\\)\"" (buffer-name))
              (match-string 1 (buffer-name))))
@@ -146,7 +146,7 @@ after `counsel-unquote-regex-parens'."
     (setq extra-pt-args ""))
   (if (< (length string) 3)
       (counsel-more-chars 3)
-    (let ((default-directory counsel--git-dir)
+    (let ((default-directory (ivy-state-directory ivy-last))
           (regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
                   (setq ivy--old-re
                         (ivy--regex string)))))
@@ -173,19 +173,19 @@ after `counsel-unquote-regex-parens'."
   "The same as `counsel-ag' except for using migemo and pt."
   (interactive (counsel-pt-migemo-arg-descriptor counsel-pt-migemo-base-command))
   (ivy-set-prompt 'counsel-pt-migemo counsel-prompt-function)
-  (setq counsel--git-dir (or initial-directory default-directory))
-  (ivy-read (or pt-prompt (car (split-string counsel-pt-migemo-base-command)))
-            (lambda (string)
-              (counsel-pt-function-migemo string counsel-pt-migemo-base-command extra-pt-args))
-            :initial-input initial-input
-            :dynamic-collection t
-            :keymap counsel-ag-map
-            :history 'counsel-git-grep-history
-            :action #'counsel-git-grep-action
-            :unwind (lambda ()
-                      (counsel-delete-process)
-                      (swiper--cleanup))
-            :caller 'counsel-pt-migemo))
+  (let ((default-directory (or initial-directory default-directory)))
+    (ivy-read (or pt-prompt (car (split-string counsel-pt-migemo-base-command)))
+              (lambda (string)
+                (counsel-pt-function-migemo string counsel-pt-migemo-base-command extra-pt-args))
+              :initial-input initial-input
+              :dynamic-collection t
+              :keymap counsel-ag-map
+              :history 'counsel-git-grep-history
+              :action #'counsel-git-grep-action
+              :unwind (lambda ()
+                        (counsel-delete-process)
+                        (swiper--cleanup))
+              :caller 'counsel-pt-migemo)))
 ;; (byte-compile 'counsel-pt-migemo) ;Suppress a warning message for `counsel-prompt-function'
 
 (defun counsel-pt-migemo-occur ()
@@ -202,19 +202,19 @@ after `counsel-unquote-regex-parens'."
   "The same as `counsel-rg' except for using migemo"
   (interactive (counsel-pt-migemo-arg-descriptor counsel-rg-migemo-base-command))
   (ivy-set-prompt 'counsel-rg-migemo counsel-prompt-function)
-  (setq counsel--git-dir (or initial-directory default-directory))
-  (ivy-read (or rg-prompt (car (split-string counsel-rg-migemo-base-command)))
-            (lambda (string)
-              (counsel-pt-function-migemo string counsel-rg-migemo-base-command extra-rg-args))
-            :initial-input initial-input
-            :dynamic-collection t
-            :keymap counsel-ag-map
-            :history 'counsel-git-grep-history
-            :action #'counsel-git-grep-action
-            :unwind (lambda ()
-                      (counsel-delete-process)
-                      (swiper--cleanup))
-            :caller 'counsel-rg-migemo))
+  (let ((default-directory (or initial-directory default-directory)))
+    (ivy-read (or rg-prompt (car (split-string counsel-rg-migemo-base-command)))
+              (lambda (string)
+                (counsel-pt-function-migemo string counsel-rg-migemo-base-command extra-rg-args))
+              :initial-input initial-input
+              :dynamic-collection t
+              :keymap counsel-ag-map
+              :history 'counsel-git-grep-history
+              :action #'counsel-git-grep-action
+              :unwind (lambda ()
+                        (counsel-delete-process)
+                        (swiper--cleanup))
+              :caller 'counsel-rg-migemo)))
 ;; (byte-compile 'counsel-rg-migemo) ;Suppress a warning message for `counsel-prompt-function'
 
 (defun counsel-rg-migemo-occur ()
@@ -280,7 +280,7 @@ after `counsel-unquote-regex-parens'."
   "Around advice for `counsel-git-occur'."
   (if (ivy-migemo-ignore-p)
       (apply fn args)
-    (cd counsel--git-dir)
+    (cd (ivy-state-directory ivy-last))
     (counsel-cmd-to-dired
      (counsel--expand-ls
       (concat counsel-git-cmd " | "
