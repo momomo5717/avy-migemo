@@ -277,14 +277,16 @@ If `ivy-migemo-preferred-functions' is non-nil,
   (let ((fuzzy-p (eq ivy--highlight-function 'ivy--highlight-fuzzy))
         (start
          (if (and (memq (ivy-state-caller ivy-last)
-                        '(counsel-git-grep counsel-ag counsel-rg counsel-pt
+                        '(counsel-git-grep
+                          counsel-ag counsel-rg counsel-pt
                           ;; Add migemo version
                           counsel-pt-migemo counsel-rg-migemo))
                   (string-match "^[^:]+:[^:]+:" str))
              (match-end 0)
-           0)))
+           0))
+        (re (ivy-generic-regex-to-str ivy--old-re)))
     (ignore-errors
-      (while (and (string-match ivy--old-re str start)
+      (while (and (string-match re str start)
                   (> (- (match-end 0) (match-beginning 0)) 0))
         (setq start (match-end 0))
         ;; Adapt for migemo's regexp
