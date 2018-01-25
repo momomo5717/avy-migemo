@@ -169,7 +169,7 @@ If `ivy-migemo-preferred-functions' is non-nil,
 
 (defun ivy--regex-plus-migemo (str)
   "The same as `ivy--regex-plus' except for using migemo."
-  (let ((parts (split-string str "!" t)))
+  (let ((parts (ivy--split-negation str)))
     (cl-case (length parts)
       (0
        "")
