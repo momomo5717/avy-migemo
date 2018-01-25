@@ -139,12 +139,22 @@ RE-SEQ is a list of \(regex . boolean)."
              ;; RE can become an invalid regexp
              (while (and (ignore-errors (re-search-forward re end t))
                          (> (- (match-end 0) (match-beginning 0)) 0))
-
-               (swiper--add-overlay (match-beginning 0) (match-end 0)
-                                    (if (zerop ivy--subexps)
-                                        (cadr swiper-faces)
-                                      (car swiper-faces))
-                                    wnd 0)
+               (unless (and (consp ivy--old-re)
+                            (null
+                             (save-match-data
+                               (ivy--re-filter ivy--old-re
+                                               (list
+                                                (buffer-substring-no-properties
+                                                 (line-beginning-position)
+                                                 (line-end-position)))))))
+                 (let ((mb (match-beginning 0))
+                       (me (match-end 0)))
+                   (unless (> (- me mb) 2017)
+                     (swiper--add-overlay mb me
+                                          (if (zerop ivy--subexps)
+                                              (cadr swiper-faces)
+                                            (car swiper-faces))
+                                          wnd 0))))
                ;; Adapt for migemo's regexp.
                (cl-loop
                 with i-face = 1
