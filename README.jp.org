@@ -353,7 +353,7 @@
 **** User Option: =counsel-find-file-occur-migemo-ls-xargs-cmd=
 
      =counsel-find-file-occur-cmd= の =xargs= コマンド部分です．
-     初期値は "tr '\\n' '\\0' | xargs -0 ls -d --group-directories-first"．
+     初期値は "xargs -d '\\n' ls -d --group-directories-first"．
 
 **** User Option: =counsel-find-file-occur-migemo-find-cmd=
 

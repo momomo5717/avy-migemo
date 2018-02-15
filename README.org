@@ -352,7 +352,7 @@
 **** User Option: =counsel-find-file-occur-migemo-ls-xargs-cmd=
 
      Command string as =xargs= command part of =counsel-find-file-occur-cmd=.
-     Default value is "tr '\\n' '\\0' | xargs -0 ls -d --group-directories-first".
+     Default value is "xargs -d '\\n' ls -d --group-directories-first".
 
 **** User Option: =counsel-find-file-occur-migemo-find-cmd=
 
