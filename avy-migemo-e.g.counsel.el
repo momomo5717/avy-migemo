@@ -68,7 +68,7 @@ This is \"ls\" command part of `counsel-find-file-occur-cmd'."
   :group 'ivy)
 
 (defcustom counsel-find-file-occur-migemo-ls-xargs-cmd
-  "tr '\\n' '\\0' | xargs -0 ls -d --group-directories-first"
+  "xargs -d '\\n' ls -d --group-directories-first"
   "This command will be used for `counsel-find-file-occur-migemo-around'.
 This is \"xargs\" command part of `counsel-find-file-occur-cmd'."
   :type 'string
