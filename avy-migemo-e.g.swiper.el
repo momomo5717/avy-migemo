@@ -1,6 +1,6 @@
 ;;; avy-migemo-e.g.swiper.el --- An example config of avy-migemo for swiper -*- lexical-binding: t; no-byte-compile: t -*-
 
-;; Copyright (C) 2015-2017 momomo5717
+;; Copyright (C) 2015-2018 momomo5717
 
 ;; Author: momomo5717
 ;; URL: https://github.com/momomo5717/avy-migemo
