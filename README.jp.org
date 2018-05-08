@@ -215,7 +215,7 @@
     以下の関数はアドバイス関数として使用されます．
 
     + =ivy--regex-migemo-around=
-    + =ivy--regex-or-literal-migemo-around=
+    + =ivy--regex-ignore-order-migemo-around=
     + =ivy--regex-plus-migemo-around=
     + =ivy--highlight-default-migemo=
     + =ivy-occur-revert-buffer-migemo=
