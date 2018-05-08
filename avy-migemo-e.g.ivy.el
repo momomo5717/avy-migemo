@@ -91,6 +91,18 @@ If `ivy-migemo-preferred-functions' is non-nil,
   'ivy-migemo-ignore-p
   "20171218")
 
+(defun ivy-migemo--split (str)
+  "Run `ivy--split' with replacing `ivy--regex-or-literal' with `identity'."
+  (cl-letf (((symbol-function 'ivy--regex-or-literal) #'identity))
+    (ivy--split str)))
+(byte-compile 'ivy-migemo--split)
+
+(defun ivy-migemo--split-spaces (str)
+  "Run `ivy--split-spaces' with replacing `ivy--regex-or-literal' with `identity'."
+  (cl-letf (((symbol-function 'ivy--regex-or-literal) #'identity))
+    (ivy--split-spaces str)))
+(byte-compile 'ivy-migemo--split-spaces)
+
 (defvar avy-migemo--ivy--regex-hash
   (make-hash-table :test #'equal)
   "avy-migemo's `ivy--regex-hash'.")
@@ -113,7 +125,7 @@ If `ivy-migemo-preferred-functions' is non-nil,
                     (let ((subs
                            ;; Adapt for migemo
                            (mapcar ivy-migemo-get-function
-                                   (ivy--split str))))
+                                   (ivy-migemo--split str))))
                       (if (= (length subs) 1)
                           (cons
                            (setq ivy--subexps 0)
@@ -166,6 +178,30 @@ If `ivy-migemo-preferred-functions' is non-nil,
   (if (ivy-migemo-ignore-p) (apply fn args)
     (apply ivy-migemo-get-function args)))
 (byte-compile 'ivy--regex-or-literal-migemo-around)
+
+(make-obsolete 'ivy--regex-or-literal-migemo-around
+               "This will be removed in the future."
+               "20180509")
+
+(defun ivy--regex-ignore-order-migemo (str)
+  "The same as `ivy--regex-ignore-order' except for using migemo."
+  (let* (regex-parts
+         (raw-parts (ivy--split-negation str)))
+    (dolist (part (ivy-migemo--split-spaces (car raw-parts)))
+      (push (cons (funcall ivy-migemo-get-function part) t) regex-parts))
+    (when (cdr raw-parts)
+      (dolist (part (ivy-migemo--split-spaces (cadr raw-parts)))
+        (push (cons (funcall ivy-migemo-get-function part) nil) regex-parts)))
+    (if regex-parts (nreverse regex-parts)
+      "")))
+(byte-compile 'ivy--regex-ignore-order-migemo)
+
+(defun ivy--regex-ignore-order-migemo-around (fn &rest args)
+  "Around advice function for `ivy--regex-ignore-order'."
+  (if (ivy-migemo-ignore-p)
+      (apply fn args)
+    (apply #'ivy--regex-ignore-order-migemo args)))
+(byte-compile 'ivy--regex-ignore-order-migemo-around)
 
 (defun ivy--regex-plus-migemo (str)
   "The same as `ivy--regex-plus' except for using migemo."
@@ -396,11 +432,10 @@ except for adding counsel-pt-migemo, counsel-rg-migemo."
                          'ivy--format-minibuffer-line-migemo
                          '(ivy--regex-ignore-order--part
                            :around
-                           ivy--regex-ignore-order--part-migemo-around))
+                           ivy--regex-ignore-order--part-migemo-around)
+                         '(ivy--regex-or-literal :around ivy--regex-or-literal-migemo-around))
 (avy-migemo-add-names '(ivy--regex :around ivy--regex-migemo-around)
-                      '(ivy--regex-or-literal
-                        :around
-                        ivy--regex-or-literal-migemo-around)
+                      '(ivy--regex-ignore-order :around ivy--regex-ignore-order-migemo-around)
                       '(ivy--regex-plus :around ivy--regex-plus-migemo-around)
                       'ivy--highlight-default-migemo
                       'ivy-occur-revert-buffer-migemo
