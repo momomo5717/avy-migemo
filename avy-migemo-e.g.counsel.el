@@ -187,6 +187,7 @@ after `counsel-unquote-regex-parens'."
                         (swiper--cleanup))
               :caller 'counsel-pt-migemo)))
 ;; (byte-compile 'counsel-pt-migemo) ;Suppress a warning message for `counsel-prompt-function'
+(add-to-list 'ivy-highlight-grep-commands 'counsel-pt-migemo)
 
 (defun counsel-pt-migemo-occur ()
   "The same as `counsel-ag-occur' except for using `counsel-pt-migemo-base-command'."
@@ -216,6 +217,7 @@ after `counsel-unquote-regex-parens'."
                         (swiper--cleanup))
               :caller 'counsel-rg-migemo)))
 ;; (byte-compile 'counsel-rg-migemo) ;Suppress a warning message for `counsel-prompt-function'
+(add-to-list 'ivy-highlight-grep-commands 'counsel-rg-migemo)
 
 (defun counsel-rg-migemo-occur ()
   "Generate a custom occur buffer for `counsel-rg-migemo'."

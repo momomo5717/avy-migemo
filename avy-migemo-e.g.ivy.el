@@ -312,11 +312,7 @@ If `ivy-migemo-preferred-functions' is non-nil,
     (setq ivy--old-re (funcall ivy--regex-function ivy-text)))
   (let ((fuzzy-p (eq ivy--highlight-function 'ivy--highlight-fuzzy))
         (start
-         (if (and (memq (ivy-state-caller ivy-last)
-                        '(counsel-git-grep
-                          counsel-ag counsel-rg counsel-pt
-                          ;; Add migemo version
-                          counsel-pt-migemo counsel-rg-migemo))
+         (if (and (memq (ivy-state-caller ivy-last) ivy-highlight-grep-commands)
                   (string-match "^[^:]+:[^:]+:" str))
              (match-end 0)
            0))
@@ -372,9 +368,7 @@ except for adding counsel-pt-migemo, counsel-rg-migemo."
                (erase-buffer)
                (funcall (plist-get ivy--occurs-list caller) t)
                (ivy-occur-grep-mode))))
-          ((memq caller '(counsel-git-grep counsel-grep counsel-ag counsel-rg
-                                           ;; Add migemo version
-                                           counsel-pt-migemo counsel-rg-migemo))
+          ((memq caller ivy-highlight-grep-commands)
            (let ((inhibit-read-only t))
              (erase-buffer)
              (funcall (plist-get ivy--occurs-list caller)))))
