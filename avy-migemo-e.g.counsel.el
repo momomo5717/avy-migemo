@@ -144,20 +144,19 @@ after `counsel-unquote-regex-parens'."
   "The same as `counsel-ag-function' except for using migemo."
   (when (null extra-pt-args)
     (setq extra-pt-args ""))
-  (if (< (length string) 3)
-      (counsel-more-chars 3)
-    (let ((default-directory (ivy-state-directory ivy-last))
-          (regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
-                  (setq ivy--old-re
-                        (ivy--regex string)))))
-      (let ((pt-cmd (format base-cmd
-                            (concat extra-pt-args
-                                    " -- "
-                                    (shell-quote-argument regex)))))
-        (if (file-remote-p default-directory)
-            (split-string (shell-command-to-string pt-cmd) "\n" t)
-          (counsel--async-command pt-cmd)
-          nil)))))
+  (or (counsel-more-chars)
+      (let ((default-directory (ivy-state-directory ivy-last))
+            (regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
+                    (setq ivy--old-re
+                          (ivy--regex string)))))
+        (let ((pt-cmd (format base-cmd
+                              (concat extra-pt-args
+                                      " -- "
+                                      (shell-quote-argument regex)))))
+          (if (file-remote-p default-directory)
+              (split-string (shell-command-to-string pt-cmd) "\n" t)
+            (counsel--async-command pt-cmd)
+            nil)))))
 (byte-compile 'counsel-pt-function-migemo)
 
 (defun counsel-pt-migemo-arg-descriptor (base-cmd)
@@ -237,18 +236,17 @@ after `counsel-unquote-regex-parens'."
 
 (defun counsel-grep-function-migemo (string)
   "The same as `counsel-grep-function' except for using migemo."
-  (if (< (length string) 2)
-      (counsel-more-chars 2)
-    (let ((regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
-                  (setq ivy--old-re
-                        (ivy--regex-migemo string))))
-          (maybe-shell-quote-arg
-           (if (string-match-p "\\(\"%s\"\\|'%s'\\)" counsel-grep-command)
-               #'identity
-             #'shell-quote-argument)))
-      (counsel--async-command
-       (format counsel-grep-command (funcall maybe-shell-quote-arg regex)))
-      nil)))
+  (or (counsel-more-chars)
+      (let ((regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
+                    (setq ivy--old-re
+                          (ivy--regex-migemo string))))
+            (maybe-shell-quote-arg
+             (if (string-match-p "\\(\"%s\"\\|'%s'\\)" counsel-grep-command)
+                 #'identity
+               #'shell-quote-argument)))
+        (counsel--async-command
+         (format counsel-grep-command (funcall maybe-shell-quote-arg regex)))
+        nil)))
 (byte-compile 'counsel-grep-function-migemo)
 
 (defun counsel-grep-occur-migemo ()
