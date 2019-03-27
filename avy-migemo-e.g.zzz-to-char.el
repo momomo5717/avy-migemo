@@ -39,16 +39,16 @@
       (let ((p (point))
             (avy-all-windows nil))
         (avy-with zzz-to-char
-          (avy--generic-jump
+          (avy-jump
            (if (= 13 char)
                "\n"
              ;; Adapt for migemo
              (avy-migemo-regex-quote-concat (string char)))
-           nil avy-style
-           (max (- p zzz-to-char-reach)
-                (window-start))
-           (min (+ p zzz-to-char-reach)
-                (window-end (selected-window) t))))
+           :window-flip nil
+           :beg (max (- p zzz-to-char-reach)
+                     (window-start))
+           :end (min (+ p zzz-to-char-reach)
+                     (window-end (selected-window) t))))
         (let ((n (point)))
           (when (/= n p)
             (cl-destructuring-bind (beg . end)
