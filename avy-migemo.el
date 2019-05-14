@@ -4,7 +4,7 @@
 
 ;; Keywords: avy, migemo
 ;; Version: 0.3.2
-;; Package-Requires:((emacs "24.4") (avy "0.4.0") (migemo "1.9"))
+;; Package-Requires:((emacs "24.4") (avy "0.5.0") (migemo "1.9"))
 ;; Author: momomo5717
 ;; URL: https://github.com/momomo5717/avy-migemo
 
@@ -566,8 +566,7 @@ BEG / LEN is an integer."
          "\n"
        ;; Adapt for migemo
        (avy-migemo-regex-quote-concat (string char)))
-     arg
-     avy-style)))
+     arg)))
 
 ;;;###autoload
 (defun avy-migemo-goto-char-2 (char1 char2 &optional arg beg end)
@@ -587,7 +586,6 @@ BEG / LEN is an integer."
          (concat (string char1) (avy-migemo-regex-quote-concat (string char2)))
        (avy-migemo-regex-quote-concat (string char1 char2)))
      arg
-     avy-style
      beg end)))
 
 ;;;###autoload
@@ -599,7 +597,6 @@ BEG / LEN is an integer."
      ;; Adapt for migemo
      (avy-migemo-regex-quote-concat (string char))
      avy-all-windows
-     avy-style
      (line-beginning-position)
      (line-end-position))))
 
@@ -719,7 +716,7 @@ If GROUP is no-nil, the group will be highlighted. Default value is 0."
                          (concat
                           "\\b"
                           (avy-migemo-regex-concat str))))))
-      (avy--generic-jump regex arg avy-style beg end))))
+      (avy--generic-jump regex arg beg end))))
 
 (defcustom avy-migemo-use-isearch-search-fun nil
   "If non-nil, `avy-migemo-isearch' uses `isearch-search-fun'."
