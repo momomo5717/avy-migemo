@@ -3,7 +3,7 @@
 
 * avy-migemo
 
-  This package is a minor mode of avy for using migemo.
+  This package is a minor mode of avy for using [[https://github.com/emacs-jp/migemo][migemo]].
 
   The following functions are provided:
 
@@ -14,9 +14,10 @@
     + =avy-migemo-goto-subword-1=
     + =avy-migemo-goto-word-1=
     + =avy-migemo-isearch=
+    + =avy-migemo-org-goto-heading-timer=
     + =avy-migemo--overlay-at=
     + =avy-migemo--overlay-at-full=
-    + =avy-migemo--read-string-timer=
+    + =avy-migemo--read-candidates=
 
   These are the same as [[https://github.com/abo-abo/avy][avy]]'s predefined functions
   except for adding candidates via [[https://github.com/emacs-jp/migemo][migemo]] (simply using migemo instead of =regexp-quote=).
@@ -24,24 +25,50 @@
   The following extensions are available:
 
     + avy-migemo-e.g.zzz-to-char.el
+    + avy-migemo-e.g.ivy.el
     + avy-migemo-e.g.swiper.el
+    + avy-migemo-e.g.counsel.el
 
-** Table of contents
+    [[file:image/image.gif]]
 
-  + [[#requirements][Requirements]]
-  + [[#setup][Setup]]
-  + [[#customization][Customization]]
-    + [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
-    + [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
-    + [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
-    + [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
-    + [[#an-example-of-setting-for-zzz-to-char--zzz-to-char--base-][An example of setting for zzz-to-char ( =zzz-to-char--base= )]]
-    + [[#an-example-of-setting-for-swiper--ivy--regex-][An example of setting for swiper ( =ivy--regex= )]]
+** Table of contents                                                  :toc_4:
+- [[#avy-migemo][avy-migemo]]
+  - [[#requirements][Requirements]]
+  - [[#setup][Setup]]
+  - [[#customization][Customization]]
+    - [[#user-option-avy-migemo-lighter][User Option: =avy-migemo-lighter= ]]
+    - [[#user-option-avy-migemo-get-function][User Option: =avy-migemo-get-function= ]]
+    - [[#user-option-avy-migemo-regex-concat-use-non-capturing][User Option: =avy-migemo-regex-concat-use-non-capturing= ]]
+    - [[#user-option-avy-migemo-function-names][User Option: =avy-migemo-function-names= ]]
+    - [[#function-avy-migemo-remove-names-rest-names][Function: =avy-migemo-remove-names= /&rest/ /names/ ]]
+    - [[#function-avy-migemo-add-names-rest-names][Function: =avy-migemo-add-names= /&rest/ /names/ ]]
+    - [[#user-option-avy-migemo-use-isearch-search-fun][User Option: =avy-migemo-use-isearch-search-fun= ]]
+    - [[#user-option-avy-migemo-at-full-max][User Option: =avy-migemo-at-full-max= ]]
+    - [[#user-option-avy-migemo-regex-cache-clear-hook][User Option: =avy-migemo-regex-cache-clear-hook= ]]
+    - [[#an-example-config-for-zzz-to-char--zzz-to-char--base-][An example config for zzz-to-char ( =zzz-to-char--base= ) ]]
+    - [[#an-example-config-for-ivy][An example config for ivy]]
+      - [[#user-option-ivy-migemo-get-function][User Option: =ivy-migemo-get-function= ]]
+      - [[#user-option-ivy-migemo-ignore-functions][User Option: =ivy-migemo-ignore-functions= ]]
+      - [[#user-option-ivy-migemo-ignore-prompts][User Option: =ivy-migemo-ignore-prompts= ]]
+      - [[#user-option-ivy-migemo-preferred-functions][User Option: =ivy-migemo-preferred-functions= ]]
+    - [[#an-example-config-for-swiper][An example config for swiper]]
+      - [[#user-option-swiper-migemo-min-highlight][User Option: =swiper-migemo-min-highlight= ]]
+    - [[#an-example-config-for-counsel][An example config for counsel]]
+      - [[#user-option-counsel-grep-base-command-migemo][User Option: =counsel-grep-base-command-migemo= ]]
+      - [[#user-option-counsel-pt-migemo-base-command][User Option: =counsel-pt-migemo-base-command= ]]
+      - [[#user-option-counsel-rg-migemo-base-command][User Option: =counsel-rg-migemo-base-command= ]]
+      - [[#user-option-counsel-cmd-to-dired-migemo-grep-command][User Option: =counsel-cmd-to-dired-migemo-grep-command= ]]
+      - [[#user-option-counsel-cmd-to-dired-migemo-grep-invert-matching][User Option: =counsel-cmd-to-dired-migemo-grep-invert-matching= ]]
+      - [[#user-option-counsel-find-file-occur-migemo-ls-cmd][User Option: =counsel-find-file-occur-migemo-ls-cmd= ]]
+      - [[#user-option-counsel-find-file-occur-migemo-ls-xargs-cmd][User Option: =counsel-find-file-occur-migemo-ls-xargs-cmd= ]]
+      - [[#user-option-counsel-find-file-occur-migemo-find-cmd][User Option: =counsel-find-file-occur-migemo-find-cmd= ]]
+      - [[#user-option-counsel-find-file-occur-migemo-find-xargs-cmd][User Option: =counsel-find-file-occur-migemo-find-xargs-cmd= ]]
+      - [[#user-option-counsel-unquote-regex-parens-migemo-function][User Option: =counsel-unquote-regex-parens-migemo-function= ]]
 
 ** Requirements
 
    + GNU Emacs 24.4 or later
-   + [[https://github.com/abo-abo/avy][avy]] 0.3 or later
+   + [[https://github.com/abo-abo/avy][avy]] 0.4 or later
    + [[https://github.com/emacs-jp/migemo][migemo]] 1.9 or later
 
 ** Setup
@@ -49,132 +76,299 @@
    #+BEGIN_SRC emacs-lisp
      (add-to-list 'load-path "/path/to/avy-migemo")
      (require 'avy-migemo)
-     ;; If you override avy's predefined functions using `advice-add',
+     ;; `avy-migemo-mode' overrides avy's predefined functions using `advice-add'.
      (avy-migemo-mode 1)
+     (global-set-key (kbd "M-g m m") 'avy-migemo-mode)
    #+END_SRC
-
-   You can toggle =avy-migemo-mode= by M-x =avy-migemo-mode=.
 
 ** Customization
 
-***** User Option: =avy-migemo-get-function=
+*** User Option: =avy-migemo-lighter=
 
-      Its type is function. Default value is =migemo-search-pattern-get=.
+    Lighter for =avy-migemo-mode=. Default value is =nil=.
 
-      It takes a string and returns a regular expression.
+*** User Option: =avy-migemo-get-function=
 
-***** User Option: =avy-migemo-function-names=
+    Its type is function which takes a string and returns a regular expression.
 
-      Its value is a list of avy-migemo's function names.
-      Default value has all avy-migemo's function names.
-      Instead of using =setq=, =custom-set-variables= is recommended for changing its value.
+    Default value is =migemo-get-pattern=.
 
-      If you want to override only =avy-goto-char-timer=, you can use =custom-set-variables= as below.
+    #+BEGIN_SRC elisp
+      ;; e.g. Using non-capturing group
+      (custom-set-variables
+       '(avy-migemo-get-function 'avy-migemo-get-pattern-non-capturing)
+       '(avy-migemo-regex-concat-use-non-capturing t))
+    #+END_SRC
 
-      #+BEGIN_SRC emacs-lisp
-        ;; Override only `avy-goto-char-timer' when `avy-migemo-mode' is enabled.
-        (custom-set-variables
-         '(avy-migemo-function-names
-           '(avy-migemo-goto-char-timer)))
-      #+END_SRC
+*** User Option: =avy-migemo-regex-concat-use-non-capturing=
 
-***** Function: =avy-migemo-remove-names= /&rest/ /names/
+    If non-nil, =avy-migemo-regex-concat= / =avy-migemo-regex-quote-concat= will use non-capturing group.
 
-      This function removes /names/ from =avy-migemo-function-names=.
+    Default value is nil.
 
-      #+BEGIN_SRC emacs-lisp
-        ;; Remove only `avy-migemo-goto-char' from `avy-migemo-function-names'.
-        (avy-migemo-remove-names 'avy-migemo-goto-char)
-      #+END_SRC
+    Using non-capturing group will affect =counsel-grep-function-migemo= which uses [[#user-option-counsel-grep-base-command-migemo][ =counsel-grep-base-command-migemo= ]],
+    since grep with -E option can not work with it.
 
-***** Function: =avy-migemo-add-names= /&rest/ /names/
+*** User Option: =avy-migemo-function-names=
 
-      This function adds /names/ to =avy-migemo-function-names=.
+    Its value is a list of avy-migemo's function names.
+    =(orig-fn where advice-fn)= like args of =advice-add= is also available.
 
-***** An example of setting for zzz-to-char ( =zzz-to-char--base= )
+    Default value has all avy-migemo's function names which can be used as advice.
 
-      You can add a function which uses avy by adapting it for migemo.
+    Instead of using =setq=, =custom-set-variables= is recommended for changing its value.
+    If you would like to override only =avy-goto-char-timer=, you can use =custom-set-variables= as below.
 
-      #+BEGIN_SRC emacs-lisp
-        ;; If you use zzz-to-char (which can be installed from MELPA),
-        ;; you can adapt it for migemo.
-        (require 'zzz-to-char)
+    #+BEGIN_SRC emacs-lisp
+      ;; Override only `avy-goto-char-timer' when `avy-migemo-mode' is enabled.
+      (custom-set-variables
+       '(avy-migemo-function-names
+         '(avy-migemo-goto-char-timer)))
+    #+END_SRC
 
-        ;; You need to add "-migemo" to the original name.
-        (defun zzz-to-char--base-migemo (char n-shift)
-            "The same as `zzz-to-char--base' except for using migemo."
-            (let ((p (point))
-                  (avy-all-windows nil))
-              (avy-with zzz-to-char
-                (avy--generic-jump
-                 (if (= 13 char)
-                     "\n"
-                   ;; Adapt for migemo
-                   (funcall avy-migemo-get-function (string char)))
-                 nil
-                 avy-style
-                 (- p zzz-to-char-reach)
-                 (+ p zzz-to-char-reach)))
-              (let ((n (point)))
-                (when (/= n p)
-                  (cl-destructuring-bind (beg . end)
-                      (if (> n p)
-                          (cons p (- (1+ n) n-shift))
-                        (cons (+ n n-shift) p))
-                    (goto-char end)
-                    (kill-region beg end))))))
+*** Function: =avy-migemo-remove-names= /&rest/ /names/
 
-        (avy-migemo-add-names 'zzz-to-char--base-migemo)
+    This function removes /names/ from =avy-migemo-function-names=.
 
-      #+END_SRC
+    #+BEGIN_SRC emacs-lisp
+      ;; Remove only `avy-migemo-goto-char' from `avy-migemo-function-names'.
+      (avy-migemo-remove-names 'avy-migemo-goto-char)
+    #+END_SRC
 
-***** An example of setting for swiper ( =ivy--regex= )
+*** Function: =avy-migemo-add-names= /&rest/ /names/
 
-      You can add a function which doesn't use avy by adapting it for migemo.
+    This function adds /names/ to =avy-migemo-function-names=.
 
-      #+BEGIN_SRC emacs-lisp
-        ;; If you use swiper (which can be installed from MELPA),
-        ;; you can adapt it for migemo.
-        (require 'swiper)
+*** User Option: =avy-migemo-use-isearch-search-fun=
 
-        ;; You need to add "-migemo" to the original name.
-        (defun ivy--regex-migemo (str &optional greedy)
-          "The same as `ivy--regex' except for using migemo."
-          (let ((hashed (unless greedy
-                          (gethash str ivy--regex-hash))))
-            (if hashed
-                (prog1 (cdr hashed)
-                  (setq ivy--subexps (car hashed)))
-              (when (string-match "\\([^\\]\\|^\\)\\\\$" str)
-                (setq str (substring str 0 -1)))
-              (cdr (puthash str
-                            (let ((subs
-                                   ;; Adapt for mgiemo
-                                   (mapcar
-                                    (lambda (str)
-                                      (concat (funcall avy-migemo-get-function str)
-                                              "\\|" str))
-                                    (ivy--split str))))
-                              (if (= (length subs) 1)
-                                  (cons
-                                   (setq ivy--subexps 0)
-                                   (car subs))
-                                (cons
-                                 (setq ivy--subexps (length subs))
-                                 (mapconcat
-                                  (lambda (x)
-                                    (if (string-match "\\`\\\\(.*\\\\)\\'" x)
-                                        x
-                                      (format "\\(%s\\)" x)))
-                                  subs
-                                  (if greedy
-                                      ".*"
-                                    ".*?")))))
-                            ivy--regex-hash)))))
+    If non-nil, =avy-migemo-isearch= uses =isearch-search-fun= for collecting candidates.
 
-        (avy-migemo-add-names 'ivy--regex-migemo)
+    Default value is =nil=.
 
-        (add-hook 'avy-migemo-mode-hook
-                  (lambda () (setq ivy--regex-hash (make-hash-table :test #'equal))))
+    It would be useful for =migemo-isearch-toggle-migemo= or isearch symbol/word.
 
-      #+END_SRC
+*** User Option: =avy-migemo-at-full-max=
+
+    If its value is an integer, the length of displayed keys will be restricted to the maximum number.
+
+    Default value is =nil=.
+
+    This feature depends on =avy-migemo--overlay-at-full=.
+
+    #+BEGIN_SRC emacs-lisp
+      (custom-set-variables '(avy-migemo-at-full-max 2))
+    #+END_SRC
+
+*** User Option: =avy-migemo-regex-cache-clear-hook=
+
+    This normal hook is run at the end of =avy-migemo-regex-cache-clear=.
+
+*** An example config for zzz-to-char ( =zzz-to-char--base= )
+
+    You can add a function which uses avy by adapting it for migemo.
+
+    avy-migemo-e.g.zzz-to-char.el provides the example.
+
+    #+BEGIN_SRC emacs-lisp
+      ;; If you use zzz-to-char (which can be installed from MELPA or El-Get),
+      ;; you can adapt it for migemo.
+      (require 'zzz-to-char)
+
+      ;; Adding "-migemo" to the original name is needed.
+      (defun zzz-to-char--base-migemo (char n-shift)
+        "The same as `zzz-to-char--base' except for using migemo."
+        (let ((p (point))
+              (avy-all-windows nil))
+          (avy-with zzz-to-char
+            (avy--generic-jump
+             (if (= 13 char)
+                 "\n"
+               ;; Adapt for migemo
+               (avy-migemo-regex-quote-concat (string char)))
+             nil
+             avy-style
+             (- p zzz-to-char-reach)
+             (+ p zzz-to-char-reach)))
+          (let ((n (point)))
+            (when (/= n p)
+              (cl-destructuring-bind (beg . end)
+                  (if (> n p)
+                      (cons p (- (1+ n) n-shift))
+                    (cons (+ n n-shift) p))
+                (goto-char end)
+                (kill-region beg end))))))
+
+      (avy-migemo-add-names 'zzz-to-char--base-migemo)
+    #+END_SRC
+
+*** An example config for ivy
+
+    avy-migemo-e.g.ivy.el is a config file for [[https://github.com/abo-abo/swiper/blob/master/ivy.el][ivy.el]].
+
+    #+BEGIN_SRC elisp
+      (require 'avy-migemo-e.g.ivy)
+    #+END_SRC
+
+    The following functions will be used as advice.
+
+    + =ivy--regex-migemo-around=
+    + =ivy--regex-ignore-order-migemo-around=
+    + =ivy--regex-plus-migemo-around=
+    + =ivy--highlight-default-migemo=
+    + =ivy-occur-revert-buffer-migemo=
+    + =ivy-occur-press-migemo=
+
+**** User Option: =ivy-migemo-get-function=
+
+     Its type is function which takes a string and returns a regular expression.
+
+     Default value is =avy-migemo-regex-concat-nnl=.
+
+     This function takes a string and returns a regular expression.
+
+**** User Option: =ivy-migemo-ignore-functions=
+
+     List of function names.
+     If it has =ivy-state-caller= or =ivy-state-collection=, =ivy--regex-*-migemo-around= will not use migemo.
+
+     Default value is =nil=. (  avy-migemo-e.g.counsel.el will add counsel commands to this list. )
+
+**** User Option: =ivy-migemo-ignore-prompts=
+
+     List of regexps.
+     If one of it matches =ivy-state-prompt=, =ivy--regex-*-migemo-around= will not use migemo.
+
+     Default value is =(list (regexp-opt '("symbol" "function" "variable" "binding" "face")))=.
+
+     This variable can be used for ivy/counsel commands which do not have =ivy-state-caller=.
+
+**** User Option: =ivy-migemo-preferred-functions=
+
+     List of function names.
+     If it has =ivy-state-caller= or =ivy-state-collection=, =ivy--regex-*-migemo-around= will use migemo.
+     If non-nil, [[#user-option-ivy-migemo-ignore-functions][ =ivy-migemo-ignore-functions= ]] / [[#user-option-ivy-migemo-ignore-prompts][ =ivy-migemo-ignore-prompts= ]] will be ignored.
+
+     Default value is =nil=.
+
+     #+begin_src elisp
+       ;; e.g. Using only swiper with migemo.
+       (add-to-list 'ivy-migemo-preferred-functions 'swiper)
+     #+end_src
+
+*** An example config for swiper
+
+    avy-migemo-e.g.swiper.el is a config file for [[https://github.com/abo-abo/swiper/blob/master/swiper.el][swiper.el]].
+
+    #+BEGIN_SRC elisp
+      (require 'avy-migemo-e.g.swiper)
+    #+END_SRC
+
+    The following functions will be used as advice.
+
+    + =swiper--add-overlays-migemo=
+    + =swiper--re-builder-migemo-around=
+
+**** User Option: =swiper-migemo-min-highlight=
+
+     Default value is =2=.
+
+     =swiper--add-overlays-migemo= will highlight matches if an input string is at least this long.
+
+     If =nil=, =swiper-min-highlight= will be used.
+
+*** An example config for counsel
+
+    avy-migemo-e.g.counsel.el is a config file for [[https://github.com/abo-abo/swiper/blob/master/counsel.el][counsel.el]].
+
+    #+BEGIN_SRC elisp
+      (require 'avy-migemo-e.g.counsel)
+    #+END_SRC
+
+    The following functions will be used as advice.
+
+    + =counsel-grep-migemo-around=
+    + =counsel-grep-function-migemo=
+    + =counsel-grep-occur-migemo=
+    + =counsel-git-occur-migemo-around=
+    + =counsel-find-file-occur-migemo-around=
+    + =avy-migemo-disable-around= for =counsel-clj=
+
+    The following functions will be added to =ivy-migemo-ignore-functions=.
+
+    counsel-ag, counsel-rg, counsel-git-grep, counsel-locate counsel-describe-variable, counsel-fzf,
+    counsel-describe-function, counsel-descbinds, counsel-M-x ,counsel-dpkg, counsel-rpm, counsel-irony
+
+    The following commands are provided.
+
+    + =counsel-pt-migemo=
+    + =counsel-rg-migemo=
+
+**** User Option: =counsel-grep-base-command-migemo=
+
+     Format string for =counsel-grep-function-migemo=.
+     Default value is =counsel-grep-base-command=.
+
+     When =avy-migemo-regex-concat-use-non-capturing= is non-nil, grep with -E option can not work.
+     -P option can work with non-capturing group.
+
+     #+BEGIN_SRC elisp
+       ;; e.g. grep with -P option
+       (custom-set-variables
+        '(counsel-grep-base-command-migemo "grep -nP %s %s"))
+     #+END_SRC
+
+     #+BEGIN_SRC elisp
+       ;; e.g. ripgrep
+       (custom-set-variables
+        '(counsel-grep-base-command-migemo "rg --color never --no-heading -ni %s %s"))
+     #+END_SRC
+
+**** User Option: =counsel-pt-migemo-base-command=
+
+     Format string for =counsel-pt-migemo=.
+     Default value is =counsel-pt-base-command=.
+
+**** User Option: =counsel-rg-migemo-base-command=
+
+     Format string for =counsel-rg-migemo=.
+     Default value is =counsel-rg-base-command=.
+
+**** User Option: =counsel-cmd-to-dired-migemo-grep-command=
+
+     Format string of grep part for an arg of =counsel-cmd-to-dired=.
+     Default value is "grep %s -i -P %s".
+
+**** User Option: =counsel-cmd-to-dired-migemo-grep-invert-matching=
+
+     The =--invert-matching= option of grep.
+     This will be inserted into the first format specification of =counsel-cmd-to-dired-migemo-grep-command=.
+     Default value is "-v"
+
+**** User Option: =counsel-find-file-occur-migemo-ls-cmd=
+
+     Command string as =ls= command part of =counsel-find-file-occur-cmd=.
+     Default value is "ls -a".
+
+**** User Option: =counsel-find-file-occur-migemo-ls-xargs-cmd=
+
+     Command string as =xargs= command part of =counsel-find-file-occur-cmd=.
+     Default value is "xargs -d '\\n' ls -d --group-directories-first".
+
+**** User Option: =counsel-find-file-occur-migemo-find-cmd=
+
+     Command string as =find= command part of =counsel--occur-cmd-find=.
+     Default value is "find . -maxdepth 1".
+
+**** User Option: =counsel-find-file-occur-migemo-find-xargs-cmd=
+
+     Command string as =xargs= command part of =counsel--occur-cmd-find=.
+     Default value is "xargs -I {} find {} -maxdepth 0 -ls".
+
+**** User Option: =counsel-unquote-regex-parens-migemo-function=
+
+     Its type is function which takes a string =ivy--regex= will return and returns a regular expression.
+
+     =counsel-unquote-regex-parens-migemo= will use this internally.
+
+     Default value is =counsel-unquote-regex-parens-migemo-default=
+     which will replace "\\\\|" with "|" after =counsel-unquote-regex-parens=.
