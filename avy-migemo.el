@@ -561,13 +561,12 @@ BEG / LEN is an integer."
   (interactive (list (read-char "char: " t)
                      current-prefix-arg))
   (avy-with avy-goto-char
-    (avy--generic-jump
+    (avy-jump
      (if (= 13 char)
          "\n"
        ;; Adapt for migemo
        (avy-migemo-regex-quote-concat (string char)))
-     arg
-     avy-style)))
+     :window-flip arg)))
 
 ;;;###autoload
 (defun avy-migemo-goto-char-2 (char1 char2 &optional arg beg end)
@@ -576,32 +575,32 @@ BEG / LEN is an integer."
                      (read-char "char 2: " t)
                      current-prefix-arg
                      nil nil))
-  (when (eq char1 ?)
+  (when (eq char1 ?
+)
     (setq char1 ?\n))
-  (when (eq char2 ?)
+  (when (eq char2 ?
+)
     (setq char2 ?\n))
   (avy-with avy-goto-char-2
-    (avy--generic-jump
+    (avy-jump
      ;; Adapt for migemo
      (if (eq char1 ?\n)
          (concat (string char1) (avy-migemo-regex-quote-concat (string char2)))
        (avy-migemo-regex-quote-concat (string char1 char2)))
-     arg
-     avy-style
-     beg end)))
+     :window-flip arg
+     :beg beg :end end)))
 
 ;;;###autoload
 (defun avy-migemo-goto-char-in-line (char)
   "The same as `avy-goto-char-in-line' except for the candidates via migemo."
   (interactive (list (read-char "char: " t)))
   (avy-with avy-goto-char
-    (avy--generic-jump
+    (avy-jump
      ;; Adapt for migemo
      (avy-migemo-regex-quote-concat (string char))
-     avy-all-windows
-     avy-style
-     (line-beginning-position)
-     (line-end-position))))
+     :window-flip avy-all-windows
+     :beg (line-beginning-position)
+     :end (line-end-position))))
 
 (defun avy-migemo--read-candidates (&optional re-builder group)
   "The same as `avy--read-candidates' except for the candidates via migemo.
@@ -679,7 +678,7 @@ If GROUP is no-nil, the group will be highlighted. Default value is 0."
                              (not avy-all-windows)
                            avy-all-windows)))
     (avy-with avy-goto-char-timer
-      (avy--process
+      (avy-process
        ;; Adapt for migemo
        (avy-migemo--read-candidates)
        (avy--style-fn avy-style)))))
@@ -719,7 +718,7 @@ If GROUP is no-nil, the group will be highlighted. Default value is 0."
                          (concat
                           "\\b"
                           (avy-migemo-regex-concat str))))))
-      (avy--generic-jump regex arg avy-style beg end))))
+      (avy-jump regex :window-flip arg :beg beg :end end))))
 
 (defcustom avy-migemo-use-isearch-search-fun nil
   "If non-nil, `avy-migemo-isearch' uses `isearch-search-fun'."
@@ -771,7 +770,7 @@ If GROUP is no-nil, the group will be highlighted. Default value is 0."
   (avy-with avy-isearch
     (let ((avy-background nil))
       ;; Adapt for migemo
-      (avy--process (if avy-migemo-use-isearch-search-fun
+      (avy-process (if avy-migemo-use-isearch-search-fun
                         (avy-migemo--isearch-candidates isearch-string)
                       (avy--regex-candidates
                        (avy-migemo-regex-concat isearch-string)))
@@ -789,7 +788,7 @@ If GROUP is no-nil, the group will be highlighted. Default value is 0."
                              (not avy-all-windows)
                            avy-all-windows)))
     (avy-with avy-goto-char-timer
-      (avy--process
+      (avy-process
        ;; Addapt for migemo
        (avy-migemo--read-candidates
         (lambda (input)
