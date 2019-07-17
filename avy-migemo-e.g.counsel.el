@@ -99,7 +99,7 @@ This function will be used for `counsel-unquote-regex-parens-migemo'."
   "Replace the backslash of \\\\|  with empty string in STR.
 after `counsel-unquote-regex-parens'."
   (replace-regexp-in-string "\\(\\\\\\)|" ""
-                            (counsel-unquote-regex-parens str) nil nil 1))
+                            (counsel--elisp-to-pcre str) nil nil 1))
 (byte-compile 'counsel-unquote-regex-parens-migemo-default)
 
 (defun counsel-unquote-regex-parens-migemo (str)
@@ -144,7 +144,7 @@ after `counsel-unquote-regex-parens'."
   "The same as `counsel-ag-function' except for using migemo."
   (when (null extra-pt-args)
     (setq extra-pt-args ""))
-  (or (counsel-more-chars)
+  (or (ivy-more-chars)
       (let ((default-directory (ivy-state-directory ivy-last))
             (regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
                     (setq ivy--old-re
@@ -236,7 +236,7 @@ after `counsel-unquote-regex-parens'."
 
 (defun counsel-grep-function-migemo (string)
   "The same as `counsel-grep-function' except for using migemo."
-  (or (counsel-more-chars)
+  (or (ivy-more-chars)
       (let ((regex (counsel-unquote-regex-parens-migemo ; Adapt for migemo
                     (setq ivy--old-re
                           (ivy--regex-migemo string))))
