@@ -99,7 +99,7 @@ This function will be used for `counsel-unquote-regex-parens-migemo'."
   "Replace the backslash of \\\\|  with empty string in STR.
 after `counsel-unquote-regex-parens'."
   (replace-regexp-in-string "\\(\\\\\\)|" ""
-                            (counsel-unquote-regex-parens str) nil nil 1))
+                            (counsel--elisp-to-pcre str) nil nil 1))
 (byte-compile 'counsel-unquote-regex-parens-migemo-default)
 
 (defun counsel-unquote-regex-parens-migemo (str)
